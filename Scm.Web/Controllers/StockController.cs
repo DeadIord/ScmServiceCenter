@@ -58,6 +58,12 @@ public class StockController : Controller
         return View("Index", model);
     }
 
+    [HttpGet]
+    public IActionResult Receive()
+    {
+        return PartialView("_ReceiveModal", new ReceivePartDto());
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Receive(ReceivePartDto dto)
