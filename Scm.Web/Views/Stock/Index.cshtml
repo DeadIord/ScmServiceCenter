@@ -1,0 +1,111 @@
+@model Scm.Web.Models.Stock.StockIndexViewModel
+@{
+    ViewData["Title"] = Model.OnlyLowStock ? "Низкий остаток" : "Склад";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="section-title mb-1">@ViewData["Title"]</h1>
+        <p class="text-muted mb-0">Управление запасами и приходами</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="LowStock"><i class="bi bi-exclamation-triangle me-2"></i>Низкий остаток</a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiveModal"><i class="bi bi-box-arrow-in-down me-2"></i>Приход</button>
+    </div>
+</div>
+<div class="card shadow-soft p-4">
+    <form method="get" class="row g-3 align-items-end mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Поиск</label>
+            <div class="input-group">
+                <input class="form-control" name="q" value="@Model.Query" placeholder="SKU или наименование" />
+                <button class="btn btn-outline-secondary" type="submit">Найти</button>
+            </div>
+        </div>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Наименование</th>
+                    <th class="text-end">Остаток</th>
+                    <th class="text-end">Порог</th>
+                    <th class="text-end">Розничная цена</th>
+                    <th>Активен</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Parts.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">Нет данных</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var part in Model.Parts)
+                    {
+                        <tr>
+                            <td>@part.Sku</td>
+                            <td>@part.Title</td>
+                            <td class="text-end">@part.StockQty.ToString("N2") @part.Unit</td>
+                            <td class="text-end">@part.ReorderPoint.ToString("N2")</td>
+                            <td class="text-end">@part.PriceOut.ToString("N2") ₽</td>
+                            <td>@(part.IsActive ? "Да" : "Нет")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="receiveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 shadow">
+            <form asp-action="Receive" method="post">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Приход товара</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label class="form-label">SKU</label>
+                        <input class="form-control" name="Sku" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Наименование</label>
+                        <input class="form-control" name="Title" required />
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Количество</label>
+                            <input class="form-control" type="number" step="0.01" name="Qty" min="0.01" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ед. изм.</label>
+                            <input class="form-control" name="Unit" value="шт" required />
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Цена закуп.</label>
+                            <input class="form-control" type="number" step="0.01" name="PriceIn" min="0" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Цена розн.</label>
+                            <input class="form-control" type="number" step="0.01" name="PriceOut" min="0" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
