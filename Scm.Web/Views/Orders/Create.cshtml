@@ -1,14 +1,48 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
 @model Scm.Application.DTOs.CreateOrderDto
 @using Scm.Domain.Entities
 @{
     ViewData["Title"] = "Создание заказа";
+    var accountOptions = ViewBag.Accounts as List<SelectListItem> ?? new();
+    var contactOptions = ViewBag.Contacts as List<SelectListItem> ?? new();
+    var accountSearch = ViewData["AccountSearch"] as string ?? string.Empty;
+    var contactSearch = ViewData["ContactSearch"] as string ?? string.Empty;
 }
 <div class="row justify-content-center">
-    <div class="col-lg-6">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card shadow-soft p-4 mb-4">
+            <h2 class="h5 mb-3">CRM</h2>
+            <form method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="accountId" value="@Model.AccountId" />
+                <input type="hidden" name="contactId" value="@Model.ContactId" />
+                <div class="col-md-6">
+                    <label class="form-label">Поиск контрагента</label>
+                    <input class="form-control" type="search" name="accountSearch" value="@accountSearch" placeholder="Название или ИНН" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Поиск контакта</label>
+                    <input class="form-control" type="search" name="contactSearch" value="@contactSearch" placeholder="Имя или email" />
+                </div>
+                <div class="col-12 text-end">
+                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search me-2"></i>Обновить списки</button>
+                </div>
+            </form>
+        </div>
         <div class="card shadow-soft p-4">
             <h1 class="section-title mb-3">Новый заказ</h1>
             <form asp-action="Create" method="post" class="row g-3">
                 <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" name="accountSearch" value="@accountSearch" />
+                <input type="hidden" name="contactSearch" value="@contactSearch" />
+                <div class="col-12">
+                    <label class="form-label">Контрагент</label>
+                    <select class="form-select" asp-for="AccountId" asp-items="accountOptions"></select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Контакт</label>
+                    <select class="form-select" asp-for="ContactId" asp-items="contactOptions"></select>
+                    <span asp-validation-for="ContactId" class="text-danger"></span>
+                </div>
                 <div class="col-12">
                     <label class="form-label">Имя клиента</label>
                     <input class="form-control" asp-for="ClientName" />

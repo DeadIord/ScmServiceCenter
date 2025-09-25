@@ -13,6 +13,8 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
     public DbSet<Part> Parts => Set<Part>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Contact> Contacts => Set<Contact>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -23,5 +25,7 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
         builder.ApplyConfiguration(new PartConfiguration());
         builder.ApplyConfiguration(new MessageConfiguration());
         builder.ApplyConfiguration(new InvoiceConfiguration());
+        builder.ApplyConfiguration(new AccountConfiguration());
+        builder.ApplyConfiguration(new ContactConfiguration());
     }
 }

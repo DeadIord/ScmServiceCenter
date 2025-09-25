@@ -1,0 +1,23 @@
+@model Scm.Application.DTOs.ContactInputDto
+@{
+    ViewData["Title"] = "Редактирование контакта";
+    var contactId = (Guid?)ViewBag.ContactId;
+}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card shadow-soft p-4">
+            <h1 class="section-title mb-3">Редактирование контакта</h1>
+            <form asp-action="Edit" asp-route-id="@contactId" method="post" class="d-grid gap-3">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <partial name="_Form" />
+                <div class="text-end">
+                    <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@contactId">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

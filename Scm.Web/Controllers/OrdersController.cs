@@ -1,5 +1,7 @@
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
@@ -13,14 +15,20 @@ public class OrdersController : Controller
     private readonly IOrderService _orderService;
     private readonly IQuoteService _quoteService;
     private readonly IMessageService _messageService;
+    private readonly IAccountService _accountService;
+    private readonly IContactService _contactService;
     public OrdersController(
         IOrderService orderService,
         IQuoteService quoteService,
-        IMessageService messageService)
+        IMessageService messageService,
+        IAccountService accountService,
+        IContactService contactService)
     {
         _orderService = orderService;
         _quoteService = quoteService;
         _messageService = messageService;
+        _accountService = accountService;
+        _contactService = contactService;
     }
 
     [HttpGet]
@@ -49,17 +57,62 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create(Guid? accountId, Guid? contactId, string? accountSearch, string? contactSearch)
     {
-        return View(new CreateOrderDto());
+        var dto = new CreateOrderDto();
+
+        if (contactId.HasValue && contactId.Value != Guid.Empty)
+        {
+            var contact = await _contactService.GetAsync(contactId.Value);
+            if (contact is not null)
+            {
+                dto.ContactId = contact.Id;
+                dto.AccountId = contact.AccountId;
+                dto.ClientName = contact.FullName;
+                dto.ClientPhone = contact.Phone;
+                accountId = contact.AccountId;
+            }
+        }
+        else if (accountId.HasValue && accountId.Value != Guid.Empty)
+        {
+            dto.AccountId = accountId;
+        }
+
+        await PopulateCrmSelectionsAsync(dto.AccountId, accountSearch, dto.ContactId, contactSearch);
+        ViewData["AccountSearch"] = accountSearch;
+        ViewData["ContactSearch"] = contactSearch;
+        return View(dto);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CreateOrderDto dto)
+    public async Task<IActionResult> Create(CreateOrderDto dto, string? accountSearch, string? contactSearch)
     {
+        if (dto.ContactId.HasValue && dto.ContactId.Value != Guid.Empty)
+        {
+            var contact = await _contactService.GetAsync(dto.ContactId.Value);
+            if (contact is null)
+            {
+                ModelState.AddModelError(nameof(dto.ContactId), "Контакт не найден");
+            }
+            else
+            {
+                if (dto.AccountId.HasValue && dto.AccountId.Value != Guid.Empty && dto.AccountId.Value != contact.AccountId)
+                {
+                    ModelState.AddModelError(nameof(dto.ContactId), "Контакт не относится к выбранному контрагенту");
+                }
+                else
+                {
+                    dto.AccountId = contact.AccountId;
+                }
+            }
+        }
+
         if (!ModelState.IsValid)
         {
+            await PopulateCrmSelectionsAsync(dto.AccountId, accountSearch, dto.ContactId, contactSearch);
+            ViewData["AccountSearch"] = accountSearch;
+            ViewData["ContactSearch"] = contactSearch;
             return View(dto);
         }
 
@@ -195,6 +248,64 @@ public class OrdersController : Controller
 
         var model = new OrderKanbanViewModel { Columns = columns };
         return View(model);
+    }
+
+    private async Task PopulateCrmSelectionsAsync(Guid? accountId, string? accountSearch, Guid? contactId, string? contactSearch)
+    {
+        var accounts = await _accountService.SearchAsync(accountSearch, 50);
+        if (accountId.HasValue && accountId.Value != Guid.Empty && accounts.All(a => a.Id != accountId.Value))
+        {
+            var selectedAccount = await _accountService.GetAsync(accountId.Value);
+            if (selectedAccount is not null)
+            {
+                accounts.Insert(0, selectedAccount);
+            }
+        }
+
+        ViewBag.Accounts = accounts
+            .OrderBy(a => a.Name)
+            .Select(a => new SelectListItem
+            {
+                Text = a.Name,
+                Value = a.Id.ToString(),
+                Selected = accountId.HasValue && accountId.Value == a.Id
+            })
+            .Prepend(new SelectListItem
+            {
+                Text = "— Без контрагента —",
+                Value = string.Empty,
+                Selected = !accountId.HasValue || accountId.Value == Guid.Empty
+            })
+            .ToList();
+
+        var contacts = accountId.HasValue && accountId.Value != Guid.Empty
+            ? await _contactService.GetForAccountAsync(accountId.Value, contactSearch, 50)
+            : (await _contactService.GetListAsync(null, contactSearch)).Take(50).ToList();
+
+        if (contactId.HasValue && contactId.Value != Guid.Empty && contacts.All(c => c.Id != contactId.Value))
+        {
+            var selectedContact = await _contactService.GetAsync(contactId.Value);
+            if (selectedContact is not null)
+            {
+                contacts.Insert(0, selectedContact);
+            }
+        }
+
+        ViewBag.Contacts = contacts
+            .OrderBy(c => c.FullName)
+            .Select(c => new SelectListItem
+            {
+                Text = c.FullName,
+                Value = c.Id.ToString(),
+                Selected = contactId.HasValue && contactId.Value == c.Id
+            })
+            .Prepend(new SelectListItem
+            {
+                Text = "— Без контакта —",
+                Value = string.Empty,
+                Selected = !contactId.HasValue || contactId.Value == Guid.Empty
+            })
+            .ToList();
     }
 
     private static string GetStatusTitle(OrderStatus status) => status switch

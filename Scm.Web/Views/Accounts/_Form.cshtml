@@ -1,0 +1,36 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@model Scm.Application.DTOs.AccountInputDto
+@{
+    var accountTypes = ViewBag.AccountTypes as List<SelectListItem> ?? new();
+}
+<div class="row g-3">
+    <div class="col-md-8">
+        <label class="form-label">Название</label>
+        <input class="form-control" asp-for="Name" />
+        <span class="text-danger" asp-validation-for="Name"></span>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Тип</label>
+        <select class="form-select" asp-for="Type" asp-items="accountTypes"></select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">ИНН</label>
+        <input class="form-control" asp-for="Inn" />
+        <span class="text-danger" asp-validation-for="Inn"></span>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Теги</label>
+        <input class="form-control" asp-for="Tags" />
+        <span class="text-danger" asp-validation-for="Tags"></span>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Адрес</label>
+        <textarea class="form-control" asp-for="Address" rows="2"></textarea>
+        <span class="text-danger" asp-validation-for="Address"></span>
+    </div>
+    <div class="col-12">
+        <label class="form-label">ID менеджера</label>
+        <input class="form-control" asp-for="ManagerUserId" />
+        <span class="text-danger" asp-validation-for="ManagerUserId"></span>
+    </div>
+</div>
