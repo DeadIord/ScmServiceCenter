@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Scm.Application.Services;
 using Scm.Application.Validators;
 using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
+using Scm.Web.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ScmDbContext>();
 
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IQuoteService, QuoteService>();
 builder.Services.AddScoped<IStockService, StockService>();
@@ -35,10 +40,33 @@ builder.Services.AddScoped<CreateOrderDtoValidator>();
 builder.Services.AddScoped<AddQuoteLineDtoValidator>();
 builder.Services.AddScoped<ReceivePartDtoValidator>();
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization(options =>
+    {
+        options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(SharedResource));
+    });
+builder.Services.AddRazorPages()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization(options =>
+    {
+        options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(SharedResource));
+    });
+
+var defaultCulture = new CultureInfo("ru-RU");
+var supportedCultures = new[] { defaultCulture };
+CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 var app = builder.Build();
+
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(defaultCulture),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures,
+    ApplyCurrentCultureToResponseHeaders = true
+};
 
 await ScmDbSeeder.SeedAsync(app.Services);
 
@@ -47,6 +75,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+app.UseRequestLocalization(localizationOptions);
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
