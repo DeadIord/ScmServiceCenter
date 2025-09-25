@@ -20,5 +20,5 @@ public sealed class OrderListItemViewModel
 
     public DateTime? SLAUntil { get; init; }
 
-    public DateTime CreatedAt { get; init; }
+    public DateTime CreatedAtUtc { get; init; }
 }

@@ -52,7 +52,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Status)
             .HasConversion<int>();
 
-        builder.Property(o => o.CreatedAt)
+        builder.Property(o => o.CreatedAtUtc)
             .HasColumnType("timestamp with time zone");
 
         builder.Property(o => o.SLAUntil)

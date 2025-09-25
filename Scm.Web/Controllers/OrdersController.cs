@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
-using Scm.Application.Validators;
 using Scm.Domain.Entities;
 using Scm.Web.Models.Orders;
 
@@ -14,21 +13,14 @@ public class OrdersController : Controller
     private readonly IOrderService _orderService;
     private readonly IQuoteService _quoteService;
     private readonly IMessageService _messageService;
-    private readonly CreateOrderDtoValidator _createValidator;
-    private readonly AddQuoteLineDtoValidator _quoteValidator;
-
     public OrdersController(
         IOrderService orderService,
         IQuoteService quoteService,
-        IMessageService messageService,
-        CreateOrderDtoValidator createValidator,
-        AddQuoteLineDtoValidator quoteValidator)
+        IMessageService messageService)
     {
         _orderService = orderService;
         _quoteService = quoteService;
         _messageService = messageService;
-        _createValidator = createValidator;
-        _quoteValidator = quoteValidator;
     }
 
     [HttpGet]
@@ -49,7 +41,7 @@ public class OrdersController : Controller
                 Status = o.Status,
                 Priority = o.Priority,
                 SLAUntil = o.SLAUntil,
-                CreatedAt = o.CreatedAt
+                CreatedAtUtc = o.CreatedAtUtc
             }).ToList()
         };
 
@@ -66,14 +58,8 @@ public class OrdersController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateOrderDto dto)
     {
-        var errors = _createValidator.Validate(dto).ToList();
-        if (errors.Any())
+        if (!ModelState.IsValid)
         {
-            foreach (var error in errors)
-            {
-                ModelState.AddModelError(string.Empty, error);
-            }
-
             return View(dto);
         }
 
@@ -122,10 +108,14 @@ public class OrdersController : Controller
     [HttpPost]
     public async Task<IActionResult> AddQuoteLine(AddQuoteLineDto dto)
     {
-        var errors = _quoteValidator.Validate(dto).ToList();
-        if (errors.Any())
+        if (!ModelState.IsValid)
         {
             Response.StatusCode = 400;
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message : e.ErrorMessage)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .ToList();
             return Json(new { success = false, errors });
         }
 
