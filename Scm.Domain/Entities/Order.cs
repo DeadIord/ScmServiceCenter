@@ -40,7 +40,7 @@ public sealed class Order
 
     public OrderStatus Status { get; set; } = OrderStatus.Received;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public string ClientAccessToken { get; set; } = Guid.NewGuid().ToString("N");
 

@@ -48,7 +48,7 @@ public static class ScmDbSeeder
                     Defect = "Устройство не включается",
                     Priority = priorities[rnd.Next(priorities.Length)],
                     Status = status,
-                    CreatedAt = DateTime.UtcNow.AddDays(-rnd.Next(1, 20)),
+                    CreatedAtUtc = DateTime.UtcNow.AddDays(-rnd.Next(1, 20)),
                     SLAUntil = DateTime.UtcNow.AddDays(rnd.Next(1, 5)),
                 };
 
@@ -79,7 +79,7 @@ public static class ScmDbSeeder
                     FromClient = false,
                     FromUserId = admin.Id,
                     Text = "Заказ принят в работу",
-                    At = order.CreatedAt.AddHours(1)
+                    At = order.CreatedAtUtc.AddHours(1)
                 });
 
                 context.Messages.Add(new Message
@@ -87,7 +87,7 @@ public static class ScmDbSeeder
                     OrderId = order.Id,
                     FromClient = true,
                     Text = "Спасибо за оперативность!",
-                    At = order.CreatedAt.AddHours(5)
+                    At = order.CreatedAtUtc.AddHours(5)
                 });
 
                 context.Invoices.Add(new Invoice

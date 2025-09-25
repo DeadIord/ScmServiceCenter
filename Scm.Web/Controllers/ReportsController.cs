@@ -22,7 +22,7 @@ public class ReportsController : Controller
     {
         var now = DateTime.UtcNow;
         var completed = await _dbContext.Orders.Where(o => o.Status == OrderStatus.Ready || o.Status == OrderStatus.Closed).ToListAsync();
-        var averageDays = completed.Any() ? completed.Average(o => (now - o.CreatedAt).TotalDays) : 0;
+        var averageDays = completed.Any() ? completed.Average(o => (now - o.CreatedAtUtc).TotalDays) : 0;
 
         var totalOrders = await _dbContext.Orders.CountAsync();
         var slaBreaches = await _dbContext.Orders.CountAsync(o => o.SLAUntil != null && o.SLAUntil < now && o.Status != OrderStatus.Closed);

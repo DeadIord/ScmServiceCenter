@@ -36,8 +36,6 @@ builder.Services.AddScoped<IQuoteService, QuoteService>();
 builder.Services.AddScoped<IStockService, StockService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 
-builder.Services.AddScoped<CreateOrderDtoValidator>();
-builder.Services.AddScoped<AddQuoteLineDtoValidator>();
 builder.Services.AddScoped<ReceivePartDtoValidator>();
 
 builder.Services.AddControllersWithViews()

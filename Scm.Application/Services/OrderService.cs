@@ -23,7 +23,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             Defect = dto.Defect.Trim(),
             Priority = dto.Priority,
             Status = OrderStatus.Received,
-            CreatedAt = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         _dbContext.Orders.Add(order);
@@ -48,7 +48,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
 
         return await query
             .OrderBy(o => o.Status)
-            .ThenBy(o => o.CreatedAt)
+            .ThenBy(o => o.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
 

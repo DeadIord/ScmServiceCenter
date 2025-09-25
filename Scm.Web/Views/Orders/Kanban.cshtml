@@ -24,7 +24,7 @@
                     <span class="badge text-bg-@StatusBadge(column.Status)">@column.Orders.Count</span>
                 </div>
                 <div class="card-body py-3" data-status="@column.Status" id="col-@column.Status">
-                    @foreach (var order in column.Orders.OrderBy(o => o.CreatedAt))
+                    @foreach (var order in column.Orders.OrderBy(o => o.CreatedAtUtc))
                     {
                         var slaClass = order.SLAUntil.HasValue && order.SLAUntil < DateTime.UtcNow ? "text-danger" : "text-success";
                         <div class="card shadow-sm rounded-3 mb-3 kanban-item" data-id="@order.Id">
@@ -45,22 +45,10 @@
     }
 </div>
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         document.querySelectorAll('#kanban-board .card-body').forEach(column => {
-            new Sortable(column, {
-                group: 'orders',
-                animation: 150,
-                onEnd: function (evt) {
-                    const id = evt.item.getAttribute('data-id');
-                    const status = evt.to.getAttribute('data-status');
-                    axios.post('@Url.Action("ChangeStatus")', Qs.stringify({ id, to: status }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-                        .then(() => showToast('Статус обновлён', 'bg-success'))
-                        .catch(err => {
-                            showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger');
-                            evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex]);
-                        });
-                }
+            column.querySelectorAll('.kanban-item').forEach(card => {
+                card.setAttribute('draggable', 'false');
             });
         });
     </script>
