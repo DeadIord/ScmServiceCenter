@@ -7,7 +7,7 @@ using Scm.Web.Models.Orders;
 
 namespace Scm.Web.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin,Manager,Technician")]
 public class OrdersController : Controller
 {
     private readonly IOrderService _orderService;
@@ -91,17 +91,18 @@ public class OrdersController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager,Technician")]
     public async Task<IActionResult> ChangeStatus(Guid id, OrderStatus to)
     {
         try
         {
             await _orderService.ChangeStatusAsync(id, to);
-            return Json(new { success = true, status = to.ToString() });
+            return Json(new { ok = true, status = to.ToString() });
         }
         catch (Exception ex)
         {
             Response.StatusCode = 400;
-            return Json(new { success = false, message = ex.Message });
+            return Json(new { ok = false, message = ex.Message });
         }
     }
 
@@ -169,6 +170,7 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Manager,Technician")]
     public async Task<IActionResult> Kanban()
     {
         var orders = await _orderService.GetQueueAsync(null, null);
