@@ -28,6 +28,12 @@ public sealed class Order
 
     public string ClientPhone { get; set; } = string.Empty;
 
+    public Guid? AccountId { get; set; }
+        = null;
+
+    public Guid? ContactId { get; set; }
+        = null;
+
     public string Device { get; set; } = string.Empty;
 
     public string? Serial { get; set; }
@@ -49,4 +55,10 @@ public sealed class Order
     public ICollection<Message> Messages { get; set; } = new List<Message>();
 
     public ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+
+    public Account? Account { get; set; }
+        = null;
+
+    public Contact? Contact { get; set; }
+        = null;
 }

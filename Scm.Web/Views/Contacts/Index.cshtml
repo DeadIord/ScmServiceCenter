@@ -1,0 +1,70 @@
+@model Scm.Web.Models.Crm.ContactIndexViewModel
+@{
+    ViewData["Title"] = "Контакты";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="section-title mb-0">Контакты</h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-2"></i>Добавить</a>
+</div>
+<div class="card shadow-soft p-4 mb-4">
+    <form class="row g-3 align-items-end" method="get">
+        <div class="col-lg-4">
+            <label class="form-label">Контрагент</label>
+            <select class="form-select" name="accountId">
+                <option value="">Все</option>
+                @foreach (var account in Model.Accounts)
+                {
+                    <option value="@account.Id" selected="@(Model.AccountId == account.Id ? "selected" : null)">@account.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <label class="form-label">Поиск</label>
+            <input class="form-control" type="search" name="q" value="@Model.Query" placeholder="Имя, телефон или email" />
+        </div>
+        <div class="col-lg-4 text-end">
+            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search me-2"></i>Найти</button>
+        </div>
+    </form>
+</div>
+@if (Model.Contacts.Count == 0)
+{
+    <div class="alert alert-light border">Контакты не найдены.</div>
+}
+else
+{
+    <div class="card shadow-soft">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Имя</th>
+                        <th>Контрагент</th>
+                        <th>Телефон</th>
+                        <th>Email</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var contact in Model.Contacts)
+                    {
+                        <tr>
+                            <td>@contact.FullName</td>
+                            <td>
+                                @if (contact.Account is not null)
+                                {
+                                    <a class="text-decoration-none" asp-controller="Accounts" asp-action="Details" asp-route-id="@contact.AccountId">@contact.Account.Name</a>
+                                }
+                            </td>
+                            <td><a class="text-decoration-none" href="tel:@contact.Phone">@contact.Phone</a></td>
+                            <td><a class="text-decoration-none" href="mailto:@contact.Email">@contact.Email</a></td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@contact.Id"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

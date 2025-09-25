@@ -44,6 +44,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(o => o.Status);
 
+        builder.HasIndex(o => o.AccountId);
+
+        builder.HasIndex(o => o.ContactId);
+
         builder.HasIndex(o => o.SLAUntil);
 
         builder.Property(o => o.Priority)
@@ -57,5 +61,15 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.Property(o => o.SLAUntil)
             .HasColumnType("timestamp with time zone");
+
+        builder.HasOne(o => o.Account)
+            .WithMany()
+            .HasForeignKey(o => o.AccountId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(o => o.Contact)
+            .WithMany(c => c.Orders)
+            .HasForeignKey(o => o.ContactId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

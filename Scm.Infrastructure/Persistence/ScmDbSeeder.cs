@@ -28,6 +28,61 @@ public static class ScmDbSeeder
 
         var admin = await EnsureUserAsync(userManager, "admin@scm.local", "Администратор", "P@ssw0rd!", new[] { "Admin" });
 
+        if (!await context.Accounts.AnyAsync())
+        {
+            var demoAccounts = new List<Account>
+            {
+                new()
+                {
+                    Name = "ООО \"ТехноСервис\"",
+                    Type = AccountType.Company,
+                    Inn = "7701234567",
+                    Address = "г. Москва, ул. Техническая, 15",
+                    Tags = "VIP"
+                },
+                new()
+                {
+                    Name = "ИП Иванов Сергей",
+                    Type = AccountType.Person,
+                    Address = "г. Санкт-Петербург, Невский пр., 100",
+                    Tags = "Retail"
+                }
+            };
+
+            context.Accounts.AddRange(demoAccounts);
+            await context.SaveChangesAsync();
+
+            var demoContacts = new List<Contact>
+            {
+                new()
+                {
+                    AccountId = demoAccounts[0].Id,
+                    FullName = "Анна Петрова",
+                    Position = "Офис-менеджер",
+                    Phone = "+7 495 111-22-33",
+                    Email = "anna.petrowa@technoservice.local"
+                },
+                new()
+                {
+                    AccountId = demoAccounts[0].Id,
+                    FullName = "Дмитрий Соколов",
+                    Position = "Технический директор",
+                    Phone = "+7 495 111-44-55",
+                    Email = "d.sokolov@technoservice.local"
+                },
+                new()
+                {
+                    AccountId = demoAccounts[1].Id,
+                    FullName = "Сергей Иванов",
+                    Phone = "+7 921 555-66-77",
+                    Email = "sergey@ivanov.spb"
+                }
+            };
+
+            context.Contacts.AddRange(demoContacts);
+            await context.SaveChangesAsync();
+        }
+
         if (!await context.Orders.AnyAsync())
         {
             var priorities = new[] { OrderPriority.Low, OrderPriority.Normal, OrderPriority.High, OrderPriority.Critical };
@@ -35,14 +90,22 @@ public static class ScmDbSeeder
             var rnd = new Random(42);
 
             var orders = new List<Order>();
+            var accounts = await context.Accounts.AsNoTracking().ToListAsync();
+            var contacts = await context.Contacts.AsNoTracking().ToListAsync();
             for (int i = 1; i <= 10; i++)
             {
                 var status = statuses[rnd.Next(statuses.Length)];
+                Account? account = accounts.Count > 0 ? accounts[rnd.Next(accounts.Count)] : null;
+                Contact? contact = account is not null
+                    ? contacts.FirstOrDefault(c => c.AccountId == account.Id)
+                    : null;
                 var order = new Order
                 {
                     Number = $"SRV-{DateTime.UtcNow:yyyy}-{i:D4}",
                     ClientName = $"Клиент {i}",
                     ClientPhone = $"+7 900 000-0{i:D2}",
+                    AccountId = account?.Id,
+                    ContactId = contact?.Id,
                     Device = i % 2 == 0 ? "Смартфон" : "Ноутбук",
                     Serial = i % 3 == 0 ? $"SN{i:000000}" : null,
                     Defect = "Устройство не включается",

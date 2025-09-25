@@ -18,6 +18,8 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             Number = number,
             ClientName = dto.ClientName.Trim(),
             ClientPhone = dto.ClientPhone.Trim(),
+            AccountId = dto.AccountId,
+            ContactId = dto.ContactId,
             Device = dto.Device.Trim(),
             Serial = string.IsNullOrWhiteSpace(dto.Serial) ? null : dto.Serial.Trim(),
             Defect = dto.Defect.Trim(),
@@ -58,6 +60,8 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             .Include(o => o.QuoteLines)
             .Include(o => o.Messages)
             .Include(o => o.Invoices)
+            .Include(o => o.Account)
+            .Include(o => o.Contact)
             .AsSplitQuery()
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }

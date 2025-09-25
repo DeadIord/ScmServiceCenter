@@ -14,6 +14,12 @@ public sealed class CreateOrderDto
     [StringLength(32)]
     public string ClientPhone { get; set; } = string.Empty;
 
+    public Guid? AccountId { get; set; }
+        = null;
+
+    public Guid? ContactId { get; set; }
+        = null;
+
     [Required]
     [StringLength(128)]
     public string Device { get; set; } = string.Empty;
