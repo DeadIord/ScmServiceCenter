@@ -1,0 +1,67 @@
+@model Scm.Web.Models.Orders.OrderKanbanViewModel
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = "Канбан";
+    string StatusBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+}
+<h1 class="section-title mb-4">Канбан-доска</h1>
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 row-cols-xxl-6 g-4" id="kanban-board">
+    @foreach (var column in Model.Columns)
+    {
+        <div class="col">
+            <div class="card shadow-soft h-100">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">@column.Title</span>
+                    <span class="badge text-bg-@StatusBadge(column.Status)">@column.Orders.Count</span>
+                </div>
+                <div class="card-body py-3" data-status="@column.Status" id="col-@column.Status">
+                    @foreach (var order in column.Orders.OrderBy(o => o.CreatedAt))
+                    {
+                        var slaClass = order.SLAUntil.HasValue && order.SLAUntil < DateTime.UtcNow ? "text-danger" : "text-success";
+                        <div class="card shadow-sm rounded-3 mb-3 kanban-item" data-id="@order.Id">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="fw-semibold">@order.Number</span>
+                                    <span class="badge text-bg-light text-dark">@order.Priority</span>
+                                </div>
+                                <div class="small text-muted">@order.Device</div>
+                                <div class="small">@order.ClientName</div>
+                                <div class="small @slaClass">SLA: @(order.SLAUntil?.ToString("dd.MM") ?? "—")</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        document.querySelectorAll('#kanban-board .card-body').forEach(column => {
+            new Sortable(column, {
+                group: 'orders',
+                animation: 150,
+                onEnd: function (evt) {
+                    const id = evt.item.getAttribute('data-id');
+                    const status = evt.to.getAttribute('data-status');
+                    axios.post('@Url.Action("ChangeStatus")', Qs.stringify({ id, to: status }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                        .then(() => showToast('Статус обновлён', 'bg-success'))
+                        .catch(err => {
+                            showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger');
+                            evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex]);
+                        });
+                }
+            });
+        });
+    </script>
+}

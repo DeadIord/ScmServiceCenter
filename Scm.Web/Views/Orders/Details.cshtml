@@ -1,0 +1,171 @@
+@model Scm.Web.Models.Orders.OrderDetailsViewModel
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = $"Заказ {Model.Order.Number}";
+    OrderStatus[] statuses = Enum.GetValues<OrderStatus>();
+    OrderPriority priority = Model.Order.Priority;
+    string StatusBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+    string PriorityBadge(OrderPriority p) => p switch
+    {
+        OrderPriority.Low => "secondary",
+        OrderPriority.Normal => "light text-dark",
+        OrderPriority.High => "warning",
+        OrderPriority.Critical => "danger",
+        _ => "secondary"
+    };
+}
+<div class="row g-4">
+    <div class="col-lg-3">
+        <div class="card shadow-soft p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-semibold mb-0">Статус</h5>
+                    <span class="badge text-bg-@StatusBadge(Model.Order.Status) badge-status">@Model.Order.Status</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Изменить статус</label>
+                <div class="input-group">
+                    <select class="form-select" id="status-select">
+                        @foreach (var status in statuses)
+                        {
+                            <option value="@status" selected="@(status == Model.Order.Status ? "selected" : null)">@status</option>
+                        }
+                    </select>
+                    <button class="btn btn-outline-primary" id="change-status-btn" data-order-id="@Model.Order.Id">Обновить</button>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Приоритет</label>
+                <div><span class="badge text-bg-@PriorityBadge(priority) badge-status">@priority</span></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">SLA до</label>
+                <div>@(Model.Order.SLAUntil?.ToString("dd.MM.yyyy") ?? "Не задано")</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Клиент</label>
+                <div class="fw-semibold">@Model.Order.ClientName</div>
+                <div><a class="text-decoration-none" href="tel:@Model.Order.ClientPhone">@Model.Order.ClientPhone</a></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Устройство</label>
+                <div>@Model.Order.Device</div>
+                @if (!string.IsNullOrWhiteSpace(Model.Order.Serial))
+                {
+                    <div class="text-muted">SN: @Model.Order.Serial</div>
+                }
+            </div>
+            <div class="border rounded-3 p-3 bg-light">
+                <div class="small text-muted">Токен доступа клиента</div>
+                <code class="text-break">@Model.Order.ClientAccessToken</code>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <ul class="nav nav-tabs" id="order-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="quote-tab" data-bs-toggle="tab" data-bs-target="#quote" type="button" role="tab">Смета</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab">Сообщения</button>
+            </li>
+        </ul>
+        <div class="tab-content pt-3">
+            <div class="tab-pane fade show active" id="quote" role="tabpanel">
+                @await Html.PartialAsync("_QuoteTable", Model.Order)
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-primary" id="submit-quote" data-order-id="@Model.Order.Id"><i class="bi bi-send me-2"></i>Отправить на согласование</button>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="messages" role="tabpanel">
+                <div class="card shadow-soft mb-3">
+                    <div class="card-body" id="messages-container">
+                        @foreach (var message in Model.Messages.OrderByDescending(m => m.At))
+                        {
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <div class="fw-semibold">@(message.FromClient ? "Клиент" : "Сотрудник")</div>
+                                    <small class="text-muted">@message.At.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                </div>
+                                <div>@message.Text</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <form id="message-form" class="card shadow-soft">
+                    <div class="card-body">
+                        <input type="hidden" name="OrderId" value="@Model.Order.Id" />
+                        <div class="mb-3">
+                            <label class="form-label">Сообщение</label>
+                            <textarea class="form-control" name="Text" rows="3" required></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-chat-text me-2"></i>Отправить</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card shadow-soft p-4 sticky-top" style="top: 90px;">
+            <h5 class="fw-semibold mb-3">Быстрые действия</h5>
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#actionsCanvas"><i class="bi bi-gear me-2"></i>Панель</button>
+                <a class="btn btn-outline-primary" asp-action="Index">К списку</a>
+            </div>
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="actionsCanvas">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Действия</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+                </div>
+                <div class="offcanvas-body d-grid gap-3">
+                    <button class="btn btn-primary" id="action-submit-quote" data-order-id="@Model.Order.Id">Отправить смету на согласование</button>
+                    <button class="btn btn-outline-primary" data-bs-dismiss="offcanvas" data-action="change-status">Сменить статус</button>
+                    <a class="btn btn-outline-success" href="#"><i class="bi bi-receipt me-2"></i>Сформировать счёт</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        const orderId = '@Model.Order.Id';
+        document.getElementById('change-status-btn').addEventListener('click', function () {
+            const status = document.getElementById('status-select').value;
+            axios.post('@Url.Action("ChangeStatus")', Qs.stringify({ id: orderId, to: status }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                .then(() => showToast('Статус обновлён', 'bg-success'))
+                .catch(err => showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger'));
+        });
+        document.getElementById('add-line-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            axios.post('@Url.Action("AddQuoteLine")', new URLSearchParams(formData))
+                .then(() => window.location.reload())
+                .catch(err => showToast(err.response?.data?.errors?.join('\n') ?? 'Не удалось добавить строку', 'bg-danger'));
+        });
+        const submitButtons = [document.getElementById('submit-quote'), document.getElementById('action-submit-quote')];
+        submitButtons.forEach(btn => btn?.addEventListener('click', () => {
+            axios.post('@Url.Action("SubmitQuote")', Qs.stringify({ orderId }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                .then(() => window.location.reload())
+                .catch(err => showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger'));
+        }));
+        document.getElementById('message-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            axios.post('@Url.Action("PostMessage")', new URLSearchParams(formData))
+                .then(() => window.location.reload())
+                .catch(err => showToast(err.response?.data?.message ?? 'Не удалось отправить сообщение', 'bg-danger'));
+        });
+    </script>
+}

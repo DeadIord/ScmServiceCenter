@@ -1,0 +1,74 @@
+@model Scm.Web.Models.Reports.DashboardViewModel
+@{
+    ViewData["Title"] = "Дашборд";
+}
+<h1 class="section-title mb-4">Ключевые показатели</h1>
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-soft text-center py-4">
+            <div class="card-body">
+                <div class="text-muted mb-2">Среднее время ремонта</div>
+                <div class="display-6 fw-bold">@Model.AverageRepairDays.ToString("F1")</div>
+                <div class="text-muted">дней</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-soft text-center py-4">
+            <div class="card-body">
+                <div class="text-muted mb-2">Просрочка SLA</div>
+                <div class="display-6 fw-bold">@Model.SlaBreachPercent.ToString("F1")%</div>
+                <div class="text-muted">от заказов</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-soft text-center py-4">
+            <div class="card-body">
+                <div class="text-muted mb-2">Выручка за месяц</div>
+                <div class="display-6 fw-bold">@Model.RevenueMonth.ToString("N0") ₽</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-soft text-center py-4">
+            <div class="card-body">
+                <div class="text-muted mb-2">Всего поломок</div>
+                <div class="display-6 fw-bold">@Model.TopDefects.Sum(x => x.Value)</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card shadow-soft">
+    <div class="card-header bg-white border-0">
+        <h5 class="fw-semibold mb-0">ТОП поломок</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Неисправность</th>
+                    <th class="text-end">Количество</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.TopDefects.Any())
+                {
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-4">Данных пока нет</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var row in Model.TopDefects)
+                    {
+                        <tr>
+                            <td>@row.Key</td>
+                            <td class="text-end">@row.Value</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

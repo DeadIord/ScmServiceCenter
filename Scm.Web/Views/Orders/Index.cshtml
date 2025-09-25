@@ -1,0 +1,158 @@
+@model Scm.Web.Models.Orders.OrdersIndexViewModel
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = "Заказы";
+    string StatusBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+    string PriorityBadge(OrderPriority priority) => priority switch
+    {
+        OrderPriority.Low => "secondary",
+        OrderPriority.Normal => "light text-dark",
+        OrderPriority.High => "warning",
+        OrderPriority.Critical => "danger",
+        _ => "secondary"
+    };
+    string SlaClass(DateTime? date) => date is null ? "text-muted" : date.Value < DateTime.UtcNow ? "text-danger fw-semibold" : "text-success";
+}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="section-title mb-1">Очередь заказов</h1>
+        <p class="text-muted mb-0">Управление ремонтами и согласованиями</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal"><i class="bi bi-plus-lg me-2"></i>Создать заказ</button>
+</div>
+<div class="card shadow-soft p-4 mb-4">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Поиск</label>
+            <div class="input-group">
+                <input type="text" class="form-control" name="q" value="@Model.Query" placeholder="Номер, клиент, устройство" />
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Статус</label>
+            <select class="form-select" name="status" onchange="this.form.submit()">
+                <option value="">Все</option>
+                @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                {
+                    <option value="@status" selected="@(Model.Status == status ? "selected" : null)">@status</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-5 d-flex gap-2 flex-wrap">
+            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+            {
+                var selected = Model.Status == status;
+                <a class="badge rounded-pill text-decoration-none px-3 py-2 badge-status text-bg-@StatusBadge(status) @(selected ? "shadow" : string.Empty)" href="@Url.Action("Index", new { status = selected ? (OrderStatus?)null : status, q = Model.Query })">@status</a>
+            }
+        </div>
+    </form>
+</div>
+<div class="card shadow-soft p-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Номер</th>
+                    <th>Клиент</th>
+                    <th>Телефон</th>
+                    <th>Устройство</th>
+                    <th>Статус</th>
+                    <th>Приоритет</th>
+                    <th>SLA</th>
+                    <th>Создан</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Orders.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">Заказы не найдены</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@order.Number</td>
+                            <td>@order.ClientName</td>
+                            <td><a href="tel:@order.ClientPhone" class="text-decoration-none">@order.ClientPhone</a></td>
+                            <td>@order.Device</td>
+                            <td><span class="badge text-bg-@StatusBadge(order.Status) badge-status">@order.Status</span></td>
+                            <td><span class="badge text-bg-@PriorityBadge(order.Priority) badge-status">@order.Priority</span></td>
+                            <td class="@SlaClass(order.SLAUntil)">@order.SLAUntil?.ToString("dd.MM.yyyy") ?? "—"</td>
+                            <td>@order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@order.Id">Открыть</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="createOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Новый заказ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="modal-body">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Имя клиента</label>
+                            <input class="form-control" name="ClientName" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Телефон</label>
+                            <input class="form-control" name="ClientPhone" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Устройство</label>
+                            <input class="form-control" name="Device" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Серийный номер</label>
+                            <input class="form-control" name="Serial" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Неисправность</label>
+                            <textarea class="form-control" name="Defect" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Приоритет</label>
+                            <select class="form-select" name="Priority">
+                                @foreach (OrderPriority priority in Enum.GetValues(typeof(OrderPriority)))
+                                {
+                                    <option value="@priority">@priority</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,27 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Scm.Domain.Entities;
+using Scm.Infrastructure.Configurations;
+using Scm.Infrastructure.Identity;
+
+namespace Scm.Infrastructure.Persistence;
+
+public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+{
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<QuoteLine> QuoteLines => Set<QuoteLine>();
+    public DbSet<Part> Parts => Set<Part>();
+    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.ApplyConfiguration(new OrderConfiguration());
+        builder.ApplyConfiguration(new QuoteLineConfiguration());
+        builder.ApplyConfiguration(new PartConfiguration());
+        builder.ApplyConfiguration(new MessageConfiguration());
+        builder.ApplyConfiguration(new InvoiceConfiguration());
+    }
+}

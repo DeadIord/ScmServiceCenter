@@ -1,0 +1,51 @@
+@model Scm.Application.DTOs.CreateOrderDto
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = "Создание заказа";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-soft p-4">
+            <h1 class="section-title mb-3">Новый заказ</h1>
+            <form asp-action="Create" method="post" class="row g-3">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="col-12">
+                    <label class="form-label">Имя клиента</label>
+                    <input class="form-control" asp-for="ClientName" />
+                    <span asp-validation-for="ClientName" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Телефон</label>
+                    <input class="form-control" asp-for="ClientPhone" />
+                    <span asp-validation-for="ClientPhone" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Устройство</label>
+                    <input class="form-control" asp-for="Device" />
+                    <span asp-validation-for="Device" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Серийный номер</label>
+                    <input class="form-control" asp-for="Serial" />
+                    <span asp-validation-for="Serial" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Описание неисправности</label>
+                    <textarea class="form-control" asp-for="Defect" rows="3"></textarea>
+                    <span asp-validation-for="Defect" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Приоритет</label>
+                    <select class="form-select" asp-for="Priority" asp-items="Html.GetEnumSelectList<OrderPriority>()"></select>
+                </div>
+                <div class="col-12 text-end">
+                    <a class="btn btn-outline-secondary" asp-action="Index">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
