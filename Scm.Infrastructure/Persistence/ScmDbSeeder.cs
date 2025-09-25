@@ -17,7 +17,7 @@ public static class ScmDbSeeder
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        var roles = new[] { "Администратор", "Мастер" };
+        var roles = new[] { "Admin", "Manager", "Technician", "Storekeeper", "Support", "Accountant", "Client" };
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
@@ -26,10 +26,7 @@ public static class ScmDbSeeder
             }
         }
 
-        var admin = await EnsureUserAsync(userManager, "admin@scm.local", "Администратор", "Admin@123", roles[0]);
-        var master = await EnsureUserAsync(userManager, "master@scm.local", "Мастер", "Master@123", roles[1]);
-        _ = master;
-        await EnsureUserAsync(userManager, "client@scm.local", "Клиент", "Client@123");
+        var admin = await EnsureUserAsync(userManager, "admin@scm.local", "Администратор", "P@ssw0rd!", new[] { "Admin" });
 
         if (!await context.Orders.AnyAsync())
         {
@@ -128,7 +125,12 @@ public static class ScmDbSeeder
         }
     }
 
-    private static async Task<ApplicationUser> EnsureUserAsync(UserManager<ApplicationUser> userManager, string email, string displayName, string password, string? role = null)
+    private static async Task<ApplicationUser> EnsureUserAsync(
+        UserManager<ApplicationUser> userManager,
+        string email,
+        string displayName,
+        string password,
+        IEnumerable<string>? userRoles = null)
     {
         var user = await userManager.FindByEmailAsync(email);
         if (user is null)
@@ -144,9 +146,15 @@ public static class ScmDbSeeder
             await userManager.CreateAsync(user, password);
         }
 
-        if (!string.IsNullOrEmpty(role) && !await userManager.IsInRoleAsync(user, role))
+        if (userRoles is not null)
         {
-            await userManager.AddToRoleAsync(user, role);
+            foreach (var role in userRoles)
+            {
+                if (!await userManager.IsInRoleAsync(user, role))
+                {
+                    await userManager.AddToRoleAsync(user, role);
+                }
+            }
         }
 
         return user;
