@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Identity;
 
@@ -184,6 +185,49 @@ public static class ScmDbSeeder
             }
 
             context.Parts.AddRange(parts);
+            await context.SaveChangesAsync();
+        }
+
+        if (!await context.ReportDefinitions.AnyAsync())
+        {
+            var reportSamples = new List<ReportDefinition>
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Открытые заказы",
+                    Description = "Перечень активных заказов с приоритетом и сроком SLA",
+                    SqlText = "SELECT o.\"Number\", o.\"ClientName\", o.\"Status\", o.\"Priority\", o.\"CreatedAtUtc\", o.\"SLAUntil\" FROM \"Orders\" o WHERE (@status IS NULL OR o.\"Status\" = @status) ORDER BY o.\"CreatedAtUtc\" DESC",
+                    ParametersJson = JsonSerializer.Serialize(new[]
+                    {
+                        new ReportParameterDefinition { Name = "@status", Type = "int", DefaultValue = null }
+                    }),
+                    Visibility = ReportVisibility.Team,
+                    AllowedRolesJson = JsonSerializer.Serialize(new[] { "Manager", "Admin" }),
+                    CreatedBy = admin.Id,
+                    CreatedAtUtc = DateTime.UtcNow.AddDays(-2),
+                    IsActive = true
+                },
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Выручка по заказам",
+                    Description = "Сумма утверждённых работ и запчастей по каждому заказу",
+                    SqlText = "SELECT o.\"Number\" AS \"Номер заказа\", SUM(q.\"Price\" * q.\"Qty\") AS \"Выручка\" FROM \"Orders\" o JOIN \"QuoteLines\" q ON q.\"OrderId\" = o.\"Id\" WHERE q.\"Status\" = 2 AND (@from IS NULL OR o.\"CreatedAtUtc\" >= @from) AND (@to IS NULL OR o.\"CreatedAtUtc\" < @to + INTERVAL '1 day') GROUP BY o.\"Number\" ORDER BY \"Выручка\" DESC",
+                    ParametersJson = JsonSerializer.Serialize(new[]
+                    {
+                        new ReportParameterDefinition { Name = "@from", Type = "date" },
+                        new ReportParameterDefinition { Name = "@to", Type = "date" }
+                    }),
+                    Visibility = ReportVisibility.Organization,
+                    AllowedRolesJson = JsonSerializer.Serialize(Array.Empty<string>()),
+                    CreatedBy = admin.Id,
+                    CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
+                    IsActive = true
+                }
+            };
+
+            context.ReportDefinitions.AddRange(reportSamples);
             await context.SaveChangesAsync();
         }
     }
