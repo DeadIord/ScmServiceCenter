@@ -90,12 +90,12 @@
                 <h3 class="fs-4 fw-semibold mt-4">Шаг 3: Связь с мастером</h3>
                 <div class="card shadow-sm mb-3">
                     <div class="card-body" style="max-height: 300px; overflow-y: auto;">
-                        @foreach (var message in Model.Messages.OrderByDescending(m => m.At))
+                        @foreach (var message in Model.Messages.OrderByDescending(m => m.AtUtc))
                         {
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between">
                                     <div class="fw-semibold">@(message.FromClient ? "Вы" : "Сервис-центр")</div>
-                                    <small class="text-muted">@message.At.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                    <small class="text-muted">@message.AtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
                                 </div>
                                 <div>@message.Text</div>
                             </div>

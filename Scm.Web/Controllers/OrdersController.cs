@@ -200,28 +200,6 @@ public class OrdersController : Controller
         }
     }
 
-    [HttpPost]
-    public async Task<IActionResult> PostMessage(MessageDto dto)
-    {
-        if (dto.OrderId == Guid.Empty || string.IsNullOrWhiteSpace(dto.Text))
-        {
-            Response.StatusCode = 400;
-            return Json(new { success = false, message = "Текст сообщения обязателен" });
-        }
-
-        try
-        {
-            var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            await _messageService.AddAsync(dto, userId);
-            return Json(new { success = true });
-        }
-        catch (Exception ex)
-        {
-            Response.StatusCode = 400;
-            return Json(new { success = false, message = ex.Message });
-        }
-    }
-
     [HttpGet]
     [Authorize(Roles = "Admin,Manager,Technician")]
     public async Task<IActionResult> Kanban()

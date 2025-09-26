@@ -33,7 +33,7 @@ public class OrdersController : Controller
         {
             var order = await _dbContext.Orders
                 .Include(o => o.QuoteLines)
-                .Include(o => o.Messages.OrderByDescending(m => m.At))
+                .Include(o => o.Messages.OrderByDescending(m => m.AtUtc))
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(o => o.Number == number && o.ClientAccessToken == token);
 
@@ -47,7 +47,7 @@ public class OrdersController : Controller
                 {
                     Order = order,
                     QuoteLines = order.QuoteLines.OrderBy(l => l.Title).ToList(),
-                    Messages = order.Messages.OrderByDescending(m => m.At).ToList()
+                    Messages = order.Messages.OrderByDescending(m => m.AtUtc).ToList()
                 };
             }
         }
@@ -116,7 +116,7 @@ public class OrdersController : Controller
         }
 
         dto.FromClient = true;
-        await _messageService.AddAsync(dto, null);
+        _ = await _messageService.AddAsync(dto, null);
         TempData["Success"] = "Сообщение отправлено";
         return RedirectToAction(nameof(Track), new { number, token });
     }

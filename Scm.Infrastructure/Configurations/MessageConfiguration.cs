@@ -14,13 +14,13 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
 
         builder.HasIndex(x => x.OrderId);
 
-        builder.HasIndex(x => x.At).IsDescending();
+        builder.HasIndex(x => x.AtUtc).IsDescending();
 
         builder.Property(x => x.Text)
             .HasMaxLength(1000)
             .IsRequired();
 
-        builder.Property(x => x.At)
+        builder.Property(x => x.AtUtc)
             .HasColumnType("timestamp with time zone");
 
         builder.HasOne(x => x.Order)
