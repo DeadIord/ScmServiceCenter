@@ -84,6 +84,14 @@
                 <div class="small text-muted">Токен доступа клиента</div>
                 <code class="text-break">@Model.Order.ClientAccessToken</code>
             </div>
+            <div class="mt-3">
+                <label class="form-label">Ссылка для клиента</label>
+                <input class="form-control" value="@Model.ClientTrackingLink" readonly />
+            </div>
+            <div class="mt-3">
+                <label class="form-label">Шаблон письма</label>
+                <textarea class="form-control" rows="6" readonly>@Model.ClientEmailTemplate</textarea>
+            </div>
         </div>
     </div>
     <div class="col-lg-6">

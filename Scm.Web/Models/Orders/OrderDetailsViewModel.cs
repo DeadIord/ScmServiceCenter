@@ -9,4 +9,8 @@ public sealed class OrderDetailsViewModel
     public decimal ApprovedTotal { get; init; }
 
     public IReadOnlyCollection<Message> Messages { get; init; } = Array.Empty<Message>();
+
+    public string ClientEmailTemplate { get; init; } = string.Empty;
+
+    public string ClientTrackingLink { get; init; } = string.Empty;
 }
