@@ -12,7 +12,7 @@ public sealed class Message
 
     public string Text { get; set; } = string.Empty;
 
-    public DateTime At { get; set; } = DateTime.UtcNow;
+    public DateTime AtUtc { get; set; } = DateTime.UtcNow;
 
     public Order? Order { get; set; }
 }

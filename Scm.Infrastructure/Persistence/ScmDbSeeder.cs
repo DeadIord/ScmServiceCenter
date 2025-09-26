@@ -142,7 +142,7 @@ public static class ScmDbSeeder
                     FromClient = false,
                     FromUserId = admin.Id,
                     Text = "Заказ принят в работу",
-                    At = order.CreatedAtUtc.AddHours(1)
+                    AtUtc = order.CreatedAtUtc.AddHours(1)
                 });
 
                 context.Messages.Add(new Message
@@ -150,7 +150,7 @@ public static class ScmDbSeeder
                     OrderId = order.Id,
                     FromClient = true,
                     Text = "Спасибо за оперативность!",
-                    At = order.CreatedAtUtc.AddHours(5)
+                    AtUtc = order.CreatedAtUtc.AddHours(5)
                 });
 
                 context.Invoices.Add(new Invoice

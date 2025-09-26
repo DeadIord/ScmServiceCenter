@@ -105,14 +105,18 @@
             <div class="tab-pane fade" id="messages" role="tabpanel">
                 <div class="card shadow-soft mb-3">
                     <div class="card-body" id="messages-container">
-                        @foreach (var message in Model.Messages.OrderByDescending(m => m.At))
+                        @foreach (var message in Model.Messages)
                         {
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between">
-                                    <div class="fw-semibold">@(message.FromClient ? "Клиент" : "Сотрудник")</div>
-                                    <small class="text-muted">@message.At.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                            var alignmentClass = message.FromClient ? "justify-content-start" : "justify-content-end";
+                            var bubbleClass = message.FromClient ? "message-bubble-client" : "message-bubble-staff";
+                            <div class="d-flex @alignmentClass mb-3">
+                                <div class="message-bubble @bubbleClass">
+                                    <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
+                                        <div class="fw-semibold">@(message.FromClient ? "Клиент" : "Сотрудник")</div>
+                                        <small class="text-muted">@message.AtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                    </div>
+                                    <div class="white-space-pre-wrap">@message.Text</div>
                                 </div>
-                                <div>@message.Text</div>
                             </div>
                         }
                     </div>
@@ -156,6 +160,8 @@
 @section Scripts {
     <script>
         const orderId = '@Model.Order.Id';
+        document.getElementById('messages-container').scrollTop = document.getElementById('messages-container').scrollHeight;
+
         document.getElementById('change-status-btn').addEventListener('click', function () {
             const status = document.getElementById('status-select').value;
             axios.post('@Url.Action("ChangeStatus")', Qs.stringify({ id: orderId, to: status }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
@@ -178,9 +184,52 @@
         document.getElementById('message-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
-            axios.post('@Url.Action("PostMessage")', new URLSearchParams(formData))
-                .then(() => window.location.reload())
+            const payload = {
+                orderId: formData.get('OrderId'),
+                text: formData.get('Text')
+            };
+            axios.post('@Url.Action("Add", "Messages")', payload)
+                .then(response => {
+                    const message = response.data;
+                    appendMessage(message);
+                    this.reset();
+                    showToast('Сообщение отправлено', 'bg-success');
+                })
                 .catch(err => showToast(err.response?.data?.message ?? 'Не удалось отправить сообщение', 'bg-danger'));
         });
+
+        function appendMessage(message) {
+            const container = document.getElementById('messages-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = `d-flex ${message.fromClient ? 'justify-content-start' : 'justify-content-end'} mb-3`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${message.fromClient ? 'message-bubble-client' : 'message-bubble-staff'}`;
+
+            const header = document.createElement('div');
+            header.className = 'd-flex justify-content-between align-items-center gap-3 mb-2';
+
+            const author = document.createElement('div');
+            author.className = 'fw-semibold';
+            author.textContent = message.fromClient ? 'Клиент' : 'Сотрудник';
+
+            const timestamp = document.createElement('small');
+            timestamp.className = 'text-muted';
+            timestamp.textContent = new Date(message.atUtc).toLocaleString();
+
+            header.appendChild(author);
+            header.appendChild(timestamp);
+
+            const text = document.createElement('div');
+            text.className = 'white-space-pre-wrap';
+            text.textContent = message.text;
+
+            bubble.appendChild(header);
+            bubble.appendChild(text);
+
+            wrapper.appendChild(bubble);
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
     </script>
 }
