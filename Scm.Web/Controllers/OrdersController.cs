@@ -133,11 +133,25 @@ public class OrdersController : Controller
         var messages = await _messageService.GetForOrderAsync(id);
         var total = await _quoteService.GetTotalAsync(id);
 
+        var trackingLink = Url.Action(
+            action: "Track",
+            controller: "Orders",
+            values: new { area = "Client", number = order.Number, token = order.ClientAccessToken },
+            protocol: Request.Scheme) ?? string.Empty;
+
+        var emailTemplate = $"Здравствуйте, {order.ClientName}!" + Environment.NewLine + Environment.NewLine +
+            $"Готова смета по ремонту {order.Device}. Перейдите по ссылке, чтобы согласовать работы:" + Environment.NewLine +
+            trackingLink + Environment.NewLine + Environment.NewLine +
+            "Если у вас есть вопросы, просто ответьте на это письмо." + Environment.NewLine + Environment.NewLine +
+            "С уважением,\nСервисный центр";
+
         var model = new OrderDetailsViewModel
         {
             Order = order,
             Messages = messages,
-            ApprovedTotal = total
+            ApprovedTotal = total,
+            ClientEmailTemplate = emailTemplate,
+            ClientTrackingLink = trackingLink
         };
 
         return View(model);

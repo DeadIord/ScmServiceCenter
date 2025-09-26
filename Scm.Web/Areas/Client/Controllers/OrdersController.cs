@@ -14,13 +14,11 @@ namespace Scm.Web.Areas.Client.Controllers;
 public class OrdersController : Controller
 {
     private readonly ScmDbContext _dbContext;
-    private readonly IQuoteService _quoteService;
     private readonly IMessageService _messageService;
 
-    public OrdersController(ScmDbContext dbContext, IQuoteService quoteService, IMessageService messageService)
+    public OrdersController(ScmDbContext dbContext, IMessageService messageService)
     {
         _dbContext = dbContext;
-        _quoteService = quoteService;
         _messageService = messageService;
     }
 
@@ -46,7 +44,10 @@ public class OrdersController : Controller
                 model = new ClientOrderViewModel
                 {
                     Order = order,
-                    QuoteLines = order.QuoteLines.OrderBy(l => l.Title).ToList(),
+                    QuoteLines = order.QuoteLines
+                        .Where(l => l.Status == QuoteLineStatus.Proposed)
+                        .OrderBy(l => l.Title)
+                        .ToList(),
                     Messages = order.Messages.OrderByDescending(m => m.AtUtc).ToList()
                 };
             }
@@ -55,48 +56,6 @@ public class OrdersController : Controller
         ViewBag.Number = number;
         ViewBag.Token = token;
         return View(model);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> ApproveLine(Guid lineId, string number, string token)
-    {
-        var line = await _dbContext.QuoteLines.Include(l => l.Order).FirstOrDefaultAsync(l => l.Id == lineId);
-        if (line?.Order is null || line.Order.Number != number || line.Order.ClientAccessToken != token)
-        {
-            TempData["Error"] = "Строка не найдена";
-            return RedirectToAction(nameof(Track), new { number, token });
-        }
-
-        if (line.Status != QuoteLineStatus.Proposed)
-        {
-            TempData["Error"] = "Строка уже обработана";
-            return RedirectToAction(nameof(Track), new { number, token });
-        }
-
-        await _quoteService.ApproveLineAsync(lineId);
-        TempData["Success"] = "Строка согласована";
-        return RedirectToAction(nameof(Track), new { number, token });
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> RejectLine(Guid lineId, string number, string token)
-    {
-        var line = await _dbContext.QuoteLines.Include(l => l.Order).FirstOrDefaultAsync(l => l.Id == lineId);
-        if (line?.Order is null || line.Order.Number != number || line.Order.ClientAccessToken != token)
-        {
-            TempData["Error"] = "Строка не найдена";
-            return RedirectToAction(nameof(Track), new { number, token });
-        }
-
-        if (line.Status != QuoteLineStatus.Proposed)
-        {
-            TempData["Error"] = "Строка уже обработана";
-            return RedirectToAction(nameof(Track), new { number, token });
-        }
-
-        await _quoteService.RejectLineAsync(lineId);
-        TempData["Success"] = "Строка отклонена";
-        return RedirectToAction(nameof(Track), new { number, token });
     }
 
     [HttpPost]
