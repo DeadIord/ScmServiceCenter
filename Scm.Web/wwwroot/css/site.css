@@ -8,15 +8,52 @@ body {
   color: #1f2937;
 }
 
-.card.shadow-soft {
-  box-shadow: var(--scm-shadow);
+main {
+  flex: 1 0 auto;
+}
+
+.navbar-brand {
+  font-size: 1.25rem;
+}
+
+.toast-container {
+  z-index: 1080;
+}
+
+.card {
   border: none;
   border-radius: 1rem;
+}
+
+.card.shadow-sm {
+  box-shadow: var(--scm-shadow);
+}
+
+.rounded-3 {
+  border-radius: 1rem !important;
+}
+
+.card-header,
+.card-footer {
+  background-color: #ffffff;
 }
 
 .badge-status {
   font-size: 0.85rem;
   padding: 0.4rem 0.75rem;
+}
+
+.form-control,
+.form-select {
+  border-radius: 0.75rem;
+}
+
+.btn {
+  border-radius: 0.75rem;
+}
+
+.table {
+  --bs-table-bg: #ffffff;
 }
 
 .table thead th {
@@ -29,21 +66,16 @@ body {
   background-color: rgba(59, 130, 246, 0.04);
 }
 
-.navbar-brand {
-  font-size: 1.25rem;
+.table-sticky thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f8f9fb;
 }
 
-.toast-container {
-  z-index: 1080;
-}
-
-.form-control,
-.form-select {
-  border-radius: 0.75rem;
-}
-
-.btn {
-  border-radius: 0.75rem;
+.table-empty {
+  color: #94a3b8;
+  font-size: 0.95rem;
 }
 
 .section-title {
@@ -70,4 +102,12 @@ body {
 
 .white-space-pre-wrap {
   white-space: pre-wrap;
+}
+
+.kanban-status-card {
+  border: none;
+}
+
+.kanban-column {
+  min-height: 200px;
 }

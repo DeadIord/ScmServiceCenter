@@ -82,3 +82,85 @@ window.initKanbanBoard = function () {
         });
     });
 };
+
+window.initReportParametersEditor = function () {
+    const tableBody = document.querySelector('#parameters-table tbody');
+    if (!tableBody) {
+        return;
+    }
+
+    const addButton = document.getElementById('add-parameter');
+
+    const getRows = () => Array.from(tableBody.querySelectorAll('tr')).filter(row => !row.classList.contains('table-empty-row'));
+    const removePlaceholder = () => {
+        const placeholder = tableBody.querySelector('.table-empty-row');
+        if (placeholder) {
+            placeholder.remove();
+        }
+    };
+    const ensurePlaceholder = () => {
+        if (getRows().length) {
+            removePlaceholder();
+            return;
+        }
+        if (!tableBody.querySelector('.table-empty-row')) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.className = 'table-empty-row';
+            emptyRow.innerHTML = '<td colspan="4" class="text-center py-4 table-empty">Записей нет</td>';
+            tableBody.appendChild(emptyRow);
+        }
+    };
+    const reindexRows = () => {
+        getRows().forEach((row, index) => {
+            row.querySelectorAll('[name^="Parameters["]').forEach(control => {
+                const name = control.getAttribute('name');
+                if (!name) {
+                    return;
+                }
+                control.setAttribute('name', name.replace(/Parameters\[\d+\]/, `Parameters[${index}]`));
+            });
+        });
+    };
+
+    addButton?.addEventListener('click', () => {
+        removePlaceholder();
+        const index = getRows().length;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <input class="form-control" name="Parameters[${index}].Name" placeholder="@example_param" />
+            </td>
+            <td>
+                <select class="form-select" name="Parameters[${index}].Type">
+                    <option value="string">Строка</option>
+                    <option value="int">Целое число</option>
+                    <option value="decimal">Десятичное</option>
+                    <option value="date">Дата</option>
+                    <option value="bool">Логическое</option>
+                </select>
+            </td>
+            <td>
+                <input class="form-control" name="Parameters[${index}].DefaultValue" />
+            </td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-parameter"><i class="bi bi-x"></i></button>
+            </td>`;
+        tableBody.appendChild(row);
+        reindexRows();
+    });
+
+    tableBody.addEventListener('click', event => {
+        if (!event.target.closest('.remove-parameter')) {
+            return;
+        }
+        const row = event.target.closest('tr');
+        if (row) {
+            row.remove();
+            reindexRows();
+            ensurePlaceholder();
+        }
+    });
+
+    ensurePlaceholder();
+    reindexRows();
+};

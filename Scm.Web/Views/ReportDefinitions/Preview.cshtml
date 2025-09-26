@@ -1,6 +1,7 @@
 @model Scm.Web.Models.ReportBuilder.ReportPreviewViewModel
 @{
     ViewData["Title"] = ViewData["Title"] ?? $"Предпросмотр: {Model.Title}";
+    var columnCount = Math.Max(1, Model.Columns.Count);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -11,7 +12,7 @@
     <a asp-action="Index" class="btn btn-outline-secondary">Назад к списку</a>
 </div>
 
-<div class="card shadow-sm mb-4">
+<div class="card shadow-sm rounded-3 mb-4">
     <div class="card-header bg-white">
         <h2 class="h5 mb-0">Параметры</h2>
     </div>
@@ -64,9 +65,9 @@
 {
     <div class="alert alert-danger">@Model.Error</div>
 }
-else if (Model.Rows.Any())
+else
 {
-    <div class="card shadow-sm">
+    <div class="card shadow-sm rounded-3">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h2 class="h5 mb-0">Результат (@Model.Rows.Count строк)</h2>
             <div class="d-flex gap-2">
@@ -94,7 +95,7 @@ else if (Model.Rows.Any())
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-striped table-sm mb-0">
+                <table class="table table-hover table-striped table-sm align-middle table-sticky mb-0">
                     <thead class="table-light">
                         <tr>
                         @foreach (var column in Model.Columns)
@@ -104,14 +105,23 @@ else if (Model.Rows.Any())
                         </tr>
                     </thead>
                     <tbody>
-                    @foreach (var row in Model.Rows)
+                    @if (Model.Rows.Any())
+                    {
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                            @foreach (var column in Model.Columns)
+                            {
+                                row.TryGetValue(column, out var cellValue);
+                                <td>@(cellValue ?? "")</td>
+                            }
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                        @foreach (var column in Model.Columns)
-                        {
-                            row.TryGetValue(column, out var cellValue);
-                            <td>@(cellValue ?? "")</td>
-                        }
+                            <td colspan="@columnCount" class="text-center py-4 table-empty">Записей нет</td>
                         </tr>
                     }
                     </tbody>
@@ -119,8 +129,4 @@ else if (Model.Rows.Any())
             </div>
         </div>
     </div>
-}
-else
-{
-    <div class="alert alert-info">Нет данных для отображения. Уточните параметры и выполните предпросмотр.</div>
 }
