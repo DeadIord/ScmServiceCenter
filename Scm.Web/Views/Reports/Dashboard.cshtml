@@ -1,8 +1,26 @@
 @model Scm.Web.Models.Reports.DashboardViewModel
 @{
     ViewData["Title"] = "Дашборд";
+    var periodStartValue = Model.PeriodStart?.ToString("yyyy-MM-dd") ?? string.Empty;
+    var periodEndValue = Model.PeriodEnd?.ToString("yyyy-MM-dd") ?? string.Empty;
 }
+
 <h1 class="section-title mb-4">Ключевые показатели</h1>
+
+<form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-3">
+        <label class="form-label text-muted" for="periodStart">Начало периода</label>
+        <input type="date" class="form-control" id="periodStart" name="periodStart" value="@periodStartValue" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label text-muted" for="periodEnd">Окончание периода</label>
+        <input type="date" class="form-control" id="periodEnd" name="periodEnd" value="@periodEndValue" />
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary">Показать</button>
+    </div>
+</form>
+
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card shadow-soft text-center py-4">
@@ -17,28 +35,29 @@
         <div class="card shadow-soft text-center py-4">
             <div class="card-body">
                 <div class="text-muted mb-2">Просрочка SLA</div>
-                <div class="display-6 fw-bold">@Model.SlaBreachPercent.ToString("F1")%</div>
-                <div class="text-muted">от заказов</div>
+                <div class="display-6 fw-bold">@Model.SlaViolationRate.ToString("F1")%</div>
+                <div class="text-muted">от заказов со SLA</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card shadow-soft text-center py-4">
             <div class="card-body">
-                <div class="text-muted mb-2">Выручка за месяц</div>
-                <div class="display-6 fw-bold">@Model.RevenueMonth.ToString("N0") ₽</div>
+                <div class="text-muted mb-2">Оценка выручки</div>
+                <div class="display-6 fw-bold">@Model.RevenueStub.ToString("N0") ₽</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card shadow-soft text-center py-4">
             <div class="card-body">
-                <div class="text-muted mb-2">Всего поломок</div>
-                <div class="display-6 fw-bold">@Model.TopDefects.Sum(x => x.Value)</div>
+                <div class="text-muted mb-2">Заказы в периоде</div>
+                <div class="display-6 fw-bold">@Model.TotalOrders</div>
             </div>
         </div>
     </div>
 </div>
+
 <div class="card shadow-soft">
     <div class="card-header bg-white border-0">
         <h5 class="fw-semibold mb-0">ТОП поломок</h5>
@@ -63,8 +82,8 @@
                     foreach (var row in Model.TopDefects)
                     {
                         <tr>
-                            <td>@row.Key</td>
-                            <td class="text-end">@row.Value</td>
+                            <td>@row.Defect</td>
+                            <td class="text-end">@row.Count</td>
                         </tr>
                     }
                 }
