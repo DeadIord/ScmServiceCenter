@@ -25,7 +25,7 @@
 }
 <div class="row g-4">
     <div class="col-lg-3">
-        <div class="card shadow-soft p-4">
+        <div class="card shadow-sm rounded-3 p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h5 class="fw-semibold mb-0">Статус</h5>
@@ -41,7 +41,7 @@
                             <option value="@status" selected="@(status == Model.Order.Status ? "selected" : null)">@status</option>
                         }
                     </select>
-                    <button class="btn btn-outline-primary" id="change-status-btn" data-order-id="@Model.Order.Id">Обновить</button>
+                    <button class="btn btn-primary" id="change-status-btn" data-order-id="@Model.Order.Id">Обновить</button>
                 </div>
             </div>
             <div class="mb-3">
@@ -111,7 +111,7 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="messages" role="tabpanel">
-                <div class="card shadow-soft mb-3">
+                <div class="card shadow-sm rounded-3 mb-3">
                     <div class="card-body" id="messages-container">
                         @foreach (var message in Model.Messages)
                         {
@@ -129,7 +129,7 @@
                         }
                     </div>
                 </div>
-                <form id="message-form" class="card shadow-soft">
+                <form id="message-form" class="card shadow-sm rounded-3">
                     <div class="card-body">
                         <input type="hidden" name="OrderId" value="@Model.Order.Id" />
                         <div class="mb-3">
@@ -137,7 +137,7 @@
                             <textarea class="form-control" name="Text" rows="3" required></textarea>
                         </div>
                         <div class="text-end">
-                            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-chat-text me-2"></i>Отправить</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-chat-text me-2"></i>Отправить</button>
                         </div>
                     </div>
                 </form>
@@ -145,11 +145,11 @@
         </div>
     </div>
     <div class="col-lg-3">
-        <div class="card shadow-soft p-4 sticky-top" style="top: 90px;">
+        <div class="card shadow-sm rounded-3 p-4 sticky-top" style="top: 90px;">
             <h5 class="fw-semibold mb-3">Быстрые действия</h5>
             <div class="d-grid gap-2">
                 <button class="btn btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#actionsCanvas"><i class="bi bi-gear me-2"></i>Панель</button>
-                <a class="btn btn-outline-primary" asp-action="Index">К списку</a>
+                <a class="btn btn-outline-secondary" asp-action="Index">К списку</a>
             </div>
             <div class="offcanvas offcanvas-end" tabindex="-1" id="actionsCanvas">
                 <div class="offcanvas-header">
@@ -158,7 +158,7 @@
                 </div>
                 <div class="offcanvas-body d-grid gap-3">
                     <button class="btn btn-primary" id="action-submit-quote" data-order-id="@Model.Order.Id">Отправить смету на согласование</button>
-                    <button class="btn btn-outline-primary" data-bs-dismiss="offcanvas" data-action="change-status">Сменить статус</button>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="offcanvas" data-action="change-status">Сменить статус</button>
                     <a class="btn btn-outline-success" href="#"><i class="bi bi-receipt me-2"></i>Сформировать счёт</a>
                 </div>
             </div>
@@ -180,13 +180,19 @@
             e.preventDefault();
             const formData = new FormData(this);
             axios.post('@Url.Action("AddQuoteLine")', new URLSearchParams(formData))
-                .then(() => window.location.reload())
+                .then(() => {
+                    showToast('Строка добавлена', 'bg-success');
+                    setTimeout(() => window.location.reload(), 400);
+                })
                 .catch(err => showToast(err.response?.data?.errors?.join('\n') ?? 'Не удалось добавить строку', 'bg-danger'));
         });
         const submitButtons = [document.getElementById('submit-quote'), document.getElementById('action-submit-quote')];
         submitButtons.forEach(btn => btn?.addEventListener('click', () => {
             axios.post('@Url.Action("SubmitQuote")', Qs.stringify({ orderId }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-                .then(() => window.location.reload())
+                .then(() => {
+                    showToast('Смета отправлена на согласование', 'bg-success');
+                    setTimeout(() => window.location.reload(), 600);
+                })
                 .catch(err => showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger'));
         }));
         document.getElementById('message-form').addEventListener('submit', function (e) {

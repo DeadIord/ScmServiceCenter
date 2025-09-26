@@ -11,7 +11,7 @@
     <a asp-action="Index" class="btn btn-outline-secondary">Назад к списку</a>
 </div>
 
-<form asp-action="Edit" method="post" class="card shadow-sm">
+<form asp-action="Edit" method="post" class="card shadow-sm rounded-3">
     <div class="card-body">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="Id" />
@@ -53,12 +53,12 @@
         <div>
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h2 class="h5 mb-0">Параметры запроса</h2>
-                <button type="button" class="btn btn-sm btn-outline-primary" id="add-parameter">
+                <button type="button" class="btn btn-sm btn-primary" id="add-parameter">
                     <i class="bi bi-plus"></i> Добавить параметр
                 </button>
             </div>
             <div class="table-responsive">
-                <table class="table table-sm align-middle" id="parameters-table">
+                <table class="table table-hover table-sm align-middle table-sticky mb-0" id="parameters-table">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 40%">Имя параметра</th>
@@ -68,6 +68,12 @@
                         </tr>
                     </thead>
                     <tbody>
+                    @if (!Model.Parameters.Any())
+                    {
+                        <tr class="table-empty-row">
+                            <td colspan="4" class="text-center py-4 table-empty">Записей нет</td>
+                        </tr>
+                    }
                     @for (var i = 0; i < Model.Parameters.Count; i++)
                     {
                         <tr>
@@ -98,7 +104,7 @@
         </div>
     </div>
     <div class="card-footer d-flex justify-content-between">
-        <button type="submit" class="btn btn-success">Сохранить</button>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
         <a asp-action="Preview" asp-route-id="@Model.Id" class="btn btn-outline-secondary @(Model.Id.HasValue ? string.Empty : "disabled")">Предпросмотр</a>
     </div>
 </form>
@@ -106,41 +112,8 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        (function () {
-            const tableBody = document.querySelector('#parameters-table tbody');
-            const addButton = document.getElementById('add-parameter');
-
-            addButton?.addEventListener('click', () => {
-                const index = tableBody.children.length;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <input class="form-control" name="Parameters[${index}].Name" placeholder="@@example_param" />
-                    </td>
-                    <td>
-                        <select class="form-select" name="Parameters[${index}].Type">
-                            <option value="string">Строка</option>
-                            <option value="int">Целое число</option>
-                            <option value="decimal">Десятичное</option>
-                            <option value="date">Дата</option>
-                            <option value="bool">Логическое</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input class="form-control" name="Parameters[${index}].DefaultValue" />
-                    </td>
-                    <td class="text-end">
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-parameter"><i class="bi bi-x"></i></button>
-                    </td>`;
-                tableBody.appendChild(row);
-            });
-
-            tableBody.addEventListener('click', (event) => {
-                if (event.target.closest('.remove-parameter')) {
-                    const row = event.target.closest('tr');
-                    row?.remove();
-                }
-            });
-        })();
+        if (typeof initReportParametersEditor === 'function') {
+            initReportParametersEditor();
+        }
     </script>
 }

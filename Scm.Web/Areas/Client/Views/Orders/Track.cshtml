@@ -4,10 +4,20 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Отслеживание заказа";
+    string StatusBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
 }
 <div class="row justify-content-center mb-4">
     <div class="col-lg-8">
-        <div class="card shadow-soft p-4">
+        <div class="card shadow-sm rounded-3 p-4">
             <h1 class="section-title mb-3">Личный кабинет клиента</h1>
             <p class="text-muted">Введите номер заказа и токен доступа из SMS, чтобы отслеживать ремонт и согласовывать смету.</p>
             <form method="get" class="row g-3">
@@ -34,12 +44,12 @@
 {
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="card shadow-soft p-4">
+            <div class="card shadow-sm rounded-3 p-4">
                 <h2 class="fs-3 fw-semibold">Статус заказа</h2>
-                <p class="text-muted">Текущий статус: <span class="fw-semibold">@Model.Order.Status</span></p>
+                <p class="text-muted">Текущий статус: <span class="badge text-bg-@StatusBadge(Model.Order.Status) badge-status">@Model.Order.Status</span></p>
                 <h3 class="fs-4 fw-semibold mt-4">Смета на согласовании</h3>
                 <div class="table-responsive">
-                    <table class="table align-middle">
+                    <table class="table table-hover align-middle table-sticky mb-0">
                         <thead>
                             <tr>
                                 <th>Наименование</th>
@@ -52,12 +62,12 @@
                             @if (!Model.QuoteLines.Any())
                             {
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">Строки на согласование отсутствуют.</td>
+                                    <td colspan="4" class="text-center py-4 table-empty">Записей нет</td>
                                 </tr>
                             }
                             else
                             {
-                                foreach (var line in Model.QuoteLines)
+                                @foreach (var line in Model.QuoteLines)
                                 {
                                     <tr>
                                         <td>@line.Title</td>
@@ -84,7 +94,7 @@
                     </table>
                 </div>
                 <h3 class="fs-4 fw-semibold mt-4">Связь с мастером</h3>
-                <div class="card shadow-sm mb-3">
+                <div class="card shadow-sm rounded-3 mb-3">
                     <div class="card-body" style="max-height: 300px; overflow-y: auto;">
                         @foreach (var message in Model.Messages.OrderByDescending(m => m.AtUtc))
                         {
@@ -107,13 +117,13 @@
                         <textarea class="form-control" name="Text" rows="3" required></textarea>
                     </div>
                     <div class="col-12 text-end">
-                        <button class="btn btn-outline-primary" type="submit">Отправить</button>
+                        <button class="btn btn-primary" type="submit">Отправить</button>
                     </div>
                 </form>
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="card shadow-soft p-4">
+            <div class="card shadow-sm rounded-3 p-4">
                 <h3 class="fs-4 fw-semibold mb-3">Шаг 4: Завершение</h3>
                 <p class="text-muted">После подтверждения сметы мастер приступит к ремонту. Следите за обновлениями статуса.</p>
                 <ul class="list-group list-group-flush">

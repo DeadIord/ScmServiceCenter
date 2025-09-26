@@ -10,7 +10,7 @@
 }
 <div class="row justify-content-center">
     <div class="col-lg-7 col-xl-6">
-        <div class="card shadow-soft p-4 mb-4">
+        <div class="card shadow-sm rounded-3 p-4 mb-4">
             <h2 class="h5 mb-3">CRM</h2>
             <form method="get" class="row g-3 align-items-end">
                 <input type="hidden" name="accountId" value="@Model.AccountId" />
@@ -24,11 +24,11 @@
                     <input class="form-control" type="search" name="contactSearch" value="@contactSearch" placeholder="Имя или email" />
                 </div>
                 <div class="col-12 text-end">
-                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search me-2"></i>Обновить списки</button>
+                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search me-2"></i>Обновить списки</button>
                 </div>
             </form>
         </div>
-        <div class="card shadow-soft p-4">
+        <div class="card shadow-sm rounded-3 p-4">
             <h1 class="section-title mb-3">Новый заказ</h1>
             <form asp-action="Create" method="post" class="row g-3">
                 <div asp-validation-summary="All" class="text-danger"></div>
