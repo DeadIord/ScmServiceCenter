@@ -18,31 +18,83 @@ public class ReportsController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Dashboard()
+    public async Task<IActionResult> Dashboard(DateOnly? periodStart, DateOnly? periodEnd)
     {
+        var ordersQuery = _dbContext.Orders.AsQueryable();
+
+        var startDate = periodStart.HasValue
+            ? DateTime.SpecifyKind(periodStart.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : (DateTime?)null;
+
+        var endDateExclusive = periodEnd.HasValue
+            ? DateTime.SpecifyKind(periodEnd.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : (DateTime?)null;
+
+        if (startDate.HasValue)
+        {
+            ordersQuery = ordersQuery.Where(o => o.CreatedAtUtc >= startDate.Value);
+        }
+
+        if (endDateExclusive.HasValue)
+        {
+            ordersQuery = ordersQuery.Where(o => o.CreatedAtUtc < endDateExclusive.Value);
+        }
+
+        var filteredOrders = await ordersQuery
+            .Select(o => new
+            {
+                o.Id,
+                o.Defect,
+                o.Status,
+                o.CreatedAtUtc,
+                o.SLAUntil
+            })
+            .ToListAsync();
+
+        var completedOrders = filteredOrders
+            .Where(o => o.Status == OrderStatus.Ready || o.Status == OrderStatus.Closed)
+            .ToList();
+
         var now = DateTime.UtcNow;
-        var completed = await _dbContext.Orders.Where(o => o.Status == OrderStatus.Ready || o.Status == OrderStatus.Closed).ToListAsync();
-        var averageDays = completed.Any() ? completed.Average(o => (now - o.CreatedAtUtc).TotalDays) : 0;
 
-        var totalOrders = await _dbContext.Orders.CountAsync();
-        var slaBreaches = await _dbContext.Orders.CountAsync(o => o.SLAUntil != null && o.SLAUntil < now && o.Status != OrderStatus.Closed);
-        var slaPercent = totalOrders == 0 ? 0 : (double)slaBreaches / totalOrders * 100d;
+        var averageDays = completedOrders.Count > 0
+            ? completedOrders.Average(o => (now - o.CreatedAtUtc).TotalDays)
+            : 0d;
 
-        var revenue = await _dbContext.Invoices.Where(i => i.CreatedAt.Month == now.Month && i.CreatedAt.Year == now.Year)
-            .SumAsync(i => i.Amount);
+        var completedWithSla = completedOrders.Where(o => o.SLAUntil.HasValue).ToList();
+        var slaViolations = completedWithSla.Count(o => o.SLAUntil!.Value < now);
+        var slaViolationRate = completedWithSla.Count == 0
+            ? 0d
+            : (double)slaViolations / completedWithSla.Count * 100d;
 
-        var topDefects = await _dbContext.Orders
-            .GroupBy(o => o.Defect)
-            .Select(g => new { g.Key, Count = g.Count() })
-            .OrderByDescending(x => x.Count)
-            .Take(5)
-            .ToDictionaryAsync(x => x.Key, x => x.Count);
+        var orderIds = filteredOrders.Select(o => o.Id).ToArray();
+        decimal revenue = 0m;
+
+        if (orderIds.Length > 0)
+        {
+            revenue = await _dbContext.QuoteLines
+                .Where(q => orderIds.Contains(q.OrderId))
+                .Where(q => q.Status == QuoteLineStatus.Approved)
+                .Where(q => q.Kind == QuoteLineKind.Labor || q.Kind == QuoteLineKind.Part)
+                .SumAsync(q => q.Price * q.Qty);
+        }
+
+        var topDefects = filteredOrders
+            .GroupBy(o => string.IsNullOrWhiteSpace(o.Defect) ? "Не указано" : o.Defect)
+            .Select(g => new DashboardTopDefectRow(g.Key, g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ThenBy(g => g.Defect)
+            .Take(10)
+            .ToList();
 
         var model = new DashboardViewModel
         {
+            PeriodStart = periodStart,
+            PeriodEnd = periodEnd,
             AverageRepairDays = Math.Round(averageDays, 1),
-            SlaBreachPercent = Math.Round(slaPercent, 1),
-            RevenueMonth = revenue,
+            SlaViolationRate = Math.Round(slaViolationRate, 1),
+            RevenueStub = revenue,
+            TotalOrders = filteredOrders.Count,
             TopDefects = topDefects
         };
 
