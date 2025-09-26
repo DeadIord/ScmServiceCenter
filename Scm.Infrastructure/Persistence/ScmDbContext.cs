@@ -15,6 +15,8 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<ReportDefinition> ReportDefinitions => Set<ReportDefinition>();
+    public DbSet<ReportExecutionLog> ReportExecutionLogs => Set<ReportExecutionLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -27,5 +29,7 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
         builder.ApplyConfiguration(new InvoiceConfiguration());
         builder.ApplyConfiguration(new AccountConfiguration());
         builder.ApplyConfiguration(new ContactConfiguration());
+        builder.ApplyConfiguration(new ReportDefinitionConfiguration());
+        builder.ApplyConfiguration(new ReportExecutionLogConfiguration());
     }
 }

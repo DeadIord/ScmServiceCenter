@@ -37,6 +37,7 @@ builder.Services.AddScoped<IStockService, StockService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
 
 builder.Services.AddScoped<ReceivePartDtoValidator>();
 
