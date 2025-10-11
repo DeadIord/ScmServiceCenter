@@ -38,6 +38,8 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
+builder.Services.Configure<MailOptions>(builder.Configuration.GetSection("Mail"));
+builder.Services.AddScoped<IMailService, MailService>();
 
 builder.Services.AddScoped<ReceivePartDtoValidator>();
 
