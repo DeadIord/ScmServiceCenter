@@ -18,6 +18,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             Number = number,
             ClientName = dto.ClientName.Trim(),
             ClientPhone = dto.ClientPhone.Trim(),
+            ClientEmail = dto.ClientEmail.Trim(),
             AccountId = dto.AccountId,
             ContactId = dto.ContactId,
             Device = dto.Device.Trim(),
@@ -40,7 +41,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
         if (!string.IsNullOrWhiteSpace(q))
         {
             var term = q.Trim();
-            query = query.Where(o => o.Number.Contains(term) || o.ClientName.Contains(term) || o.ClientPhone.Contains(term) || o.Device.Contains(term));
+            query = query.Where(o => o.Number.Contains(term) || o.ClientName.Contains(term) || o.ClientPhone.Contains(term) || o.ClientEmail.Contains(term) || o.Device.Contains(term));
         }
 
         if (status.HasValue)

@@ -56,6 +56,10 @@
                 <label class="form-label">Клиент</label>
                 <div class="fw-semibold">@Model.Order.ClientName</div>
                 <div><a class="text-decoration-none" href="tel:@Model.Order.ClientPhone">@Model.Order.ClientPhone</a></div>
+                @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
+                {
+                    <div><a class="text-decoration-none" href="mailto:@Model.Order.ClientEmail">@Model.Order.ClientEmail</a></div>
+                }
             </div>
             @if (Model.Order.Account is not null)
             {

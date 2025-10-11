@@ -34,7 +34,7 @@
         <div class="col-md-4">
             <label class="form-label">Поиск</label>
             <div class="input-group">
-                <input type="text" class="form-control" name="q" value="@Model.Query" placeholder="Номер, клиент, устройство" />
+                <input type="text" class="form-control" name="q" value="@Model.Query" placeholder="Номер, клиент, email, устройство" />
                 <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
             </div>
         </div>
@@ -64,6 +64,7 @@
                 <tr>
                     <th>Номер</th>
                     <th>Клиент</th>
+                    <th>Email</th>
                     <th>Телефон</th>
                     <th>Устройство</th>
                     <th>Статус</th>
@@ -77,7 +78,7 @@
                 @if (!Model.Orders.Any())
                 {
                     <tr>
-                        <td colspan="9" class="text-center py-5 table-empty">Записей нет</td>
+                        <td colspan="10" class="text-center py-5 table-empty">Записей нет</td>
                     </tr>
                 }
                 else
@@ -87,6 +88,7 @@
                         <tr>
                             <td class="fw-semibold">@order.Number</td>
                             <td>@order.ClientName</td>
+                            <td><a href="mailto:@order.ClientEmail" class="text-decoration-none">@order.ClientEmail</a></td>
                             <td><a href="tel:@order.ClientPhone" class="text-decoration-none">@order.ClientPhone</a></td>
                             <td>@order.Device</td>
                             <td><span class="badge text-bg-@StatusBadge(order.Status) badge-status">@order.Status</span></td>
@@ -121,6 +123,10 @@
                         <div class="col-md-6">
                             <label class="form-label">Телефон</label>
                             <input class="form-control" name="ClientPhone" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" name="ClientEmail" type="email" required />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Устройство</label>

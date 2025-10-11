@@ -53,6 +53,7 @@ public class OrdersController : Controller
                 Number = o.Number,
                 ClientName = o.ClientName,
                 ClientPhone = o.ClientPhone,
+                ClientEmail = o.ClientEmail,
                 Device = o.Device,
                 Status = o.Status,
                 Priority = o.Priority,
@@ -78,6 +79,7 @@ public class OrdersController : Controller
                 dto.AccountId = contact.AccountId;
                 dto.ClientName = contact.FullName;
                 dto.ClientPhone = contact.Phone;
+                dto.ClientEmail = contact.Email;
                 accountId = contact.AccountId;
             }
         }
@@ -112,6 +114,10 @@ public class OrdersController : Controller
                 else
                 {
                     dto.AccountId = contact.AccountId;
+                    if (string.IsNullOrWhiteSpace(dto.ClientEmail))
+                    {
+                        dto.ClientEmail = contact.Email;
+                    }
                 }
             }
         }
@@ -208,7 +214,11 @@ public class OrdersController : Controller
                 throw new InvalidOperationException("Заказ не найден");
             }
 
-            if (order.Contact is null || string.IsNullOrWhiteSpace(order.Contact.Email))
+            var recipientEmail = string.IsNullOrWhiteSpace(order.ClientEmail)
+                ? order.Contact?.Email
+                : order.ClientEmail;
+
+            if (string.IsNullOrWhiteSpace(recipientEmail))
             {
                 throw new InvalidOperationException("Для заказа не указан email клиента");
             }
@@ -222,7 +232,7 @@ public class OrdersController : Controller
             var body = BuildClientApprovalEmail(order.ClientName, order.Device, trackingLink);
 
             await _mailService.SendAsync(
-                order.Contact.Email,
+                recipientEmail,
                 subject,
                 body,
                 false,

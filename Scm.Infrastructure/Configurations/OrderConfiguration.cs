@@ -27,6 +27,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasMaxLength(32)
             .IsRequired();
 
+        builder.Property(o => o.ClientEmail)
+            .HasMaxLength(128)
+            .IsRequired();
+
         builder.Property(o => o.Device)
             .HasMaxLength(128)
             .IsRequired();

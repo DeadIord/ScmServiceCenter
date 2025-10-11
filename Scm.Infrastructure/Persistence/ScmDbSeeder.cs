@@ -105,6 +105,7 @@ public static class ScmDbSeeder
                     Number = $"SRV-{DateTime.UtcNow:yyyy}-{i:D4}",
                     ClientName = $"Клиент {i}",
                     ClientPhone = $"+7 900 000-0{i:D2}",
+                    ClientEmail = contact?.Email ?? $"client{i}@example.com",
                     AccountId = account?.Id,
                     ContactId = contact?.Id,
                     Device = i % 2 == 0 ? "Смартфон" : "Ноутбук",

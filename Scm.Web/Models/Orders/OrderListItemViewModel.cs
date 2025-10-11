@@ -12,6 +12,8 @@ public sealed class OrderListItemViewModel
 
     public string ClientPhone { get; init; } = string.Empty;
 
+    public string ClientEmail { get; init; } = string.Empty;
+
     public string Device { get; init; } = string.Empty;
 
     public OrderStatus Status { get; init; }

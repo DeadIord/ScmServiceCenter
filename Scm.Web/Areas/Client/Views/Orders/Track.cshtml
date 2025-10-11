@@ -131,6 +131,10 @@
                     <li class="list-group-item">Устройство: <span class="fw-semibold">@Model.Order.Device</span></li>
                     <li class="list-group-item">Клиент: <span class="fw-semibold">@Model.Order.ClientName</span></li>
                     <li class="list-group-item">Телефон: <a href="tel:@Model.Order.ClientPhone">@Model.Order.ClientPhone</a></li>
+                    @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
+                    {
+                        <li class="list-group-item">Email: <a href="mailto:@Model.Order.ClientEmail">@Model.Order.ClientEmail</a></li>
+                    }
                 </ul>
             </div>
         </div>
