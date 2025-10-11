@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,62 +23,54 @@ public class QuoteController : Controller
         _quoteService = quoteService;
     }
 
-    [HttpPost("Approve")]
-    public async Task<IActionResult> Approve(Guid lineId, string token)
+    [HttpPost("Submit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Submit(Guid in_orderId, string in_token, Guid[]? in_approvedLineIds)
     {
-        var line = await _dbContext.QuoteLines
-            .Include(l => l.Order)
-            .FirstOrDefaultAsync(l => l.Id == lineId);
+        IActionResult ret;
+        var order = await _dbContext.Orders
+            .Include(o => o.QuoteLines)
+            .FirstOrDefaultAsync(o => o.Id == in_orderId);
 
-        if (line?.Order is null || line.Order.ClientAccessToken != token)
+        if (order is null || order.ClientAccessToken != in_token)
         {
-            TempData["Error"] = "Строка сметы не найдена";
-            return RedirectToOrder(line?.Order?.Number, token);
+            TempData["Error"] = "Заказ не найден";
+            ret = RedirectToOrder(order?.Number, in_token);
+        }
+        else
+        {
+            var hasProposed = order.QuoteLines.Any(l => l.Status == QuoteLineStatus.Proposed);
+            if (!hasProposed)
+            {
+                TempData["Error"] = "Нет строк для подтверждения";
+                ret = RedirectToOrder(order.Number, in_token);
+            }
+            else
+            {
+                var approvedLineIds = in_approvedLineIds ?? Array.Empty<Guid>();
+                await _quoteService.ProcessClientApprovalAsync(order.Id, approvedLineIds);
+
+                TempData["Success"] = "Смета обработана";
+                ret = RedirectToOrder(order.Number, in_token);
+            }
         }
 
-        if (line.Status != QuoteLineStatus.Proposed)
-        {
-            TempData["Error"] = "Строка уже обработана";
-            return RedirectToOrder(line.Order.Number, token);
-        }
-
-        await _quoteService.ApproveLineAsync(lineId);
-        TempData["Success"] = "Строка согласована";
-        return RedirectToOrder(line.Order.Number, token);
+        return ret;
     }
 
-    [HttpPost("Reject")]
-    public async Task<IActionResult> Reject(Guid lineId, string token)
+    private RedirectToActionResult RedirectToOrder(string? in_number, string in_token)
     {
-        var line = await _dbContext.QuoteLines
-            .Include(l => l.Order)
-            .FirstOrDefaultAsync(l => l.Id == lineId);
-
-        if (line?.Order is null || line.Order.ClientAccessToken != token)
-        {
-            TempData["Error"] = "Строка сметы не найдена";
-            return RedirectToOrder(line?.Order?.Number, token);
-        }
-
-        if (line.Status != QuoteLineStatus.Proposed)
-        {
-            TempData["Error"] = "Строка уже обработана";
-            return RedirectToOrder(line.Order.Number, token);
-        }
-
-        await _quoteService.RejectLineAsync(lineId);
-        TempData["Success"] = "Строка отклонена";
-        return RedirectToOrder(line.Order.Number, token);
-    }
-
-    private RedirectToActionResult RedirectToOrder(string? number, string token)
-    {
-        if (string.IsNullOrWhiteSpace(number))
+        RedirectToActionResult ret;
+        if (string.IsNullOrWhiteSpace(in_number))
         {
             TempData["Error"] ??= "Не удалось найти заказ";
-            return RedirectToAction("Track", "Orders", new { area = "Client" });
+            ret = RedirectToAction("Track", "Orders", new { area = "Client" });
+        }
+        else
+        {
+            ret = RedirectToAction("Track", "Orders", new { area = "Client", number = in_number, token = in_token });
         }
 
-        return RedirectToAction("Track", "Orders", new { area = "Client", number, token });
+        return ret;
     }
 }
