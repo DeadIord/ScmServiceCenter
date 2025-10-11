@@ -1,16 +1,62 @@
 @model Scm.Domain.Entities.Order
 @using Scm.Domain.Entities
+@{
+    var lines = Model.QuoteLines;
+    decimal approvedTotal = lines.Where(l => l.Status == QuoteLineStatus.Approved).Sum(l => l.Price * l.Qty);
+    decimal proposedTotal = lines.Where(l => l.Status == QuoteLineStatus.Proposed).Sum(l => l.Price * l.Qty);
+    int laborCount = lines.Count(l => l.Kind == QuoteLineKind.Labor);
+    int partCount = lines.Count(l => l.Kind == QuoteLineKind.Part);
+    string KindTitle(QuoteLineKind in_kind) => in_kind switch
+    {
+        QuoteLineKind.Labor => "Работа",
+        QuoteLineKind.Part => "Запчасть",
+        _ => in_kind.ToString()
+    };
+    string StatusTitle(QuoteLineStatus in_status) => in_status switch
+    {
+        QuoteLineStatus.Draft => "Черновик",
+        QuoteLineStatus.Proposed => "Отправлено",
+        QuoteLineStatus.Approved => "Согласовано",
+        QuoteLineStatus.Rejected => "Отклонено",
+        _ => in_status.ToString()
+    };
+    string StatusBadge(QuoteLineStatus in_status) => in_status switch
+    {
+        QuoteLineStatus.Draft => "secondary",
+        QuoteLineStatus.Proposed => "warning",
+        QuoteLineStatus.Approved => "success",
+        QuoteLineStatus.Rejected => "danger",
+        _ => "secondary"
+    };
+}
 <div class="card shadow-sm rounded-3 mb-4">
     <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-semibold mb-0">Смета</h5>
-            <div class="text-end">
-                <div class="small text-muted">Итого утверждено</div>
-                <div class="fs-4 fw-bold" id="quote-total">@Model.QuoteLines.Where(l => l.Status == QuoteLineStatus.Approved).Sum(l => l.Price * l.Qty).ToString("N2") ₽</div>
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <h5 class="fw-semibold mb-1">Смета заказа</h5>
+                <p class="section-subtitle mb-0">Фиксация работ, запчастей и статуса согласования</p>
+            </div>
+            <div class="quote-summary">
+                <div class="quote-summary-item">
+                    <div class="small text-uppercase text-muted">Работы</div>
+                    <div class="fs-5 fw-semibold">@laborCount</div>
+                </div>
+                <div class="quote-summary-item">
+                    <div class="small text-uppercase text-muted">Запчасти</div>
+                    <div class="fs-5 fw-semibold">@partCount</div>
+                </div>
+                <div class="quote-summary-item">
+                    <div class="small text-uppercase text-muted">На согласовании</div>
+                    <div class="fs-5 fw-semibold">@proposedTotal.ToString("N2") ₽</div>
+                </div>
+                <div class="quote-summary-item">
+                    <div class="small text-uppercase text-muted">Согласовано</div>
+                    <div class="fs-5 fw-semibold" id="quote-total">@approvedTotal.ToString("N2") ₽</div>
+                </div>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover table-sm align-middle table-sticky mb-0">
+            <table class="table table-hover align-middle table-sticky mb-0">
                 <thead>
                     <tr>
                         <th>Наименование</th>
@@ -22,7 +68,7 @@
                     </tr>
                 </thead>
                 <tbody id="quote-lines">
-                    @if (!Model.QuoteLines.Any())
+                    @if (!lines.Any())
                     {
                         <tr>
                             <td colspan="6" class="text-center py-5 table-empty">Записей нет</td>
@@ -30,25 +76,18 @@
                     }
                     else
                     {
-                        @foreach (var line in Model.QuoteLines.OrderBy(l => l.Title))
+                        foreach (var line in lines.OrderBy(l => l.Kind).ThenBy(l => l.Title))
                         {
-                            var badge = line.Status switch
-                            {
-                                QuoteLineStatus.Draft => "secondary",
-                                QuoteLineStatus.Proposed => "warning",
-                                QuoteLineStatus.Approved => "success",
-                                QuoteLineStatus.Rejected => "danger",
-                                _ => "secondary"
-                            };
+                            var badge = StatusBadge(line.Status);
                             <tr>
-                                <td>@line.Title</td>
+                                <td class="fw-semibold">@line.Title</td>
                                 <td class="text-center">
-                                    <span class="badge text-bg-light text-dark">@(line.Kind == QuoteLineKind.Labor ? "Работа" : "Запчасть")</span>
+                                    <span class="badge badge-light-alt">@KindTitle(line.Kind)</span>
                                 </td>
                                 <td class="text-end">@line.Qty.ToString("N2")</td>
                                 <td class="text-end">@line.Price.ToString("N2")</td>
                                 <td class="text-end">@(line.Price * line.Qty).ToString("N2")</td>
-                                <td class="text-end"><span class="badge text-bg-@badge">@line.Status</span></td>
+                                <td class="text-end"><span class="badge text-bg-@badge">@StatusTitle(line.Status)</span></td>
                             </tr>
                         }
                     }
@@ -59,7 +98,7 @@
             <input type="hidden" name="OrderId" value="@Model.Id" />
             <div class="col-md-4">
                 <label class="form-label">Наименование</label>
-                <input class="form-control" name="Title" required />
+                <input class="form-control" name="Title" placeholder="Например, диагностика" required />
             </div>
             <div class="col-md-2">
                 <label class="form-label">Тип</label>

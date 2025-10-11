@@ -39,6 +39,12 @@ public sealed class QuoteService(ScmDbContext dbContext) : IQuoteService
             throw new InvalidOperationException("Заказ не найден");
         }
 
+        var hasQuoteItems = order.QuoteLines.Any(l => l.Kind == QuoteLineKind.Labor || l.Kind == QuoteLineKind.Part);
+        if (!hasQuoteItems)
+        {
+            throw new InvalidOperationException("Нельзя отправить заказ без указанных работ или запчастей");
+        }
+
         foreach (var line in order.QuoteLines)
         {
             if (line.Status == QuoteLineStatus.Draft)

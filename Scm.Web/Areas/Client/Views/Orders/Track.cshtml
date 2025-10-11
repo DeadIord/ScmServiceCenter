@@ -14,6 +14,16 @@
         OrderStatus.Closed => "dark",
         _ => "secondary"
     };
+    string StatusTitle(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "Принят",
+        OrderStatus.Diagnosing => "Диагностика",
+        OrderStatus.WaitingApproval => "Ожидает согласования",
+        OrderStatus.InRepair => "В ремонте",
+        OrderStatus.Ready => "Готов",
+        OrderStatus.Closed => "Закрыт",
+        _ => status.ToString()
+    };
 }
 <div class="row justify-content-center mb-4">
     <div class="col-lg-8">
@@ -46,7 +56,7 @@
         <div class="col-lg-8">
             <div class="card shadow-sm rounded-3 p-4">
                 <h2 class="fs-3 fw-semibold">Статус заказа</h2>
-                <p class="text-muted">Текущий статус: <span class="badge text-bg-@StatusBadge(Model.Order.Status) badge-status">@Model.Order.Status</span></p>
+                <p class="text-muted">Текущий статус: <span class="badge text-bg-@StatusBadge(Model.Order.Status) badge-status">@StatusTitle(Model.Order.Status)</span></p>
                 <h3 class="fs-4 fw-semibold mt-4">Смета на согласовании</h3>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle table-sticky mb-0">
