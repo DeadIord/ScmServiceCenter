@@ -1,7 +1,9 @@
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
@@ -17,18 +19,24 @@ public class OrdersController : Controller
     private readonly IMessageService _messageService;
     private readonly IAccountService _accountService;
     private readonly IContactService _contactService;
+    private readonly IMailService _mailService;
+    private readonly ILogger<OrdersController> _logger;
     public OrdersController(
         IOrderService orderService,
         IQuoteService quoteService,
         IMessageService messageService,
         IAccountService accountService,
-        IContactService contactService)
+        IContactService contactService,
+        IMailService mailService,
+        ILogger<OrdersController> logger)
     {
         _orderService = orderService;
         _quoteService = quoteService;
         _messageService = messageService;
         _accountService = accountService;
         _contactService = contactService;
+        _mailService = mailService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -45,6 +53,7 @@ public class OrdersController : Controller
                 Number = o.Number,
                 ClientName = o.ClientName,
                 ClientPhone = o.ClientPhone,
+                ClientEmail = o.ClientEmail,
                 Device = o.Device,
                 Status = o.Status,
                 Priority = o.Priority,
@@ -70,6 +79,7 @@ public class OrdersController : Controller
                 dto.AccountId = contact.AccountId;
                 dto.ClientName = contact.FullName;
                 dto.ClientPhone = contact.Phone;
+                dto.ClientEmail = contact.Email;
                 accountId = contact.AccountId;
             }
         }
@@ -104,6 +114,10 @@ public class OrdersController : Controller
                 else
                 {
                     dto.AccountId = contact.AccountId;
+                    if (string.IsNullOrWhiteSpace(dto.ClientEmail))
+                    {
+                        dto.ClientEmail = contact.Email;
+                    }
                 }
             }
         }
@@ -133,24 +147,13 @@ public class OrdersController : Controller
         var messages = await _messageService.GetForOrderAsync(id);
         var total = await _quoteService.GetTotalAsync(id);
 
-        var trackingLink = Url.Action(
-            action: "Track",
-            controller: "Orders",
-            values: new { area = "Client", number = order.Number, token = order.ClientAccessToken },
-            protocol: Request.Scheme) ?? string.Empty;
-
-        var emailTemplate = $"Здравствуйте, {order.ClientName}!" + Environment.NewLine + Environment.NewLine +
-            $"Готова смета по ремонту {order.Device}. Перейдите по ссылке, чтобы согласовать работы:" + Environment.NewLine +
-            trackingLink + Environment.NewLine + Environment.NewLine +
-            "Если у вас есть вопросы, просто ответьте на это письмо." + Environment.NewLine + Environment.NewLine +
-            "С уважением,\nСервисный центр";
+        var trackingLink = BuildTrackingLink(order);
 
         var model = new OrderDetailsViewModel
         {
             Order = order,
             Messages = messages,
             ApprovedTotal = total,
-            ClientEmailTemplate = emailTemplate,
             ClientTrackingLink = trackingLink
         };
 
@@ -205,10 +208,41 @@ public class OrdersController : Controller
         try
         {
             await _quoteService.SubmitForApprovalAsync(orderId);
+            var order = await _orderService.GetAsync(orderId);
+            if (order is null)
+            {
+                throw new InvalidOperationException("Заказ не найден");
+            }
+
+            var recipientEmail = string.IsNullOrWhiteSpace(order.ClientEmail)
+                ? order.Contact?.Email
+                : order.ClientEmail;
+
+            if (string.IsNullOrWhiteSpace(recipientEmail))
+            {
+                throw new InvalidOperationException("Для заказа не указан email клиента");
+            }
+
+            var trackingLink = BuildTrackingLink(order);
+            if (string.IsNullOrWhiteSpace(trackingLink))
+            {
+                throw new InvalidOperationException("Не удалось сформировать ссылку для клиента");
+            }
+            var subject = $"Смета для заказа {order.Number}";
+            var body = BuildClientApprovalEmail(order.ClientName, order.Device, trackingLink);
+
+            await _mailService.SendAsync(
+                recipientEmail,
+                subject,
+                body,
+                false,
+                HttpContext.RequestAborted);
+
             return Json(new { success = true });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Не удалось отправить смету на согласование для заказа {OrderId}", orderId);
             Response.StatusCode = 400;
             return Json(new { success = false, message = ex.Message });
         }
@@ -310,4 +344,24 @@ public class OrdersController : Controller
         OrderStatus.Closed => "Закрыты",
         _ => status.ToString()
     };
+
+    private string BuildTrackingLink(Order order)
+    {
+        var ret = Url.Action(
+            action: "Track",
+            controller: "Orders",
+            values: new { area = "Client", number = order.Number, token = order.ClientAccessToken },
+            protocol: Request.Scheme) ?? string.Empty;
+        return ret;
+    }
+
+    private static string BuildClientApprovalEmail(string clientName, string device, string trackingLink)
+    {
+        var ret = $"Здравствуйте, {clientName}!" + Environment.NewLine + Environment.NewLine;
+        ret += $"Готова смета по ремонту {device}. Перейдите по ссылке, чтобы согласовать работы:" + Environment.NewLine;
+        ret += trackingLink + Environment.NewLine + Environment.NewLine;
+        ret += "Если у вас есть вопросы, просто ответьте на это письмо." + Environment.NewLine + Environment.NewLine;
+        ret += "С уважением,\nСервисный центр";
+        return ret;
+    }
 }

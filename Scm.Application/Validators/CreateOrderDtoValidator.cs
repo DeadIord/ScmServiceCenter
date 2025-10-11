@@ -29,6 +29,19 @@ public sealed class CreateOrderDtoValidator : IValidator<CreateOrderDto>
             yield return "Телефон указан в неверном формате";
         }
 
+        if (string.IsNullOrWhiteSpace(instance.ClientEmail))
+        {
+            yield return "Email обязателен";
+        }
+        else if (instance.ClientEmail.Length > 128)
+        {
+            yield return "Email слишком длинный";
+        }
+        else if (!Regex.IsMatch(instance.ClientEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase))
+        {
+            yield return "Email указан в неверном формате";
+        }
+
         if (string.IsNullOrWhiteSpace(instance.Device))
         {
             yield return "Устройство обязательно";

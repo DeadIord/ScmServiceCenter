@@ -8,18 +8,27 @@
     var accountSearch = ViewData["AccountSearch"] as string ?? string.Empty;
     var contactSearch = ViewData["ContactSearch"] as string ?? string.Empty;
 }
-<div class="row justify-content-center">
-    <div class="col-lg-7 col-xl-6">
-        <div class="card shadow-sm rounded-3 p-4 mb-4">
-            <h2 class="h5 mb-3">CRM</h2>
+<div class="row g-4 justify-content-center">
+    <div class="col-xl-10 col-xxl-8">
+        <div class="card p-4 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                <div>
+                    <h1 class="section-title mb-1">Новый заказ</h1>
+                    <p class="section-subtitle mb-0">Заполните данные клиента и устройства, чтобы начать работу по ремонту</p>
+                </div>
+                <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left me-2"></i>Вернуться к списку</a>
+            </div>
+        </div>
+        <div class="card p-4 mb-4">
+            <h2 class="h5 fw-semibold mb-3">Поиск в CRM</h2>
             <form method="get" class="row g-3 align-items-end">
                 <input type="hidden" name="accountId" value="@Model.AccountId" />
                 <input type="hidden" name="contactId" value="@Model.ContactId" />
-                <div class="col-md-6">
+                <div class="col-lg-6">
                     <label class="form-label">Поиск контрагента</label>
                     <input class="form-control" type="search" name="accountSearch" value="@accountSearch" placeholder="Название или ИНН" />
                 </div>
-                <div class="col-md-6">
+                <div class="col-lg-6">
                     <label class="form-label">Поиск контакта</label>
                     <input class="form-control" type="search" name="contactSearch" value="@contactSearch" placeholder="Имя или email" />
                 </div>
@@ -28,53 +37,57 @@
                 </div>
             </form>
         </div>
-        <div class="card shadow-sm rounded-3 p-4">
-            <h1 class="section-title mb-3">Новый заказ</h1>
-            <form asp-action="Create" method="post" class="row g-3">
+        <div class="card p-4">
+            <form asp-action="Create" method="post" class="row g-4">
                 <div asp-validation-summary="All" class="text-danger"></div>
                 <input type="hidden" name="accountSearch" value="@accountSearch" />
                 <input type="hidden" name="contactSearch" value="@contactSearch" />
-                <div class="col-12">
+                <div class="col-md-6">
                     <label class="form-label">Контрагент</label>
                     <select class="form-select" asp-for="AccountId" asp-items="accountOptions"></select>
                 </div>
-                <div class="col-12">
+                <div class="col-md-6">
                     <label class="form-label">Контакт</label>
                     <select class="form-select" asp-for="ContactId" asp-items="contactOptions"></select>
                     <span asp-validation-for="ContactId" class="text-danger"></span>
                 </div>
-                <div class="col-12">
+                <div class="col-md-6">
                     <label class="form-label">Имя клиента</label>
-                    <input class="form-control" asp-for="ClientName" />
+                    <input class="form-control" asp-for="ClientName" placeholder="ФИО клиента" />
                     <span asp-validation-for="ClientName" class="text-danger"></span>
                 </div>
-                <div class="col-12">
+                <div class="col-md-6">
                     <label class="form-label">Телефон</label>
-                    <input class="form-control" asp-for="ClientPhone" />
+                    <input class="form-control" asp-for="ClientPhone" placeholder="+7" />
                     <span asp-validation-for="ClientPhone" class="text-danger"></span>
                 </div>
-                <div class="col-12">
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" asp-for="ClientEmail" type="email" placeholder="client@domain.ru" />
+                    <span asp-validation-for="ClientEmail" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Приоритет</label>
+                    <select class="form-select" asp-for="Priority" asp-items="Html.GetEnumSelectList<OrderPriority>()"></select>
+                </div>
+                <div class="col-md-6">
                     <label class="form-label">Устройство</label>
-                    <input class="form-control" asp-for="Device" />
+                    <input class="form-control" asp-for="Device" placeholder="Например, ноутбук Lenovo" />
                     <span asp-validation-for="Device" class="text-danger"></span>
                 </div>
-                <div class="col-12">
+                <div class="col-md-6">
                     <label class="form-label">Серийный номер</label>
-                    <input class="form-control" asp-for="Serial" />
+                    <input class="form-control" asp-for="Serial" placeholder="Серийный номер" />
                     <span asp-validation-for="Serial" class="text-danger"></span>
                 </div>
                 <div class="col-12">
                     <label class="form-label">Описание неисправности</label>
-                    <textarea class="form-control" asp-for="Defect" rows="3"></textarea>
+                    <textarea class="form-control" asp-for="Defect" rows="3" placeholder="Что именно произошло с устройством"></textarea>
                     <span asp-validation-for="Defect" class="text-danger"></span>
-                </div>
-                <div class="col-12">
-                    <label class="form-label">Приоритет</label>
-                    <select class="form-select" asp-for="Priority" asp-items="Html.GetEnumSelectList<OrderPriority>()"></select>
                 </div>
                 <div class="col-12 text-end">
                     <a class="btn btn-outline-secondary" asp-action="Index">Отмена</a>
-                    <button type="submit" class="btn btn-primary">Создать</button>
+                    <button type="submit" class="btn btn-primary">Создать заказ</button>
                 </div>
             </form>
         </div>

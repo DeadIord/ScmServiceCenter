@@ -28,6 +28,8 @@ public sealed class Order
 
     public string ClientPhone { get; set; } = string.Empty;
 
+    public string ClientEmail { get; set; } = string.Empty;
+
     public Guid? AccountId { get; set; }
         = null;
 
