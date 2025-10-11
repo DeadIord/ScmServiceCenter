@@ -36,10 +36,19 @@
   <data name="DealsNav" xml:space="preserve">
     <value>Deals</value>
   </data>
+  <data name="DealsNavDescription" xml:space="preserve">
+    <value>Manage sales opportunities and forecasts.</value>
+  </data>
   <data name="TasksNav" xml:space="preserve">
     <value>Tasks</value>
   </data>
+  <data name="TasksNavDescription" xml:space="preserve">
+    <value>Coordinate teamwork and stay on schedule.</value>
+  </data>
   <data name="TicketsNav" xml:space="preserve">
     <value>Tickets</value>
+  </data>
+  <data name="TicketsNavDescription" xml:space="preserve">
+    <value>Support customers and resolve requests faster.</value>
   </data>
 </root>
