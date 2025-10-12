@@ -1,11 +1,14 @@
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Identity;
@@ -17,36 +20,70 @@ namespace Scm.Web.Controllers;
 [Authorize]
 public class ReportDefinitionsController : Controller
 {
-    private static readonly string[] AllowedSchemas = ["public"];
-
-    private readonly ScmDbContext _dbContext;
-    private readonly IReportBuilderService _reportBuilderService;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly ScmDbContext m_dbContext;
+    private readonly IReportBuilderService m_reportBuilderService;
+    private readonly IReportMetadataService m_reportMetadataService;
+    private readonly UserManager<ApplicationUser> m_userManager;
+    private readonly RoleManager<IdentityRole> m_roleManager;
+    private readonly ILogger<ReportDefinitionsController> m_logger;
 
     public ReportDefinitionsController(
-        ScmDbContext dbContext,
-        IReportBuilderService reportBuilderService,
-        UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager)
+        ScmDbContext in_dbContext,
+        IReportBuilderService in_reportBuilderService,
+        IReportMetadataService in_reportMetadataService,
+        UserManager<ApplicationUser> in_userManager,
+        RoleManager<IdentityRole> in_roleManager,
+        ILogger<ReportDefinitionsController> in_logger)
     {
-        _dbContext = dbContext;
-        _reportBuilderService = reportBuilderService;
-        _userManager = userManager;
-        _roleManager = roleManager;
+        m_dbContext = in_dbContext;
+        m_reportBuilderService = in_reportBuilderService;
+        m_reportMetadataService = in_reportMetadataService;
+        m_userManager = in_userManager;
+        m_roleManager = in_roleManager;
+        m_logger = in_logger;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Metadata(CancellationToken in_cancellationToken)
+    {
+        var metadata = await m_reportMetadataService.GetMetadataAsync(in_cancellationToken);
+        return Json(metadata);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GenerateSql([FromBody] ReportQueryRequest in_request, CancellationToken in_cancellationToken)
+    {
+        if (in_request is null)
+        {
+            return BadRequest(new { error = "Не передана конфигурация отчёта." });
+        }
+
+        try
+        {
+            var sqlResult = await m_reportBuilderService.BuildSqlAsync(in_request, in_cancellationToken);
+            var metadata = await m_reportMetadataService.GetMetadataAsync(in_cancellationToken);
+            var allowedSchemas = metadata.Schemas.Select(schema => schema.Name);
+            m_reportBuilderService.ValidateSqlSafety(sqlResult.Sql, allowedSchemas);
+            return Json(sqlResult);
+        }
+        catch (Exception ex)
+        {
+            Response.StatusCode = StatusCodes.Status400BadRequest;
+            return Json(new { error = ex.Message });
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUser = await m_userManager.GetUserAsync(User);
         if (currentUser is null)
         {
             return Challenge();
         }
 
-        var userRoles = await _userManager.GetRolesAsync(currentUser);
-        var reports = await _dbContext.ReportDefinitions
+        var userRoles = await m_userManager.GetRolesAsync(currentUser);
+        var reports = await m_dbContext.ReportDefinitions
             .Where(r => r.IsActive)
             .OrderByDescending(r => r.CreatedAtUtc)
             .ToListAsync();
@@ -72,7 +109,7 @@ public class ReportDefinitionsController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(Guid? id)
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUser = await m_userManager.GetUserAsync(User);
         if (currentUser is null)
         {
             return Challenge();
@@ -81,13 +118,13 @@ public class ReportDefinitionsController : Controller
         ReportDefinition? report = null;
         if (id.HasValue)
         {
-            report = await _dbContext.ReportDefinitions.FindAsync(id.Value);
+            report = await m_dbContext.ReportDefinitions.FindAsync(id.Value);
             if (report is null)
             {
                 return NotFound();
             }
 
-            var roles = await _userManager.GetRolesAsync(currentUser);
+            var roles = await m_userManager.GetRolesAsync(currentUser);
             if (!CanEdit(report, currentUser.Id, roles))
             {
                 return Forbid();
@@ -103,7 +140,7 @@ public class ReportDefinitionsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid? id, ReportDefinitionEditViewModel model)
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUser = await m_userManager.GetUserAsync(User);
         if (currentUser is null)
         {
             return Challenge();
@@ -112,39 +149,58 @@ public class ReportDefinitionsController : Controller
         ReportDefinition? report = null;
         if (id.HasValue)
         {
-            report = await _dbContext.ReportDefinitions.FirstOrDefaultAsync(r => r.Id == id.Value);
+            report = await m_dbContext.ReportDefinitions.FirstOrDefaultAsync(r => r.Id == id.Value);
             if (report is null)
             {
                 return NotFound();
             }
 
-            var roles = await _userManager.GetRolesAsync(currentUser);
+            var roles = await m_userManager.GetRolesAsync(currentUser);
             if (!CanEdit(report, currentUser.Id, roles))
             {
                 return Forbid();
             }
         }
 
-        model.Parameters = model.Parameters.Where(p => !string.IsNullOrWhiteSpace(p.Name)).ToList();
+        model.Parameters = model.Parameters.Where(parameter => !string.IsNullOrWhiteSpace(parameter.Name)).ToList();
         if (!model.Parameters.Any())
         {
             model.Parameters.Add(new ReportParameterInputModel { Name = "", Type = "string" });
         }
 
-        if (!ModelState.IsValid)
-        {
-            await PopulateRoles(model);
-            ViewData["Title"] = report is null ? "Новый отчёт" : $"Редактирование: {report.Title}";
-            return View(model);
-        }
+        var configuration = m_reportBuilderService.DeserializeQuery(model.BuilderConfigurationJson);
+        configuration.AllowManualSql = model.IsManualSqlAllowed;
+        var configurationJson = m_reportBuilderService.SerializeQuery(configuration);
+        model.BuilderConfigurationJson = configurationJson;
 
+        ReportSqlGenerationResult? generatedSql = null;
         try
         {
-            _reportBuilderService.ValidateSqlSafety(model.SqlText, AllowedSchemas);
+            generatedSql = await m_reportBuilderService.BuildSqlAsync(configuration);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(nameof(model.BuilderConfigurationJson), ex.Message);
+        }
+
+        if (!model.IsManualSqlAllowed && generatedSql is not null)
+        {
+            model.SqlText = generatedSql.Sql;
+        }
+
+        var metadata = await m_reportMetadataService.GetMetadataAsync();
+        var allowedSchemas = metadata.Schemas.Select(schema => schema.Name);
+        try
+        {
+            m_reportBuilderService.ValidateSqlSafety(model.SqlText, allowedSchemas);
         }
         catch (Exception ex)
         {
             ModelState.AddModelError(nameof(model.SqlText), ex.Message);
+        }
+
+        if (!ModelState.IsValid)
+        {
             await PopulateRoles(model);
             ViewData["Title"] = report is null ? "Новый отчёт" : $"Редактирование: {report?.Title}";
             return View(model);
@@ -161,8 +217,8 @@ public class ReportDefinitionsController : Controller
             .ToList();
 
         var allowedRoles = model.AllowedRoles ?? new List<string>();
-        var serializedParameters = _reportBuilderService.SerializeParameters(parameterDefinitions);
-        var serializedRoles = _reportBuilderService.SerializeRoles(allowedRoles);
+        var serializedParameters = m_reportBuilderService.SerializeParameters(parameterDefinitions);
+        var serializedRoles = m_reportBuilderService.SerializeRoles(allowedRoles);
 
         if (report is null)
         {
@@ -172,6 +228,7 @@ public class ReportDefinitionsController : Controller
                 Title = model.Title,
                 Description = model.Description,
                 SqlText = model.SqlText,
+                BuilderConfigurationJson = configurationJson,
                 ParametersJson = serializedParameters,
                 Visibility = model.Visibility,
                 AllowedRolesJson = serializedRoles,
@@ -180,21 +237,24 @@ public class ReportDefinitionsController : Controller
                 IsActive = model.IsActive
             };
 
-            _dbContext.ReportDefinitions.Add(report);
+            m_dbContext.ReportDefinitions.Add(report);
         }
         else
         {
             report.Title = model.Title;
             report.Description = model.Description;
             report.SqlText = model.SqlText;
+            report.BuilderConfigurationJson = configurationJson;
             report.ParametersJson = serializedParameters;
             report.Visibility = model.Visibility;
             report.AllowedRolesJson = serializedRoles;
             report.IsActive = model.IsActive;
-            _dbContext.ReportDefinitions.Update(report);
+            m_dbContext.ReportDefinitions.Update(report);
         }
 
-        await _dbContext.SaveChangesAsync();
+        m_logger.LogInformation("Конфигурация отчёта {ReportId} обновлена пользователем {UserId}", report.Id, currentUser.Id);
+
+        await m_dbContext.SaveChangesAsync();
         TempData["Success"] = "Отчёт успешно сохранён.";
         return RedirectToAction(nameof(Index));
     }
@@ -202,25 +262,25 @@ public class ReportDefinitionsController : Controller
     [HttpGet]
     public async Task<IActionResult> Preview(Guid id)
     {
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUser = await m_userManager.GetUserAsync(User);
         if (currentUser is null)
         {
             return Challenge();
         }
 
-        var report = await _dbContext.ReportDefinitions.FindAsync(id);
+        var report = await m_dbContext.ReportDefinitions.FindAsync(id);
         if (report is null || !report.IsActive)
         {
             return NotFound();
         }
 
-        var roles = await _userManager.GetRolesAsync(currentUser);
+        var roles = await m_userManager.GetRolesAsync(currentUser);
         if (!CanAccess(report, currentUser.Id, roles))
         {
             return Forbid();
         }
 
-        var parameters = _reportBuilderService.DeserializeParameters(report.ParametersJson)
+        var parameters = m_reportBuilderService.DeserializeParameters(report.ParametersJson)
             .Select(p => new ReportParameterInputModel
             {
                 Name = p.Name,
@@ -248,25 +308,25 @@ public class ReportDefinitionsController : Controller
     {
         values ??= new Dictionary<string, string?>();
 
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUser = await m_userManager.GetUserAsync(User);
         if (currentUser is null)
         {
             return Challenge();
         }
 
-        var report = await _dbContext.ReportDefinitions.FindAsync(id);
+        var report = await m_dbContext.ReportDefinitions.FindAsync(id);
         if (report is null || !report.IsActive)
         {
             return NotFound();
         }
 
-        var roles = await _userManager.GetRolesAsync(currentUser);
+        var roles = await m_userManager.GetRolesAsync(currentUser);
         if (!CanAccess(report, currentUser.Id, roles))
         {
             return Forbid();
         }
 
-        var parameterDefinitions = _reportBuilderService.DeserializeParameters(report.ParametersJson);
+        var parameterDefinitions = m_reportBuilderService.DeserializeParameters(report.ParametersJson);
         var parameters = parameterDefinitions.Select(p => new ReportParameterInputModel
         {
             Name = p.Name,
@@ -293,7 +353,7 @@ public class ReportDefinitionsController : Controller
 
         try
         {
-            var result = await _reportBuilderService.ExecuteAsync(report, values, true);
+            var result = await m_reportBuilderService.ExecuteAsync(report, values, true);
             executionModel.Columns = result.Columns;
             executionModel.Rows = result.Rows;
             executionModel.Error = result.Error;
@@ -313,8 +373,8 @@ public class ReportDefinitionsController : Controller
         finally
         {
             log.FinishedAtUtc = DateTime.UtcNow;
-            _dbContext.ReportExecutionLogs.Add(log);
-            await _dbContext.SaveChangesAsync();
+            m_dbContext.ReportExecutionLogs.Add(log);
+            await m_dbContext.SaveChangesAsync();
         }
 
         ViewData["Title"] = $"Предпросмотр: {report.Title}";
@@ -338,19 +398,19 @@ public class ReportDefinitionsController : Controller
     {
         values ??= new Dictionary<string, string?>();
 
-        var currentUser = await _userManager.GetUserAsync(User);
+        var currentUser = await m_userManager.GetUserAsync(User);
         if (currentUser is null)
         {
             return Challenge();
         }
 
-        var report = await _dbContext.ReportDefinitions.FindAsync(id);
+        var report = await m_dbContext.ReportDefinitions.FindAsync(id);
         if (report is null || !report.IsActive)
         {
             return NotFound();
         }
 
-        var roles = await _userManager.GetRolesAsync(currentUser);
+        var roles = await m_userManager.GetRolesAsync(currentUser);
         if (!CanAccess(report, currentUser.Id, roles))
         {
             return Forbid();
@@ -366,7 +426,7 @@ public class ReportDefinitionsController : Controller
 
         try
         {
-            var result = await _reportBuilderService.ExecuteAsync(report, values, false);
+            var result = await m_reportBuilderService.ExecuteAsync(report, values, false);
             if (!string.IsNullOrEmpty(result.Error))
             {
                 log.Status = ReportExecutionStatus.Fail;
@@ -390,13 +450,17 @@ public class ReportDefinitionsController : Controller
         finally
         {
             log.FinishedAtUtc = DateTime.UtcNow;
-            _dbContext.ReportExecutionLogs.Add(log);
-            await _dbContext.SaveChangesAsync();
+            m_dbContext.ReportExecutionLogs.Add(log);
+            await m_dbContext.SaveChangesAsync();
         }
     }
 
     private async Task<ReportDefinitionEditViewModel> BuildEditModel(ReportDefinition? report)
     {
+        var configuration = report is null
+            ? new ReportQueryRequest()
+            : m_reportBuilderService.DeserializeQuery(report.BuilderConfigurationJson);
+
         var model = new ReportDefinitionEditViewModel
         {
             Id = report?.Id,
@@ -404,12 +468,14 @@ public class ReportDefinitionsController : Controller
             Description = report?.Description,
             SqlText = report?.SqlText ?? string.Empty,
             Visibility = report?.Visibility ?? ReportVisibility.Private,
-            IsActive = report?.IsActive ?? true
+            IsActive = report?.IsActive ?? true,
+            BuilderConfigurationJson = m_reportBuilderService.SerializeQuery(configuration),
+            IsManualSqlAllowed = configuration.AllowManualSql
         };
 
         if (report is not null)
         {
-            var parameters = _reportBuilderService.DeserializeParameters(report.ParametersJson);
+            var parameters = m_reportBuilderService.DeserializeParameters(report.ParametersJson);
             model.Parameters = parameters.Select(p => new ReportParameterInputModel
             {
                 Name = p.Name,
@@ -421,7 +487,7 @@ public class ReportDefinitionsController : Controller
                 model.Parameters.Add(new ReportParameterInputModel());
             }
 
-            var roles = _reportBuilderService.DeserializeRoles(report.AllowedRolesJson);
+            var roles = m_reportBuilderService.DeserializeRoles(report.AllowedRolesJson);
             model.AllowedRoles = roles.ToList();
         }
         else
@@ -435,7 +501,7 @@ public class ReportDefinitionsController : Controller
 
     private async Task PopulateRoles(ReportDefinitionEditViewModel model)
     {
-        var allRoles = await _roleManager.Roles.OrderBy(r => r.Name).ToListAsync();
+        var allRoles = await m_roleManager.Roles.OrderBy(r => r.Name).ToListAsync();
         model.AllowedRoles ??= new List<string>();
 
         model.AvailableRoles = allRoles.Select(r =>
@@ -468,7 +534,7 @@ public class ReportDefinitionsController : Controller
             return true;
         }
 
-        var allowedRoles = _reportBuilderService.DeserializeRoles(report.AllowedRolesJson);
+        var allowedRoles = m_reportBuilderService.DeserializeRoles(report.AllowedRolesJson);
         return report.Visibility switch
         {
             ReportVisibility.Private => false,

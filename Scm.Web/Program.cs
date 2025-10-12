@@ -4,6 +4,7 @@ using Scm.Application.Services;
 using Scm.Application.Validators;
 using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
+using Scm.Infrastructure.Services;
 using Scm.Web.Localization;
 using Scm.Web.HealthChecks;
 using Microsoft.AspNetCore.Localization;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<IStockService, StockService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IReportMetadataService, ReportMetadataService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
 builder.Services.AddSingleton<IValidateOptions<MailOptions>, MailOptionsValidator>();
 builder.Services.AddOptions<MailOptions>()

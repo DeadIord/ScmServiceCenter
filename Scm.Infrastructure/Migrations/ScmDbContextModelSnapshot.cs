@@ -473,6 +473,12 @@ namespace Scm.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("BuilderConfigurationJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("{}");
+
                     b.Property<string>("ParametersJson")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

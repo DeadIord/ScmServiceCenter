@@ -4,17 +4,23 @@ namespace Scm.Application.Services;
 
 public interface IReportBuilderService
 {
-    IReadOnlyCollection<ReportParameterDefinition> DeserializeParameters(string? json);
+    IReadOnlyCollection<ReportParameterDefinition> DeserializeParameters(string? in_json);
 
-    string SerializeParameters(IEnumerable<ReportParameterDefinition> parameters);
+    string SerializeParameters(IEnumerable<ReportParameterDefinition> in_parameters);
 
-    IReadOnlyCollection<string> DeserializeRoles(string? json);
+    IReadOnlyCollection<string> DeserializeRoles(string? in_json);
 
-    string SerializeRoles(IEnumerable<string> roles);
+    string SerializeRoles(IEnumerable<string> in_roles);
 
-    void ValidateSqlSafety(string sql, IEnumerable<string> allowedSchemas);
+    ReportQueryRequest DeserializeQuery(string? in_json);
 
-    Task<ReportExecutionResult> ExecuteAsync(ReportDefinition report, IDictionary<string, string?> parameterValues, bool isPreview, CancellationToken cancellationToken = default);
+    string SerializeQuery(ReportQueryRequest in_request);
+
+    Task<ReportSqlGenerationResult> BuildSqlAsync(ReportQueryRequest in_request, CancellationToken in_cancellationToken = default);
+
+    void ValidateSqlSafety(string in_sql, IEnumerable<string> in_allowedSchemas);
+
+    Task<ReportExecutionResult> ExecuteAsync(ReportDefinition in_report, IDictionary<string, string?> in_parameterValues, bool in_isPreview, CancellationToken in_cancellationToken = default);
 }
 
 public class ReportExecutionResult

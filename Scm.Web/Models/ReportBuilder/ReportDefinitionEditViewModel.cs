@@ -21,6 +21,9 @@ public class ReportDefinitionEditViewModel
     [Display(Name = "SQL-запрос")]
     public string SqlText { get; set; } = string.Empty;
 
+    [Display(Name = "Конфигурация конструктора")]
+    public string BuilderConfigurationJson { get; set; } = "{}";
+
     [Display(Name = "Параметры")]
     public List<ReportParameterInputModel> Parameters { get; set; } = new();
 
@@ -33,4 +36,8 @@ public class ReportDefinitionEditViewModel
     public IEnumerable<SelectListItem> AvailableRoles { get; set; } = Array.Empty<SelectListItem>();
 
     public bool IsActive { get; set; } = true;
+
+    [Display(Name = "Разрешить ручное редактирование SQL")]
+    public bool IsManualSqlAllowed { get; set; }
+        = false;
 }

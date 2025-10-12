@@ -1,20 +1,28 @@
+@using System.Text.Json
+@using Scm.Web.Controllers
 @model Scm.Web.Models.ReportBuilder.ReportDefinitionEditViewModel
 @{
     ViewData["Title"] ??= Model.Id.HasValue ? $"Редактирование: {Model.Title}" : "Новый отчёт";
+    var metadataUrl = Url.Action(nameof(ReportDefinitionsController.Metadata)) ?? string.Empty;
+    var generateUrl = Url.Action(nameof(ReportDefinitionsController.GenerateSql)) ?? string.Empty;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 mb-0">@ViewData["Title"]</h1>
-        <p class="text-muted mb-0">Опишите запрос, параметры и доступ к отчёту</p>
+        <p class="text-muted mb-0">Сконструируйте запрос, параметры и доступ к отчёту</p>
     </div>
     <a asp-action="Index" class="btn btn-outline-secondary">Назад к списку</a>
 </div>
 
-<form asp-action="Edit" method="post" class="card shadow-sm rounded-3">
+<form asp-action="Edit" method="post" class="card shadow-sm rounded-3" id="report-edit-form">
     <div class="card-body">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="SqlText" id="sql-text" />
+        <input type="hidden" asp-for="BuilderConfigurationJson" id="builder-config" />
+        <input type="hidden" name="IsManualSqlAllowed" value="@(Model.IsManualSqlAllowed ? "true" : "false")" id="manual-sql-flag" />
+
         <div class="row g-3">
             <div class="col-md-6">
                 <label asp-for="Title" class="form-label"></label>
@@ -25,30 +33,112 @@
                 <label asp-for="Visibility" class="form-label"></label>
                 <select asp-for="Visibility" class="form-select" asp-items="Html.GetEnumSelectList<Scm.Domain.Entities.ReportVisibility>()"></select>
             </div>
-            <div class="col-md-12">
+            <div class="col-12">
                 <label asp-for="Description" class="form-label"></label>
                 <textarea asp-for="Description" class="form-control" rows="2"></textarea>
             </div>
-            <div class="col-md-12">
-                <label asp-for="SqlText" class="form-label"></label>
-                <textarea asp-for="SqlText" class="form-control font-monospace" rows="8" spellcheck="false"></textarea>
-                <small class="form-text text-muted">Допускаются только SELECT-запросы. В запросе обязательно используйте параметризацию вида @@имя.</small>
-                <span asp-validation-for="SqlText" class="text-danger"></span>
-            </div>
-            <div class="col-md-6">
+            <div class="col-lg-6">
                 <label asp-for="AllowedRoles" class="form-label"></label>
                 <select asp-for="AllowedRoles" asp-items="Model.AvailableRoles" class="form-select" multiple size="5"></select>
                 <small class="form-text text-muted">При видимости "Команда" и "Организация" можно ограничить доступ ролями.</small>
             </div>
-            <div class="col-md-6 d-flex align-items-center">
+            <div class="col-lg-3 d-flex align-items-center">
                 <div class="form-check mt-4">
                     <input asp-for="IsActive" class="form-check-input" />
                     <label asp-for="IsActive" class="form-check-label"></label>
                 </div>
             </div>
+            <div class="col-lg-3 d-flex align-items-center">
+                <div class="form-check form-switch mt-4">
+                    <input class="form-check-input" type="checkbox" id="manual-sql-toggle" @(Model.IsManualSqlAllowed ? "checked" : string.Empty) />
+                    <label class="form-check-label" for="manual-sql-toggle">@Html.DisplayNameFor(m => m.IsManualSqlAllowed)</label>
+                </div>
+            </div>
         </div>
 
         <hr class="my-4" />
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0">Конструктор запроса</h2>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="designer-generate">Сформировать SQL</button>
+            </div>
+            <div class="card-body">
+                <div id="report-designer" class="row g-3"
+                     data-metadata-url="@metadataUrl"
+                     data-generate-url="@generateUrl">
+                    <div class="col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-header bg-light">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Таблицы</span>
+                                    <span class="badge bg-secondary" id="designer-selected-table-count">0</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <input type="search" class="form-control form-control-sm mb-2" placeholder="Поиск" id="designer-table-search" />
+                                <div class="designer-table-list" id="designer-table-list"></div>
+                                <small class="text-muted d-block mt-2">Отметьте таблицы, которые хотите использовать. Допустимые связи будут добавлены автоматически.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-header bg-light">Поля отчёта</div>
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-3">
+                                    <label class="form-label">Доступные столбцы</label>
+                                    <div class="designer-columns border rounded p-2" id="designer-columns"></div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <label class="form-label">Выбранные поля</label>
+                                    <ul class="list-group list-group-flush designer-selected-fields" id="designer-selected-fields"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-header bg-light">Связи и фильтры</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Связи</label>
+                                    <div id="designer-relations" class="designer-relations border rounded p-2"></div>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label mb-0">Фильтры</label>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="designer-add-filter">Добавить</button>
+                                    </div>
+                                    <div id="designer-filters" class="designer-filters"></div>
+                                    <small class="text-muted d-block mt-2">Имя параметра должно совпадать с параметрами ниже.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0">SQL-просмотр</h2>
+                <span class="badge bg-light text-dark" id="designer-parameter-count">Параметры: 0</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Автоматически сгенерированный SQL</label>
+                    <pre class="bg-light border rounded p-3" id="designer-sql-preview">@Model.SqlText</pre>
+                    <span asp-validation-for="BuilderConfigurationJson" class="text-danger d-block"></span>
+                </div>
+                <div>
+                    <label asp-for="SqlText" class="form-label"></label>
+                    <textarea class="form-control font-monospace" rows="6" id="manual-sql-editor" @(Model.IsManualSqlAllowed ? string.Empty : "disabled")>@Model.SqlText</textarea>
+                    <small class="text-muted">Для ручного редактирования включите переключатель выше. При сохранении запрос будет повторно проверен.</small>
+                    <span asp-validation-for="SqlText" class="text-danger d-block"></span>
+                </div>
+            </div>
+        </div>
 
         <div>
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -78,7 +168,7 @@
                     {
                         <tr>
                             <td>
-                                <input asp-for="Parameters[i].Name" class="form-control" placeholder="@@example_param" />
+                                <input asp-for="Parameters[i].Name" class="form-control" placeholder="@example_param" />
                                 <span asp-validation-for="Parameters[i].Name" class="text-danger"></span>
                             </td>
                             <td>
@@ -114,6 +204,9 @@
     <script>
         if (typeof initReportParametersEditor === 'function') {
             initReportParametersEditor();
+        }
+        if (typeof initReportDesigner === 'function') {
+            initReportDesigner();
         }
     </script>
 }
