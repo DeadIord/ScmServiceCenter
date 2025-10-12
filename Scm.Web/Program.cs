@@ -4,6 +4,7 @@ using Scm.Application.Services;
 using Scm.Application.Validators;
 using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
+using Scm.Web.Authorization;
 using Scm.Web.Localization;
 using Scm.Web.HealthChecks;
 using Microsoft.AspNetCore.Localization;
@@ -30,6 +31,14 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ScmDbContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RolePolicies.RequireAdministrator, policy => policy.RequireRole("Admin"));
+    options.AddPolicy(RolePolicies.OperationsStaff, policy => policy.RequireRole("Admin", "Manager", "Technician"));
+    options.AddPolicy(RolePolicies.StockAccess, policy => policy.RequireRole("Admin", "Storekeeper"));
+    options.AddPolicy(RolePolicies.ReportsAccess, policy => policy.RequireRole("Admin", "Manager", "Accountant"));
+});
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 

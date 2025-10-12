@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Scm.Web.Authorization;
 
 namespace Scm.Web.Controllers;
 
-[Authorize(Roles = "Admin,Manager,Technician")]
+[Authorize(Policy = RolePolicies.OperationsStaff)]
 public sealed class TicketsController : Controller
 {
     private readonly ILogger<TicketsController> m_logger;

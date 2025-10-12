@@ -1,0 +1,108 @@
+@model UsersIndexViewModel
+@{
+    ViewData["Title"] = Localizer["Title"].Value;
+    var hasUsers = Model.Users.Any();
+}
+<div class="row g-4 justify-content-center">
+    <div class="col-xxl-10">
+        <div class="card p-4 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                <div>
+                    <h1 class="section-title mb-1">@Localizer["SectionTitle"]</h1>
+                    <p class="section-subtitle mb-0">@Localizer["SectionSubtitle"]</p>
+                </div>
+                <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-2"></i>@Localizer["CreateButton"]</a>
+            </div>
+        </div>
+        <div class="alert alert-info" role="alert">
+            <div class="d-flex gap-2">
+                <i class="bi bi-shield-lock-fill fs-4"></i>
+                <div>
+                    <h2 class="h6 fw-semibold mb-1">@Localizer["AccessRulesTitle"]</h2>
+                    <p class="mb-0">@Model.RoleRulesDescription</p>
+                </div>
+            </div>
+        </div>
+        @if (!hasUsers)
+        {
+            <div class="card p-5 text-center text-muted">
+                <i class="bi bi-people fs-1 mb-3"></i>
+                <p class="mb-0">@Localizer["EmptyState"]</p>
+            </div>
+        }
+        else
+        {
+            <div class="card p-4">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["TableHeaderName"]</th>
+                                <th>@Localizer["TableHeaderEmail"]</th>
+                                <th>@Localizer["TableHeaderPhone"]</th>
+                                <th>@Localizer["TableHeaderRoles"]</th>
+                                <th class="text-center">@Localizer["TableHeaderStatus"]</th>
+                                <th>@Localizer["TableHeaderActions"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@(!string.IsNullOrWhiteSpace(user.DisplayName) ? user.DisplayName : Localizer["FallbackName", user.Email])</div>
+                                </td>
+                                <td>@user.Email</td>
+                                <td>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? Localizer["NoPhone"] : user.PhoneNumber)</td>
+                                <td>
+                                    <form asp-action="UpdateRoles" method="post" class="d-flex flex-column gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="UserId" value="@user.Id" />
+                                        <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var roleName in Model.RoleNames)
+                                        {
+                                            var roleId = $"role_{user.Id}_{roleName}";
+                                            var isChecked = user.Roles.Contains(roleName, StringComparer.OrdinalIgnoreCase);
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@roleName" id="@roleId" @(isChecked ? "checked" : null) />
+                                                <label class="form-check-label" for="@roleId">@roleName</label>
+                                            </div>
+                                        }
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-save me-1"></i>@Localizer["SaveRoles"]
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="text-center">
+                                    <form asp-action="UpdateStatus" method="post" class="d-inline-flex align-items-center justify-content-center gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="UserId" value="@user.Id" />
+                                        <input type="hidden" name="IsActive" value="false" />
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" name="IsActive" value="true" @(user.IsActive ? "checked" : null) onchange="this.form.submit();" />
+                                        </div>
+                                        <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">@(user.IsActive ? Localizer["StatusActive"] : Localizer["StatusInactive"])</span>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column flex-lg-row gap-2">
+                                        <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@user.Id">
+                                            <i class="bi bi-pencil me-1"></i>@Localizer["EditLink"]
+                                        </a>
+                                        <a class="btn btn-outline-warning btn-sm" asp-action="ResetPassword" asp-route-id="@user.Id">
+                                            <i class="bi bi-arrow-repeat me-1"></i>@Localizer["ResetPasswordLink"]
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -57,6 +57,9 @@
   <data name="ReportsNav" xml:space="preserve">
     <value>Отчёты</value>
   </data>
+  <data name="UsersNav" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
   <data name="SiteTitle" xml:space="preserve">
     <value>SCM сервис-центр</value>
   </data>

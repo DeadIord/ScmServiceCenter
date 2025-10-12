@@ -18,4 +18,40 @@
   <data name="ValidationInvalidFormat" xml:space="preserve">
     <value>Недопустимый формат.</value>
   </data>
+  <data name="UserCreated" xml:space="preserve">
+    <value>Пользователь создан.</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>Профиль пользователя обновлён.</value>
+  </data>
+  <data name="PasswordResetSuccess" xml:space="preserve">
+    <value>Пароль успешно сброшен.</value>
+  </data>
+  <data name="RolesUpdated" xml:space="preserve">
+    <value>Роли пользователя обновлены.</value>
+  </data>
+  <data name="RolesUpdateError" xml:space="preserve">
+    <value>Не удалось обновить роли пользователя.</value>
+  </data>
+  <data name="StatusUpdated" xml:space="preserve">
+    <value>Статус пользователя обновлён.</value>
+  </data>
+  <data name="StatusUpdateError" xml:space="preserve">
+    <value>Не удалось изменить статус пользователя.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>Пользователь не найден.</value>
+  </data>
+  <data name="RoleRulesDescription" xml:space="preserve">
+    <value>Доступ к разделам зависит от ролей: администраторы управляют пользователями, кладовщики работают со складом, менеджеры и бухгалтеры просматривают отчёты.</value>
+  </data>
+  <data name="Validation_Required" xml:space="preserve">
+    <value>Поле обязательно для заполнения.</value>
+  </data>
+  <data name="Validation_Email" xml:space="preserve">
+    <value>Укажите корректный адрес электронной почты.</value>
+  </data>
+  <data name="Validation_PasswordsNotMatch" xml:space="preserve">
+    <value>Пароли не совпадают.</value>
+  </data>
 </root>

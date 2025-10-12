@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>User management</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Manage users</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Invite colleagues, control access and monitor activity.</value>
+  </data>
+  <data name="CreateButton" xml:space="preserve">
+    <value>New employee</value>
+  </data>
+  <data name="AccessRulesTitle" xml:space="preserve">
+    <value>Role-based access</value>
+  </data>
+  <data name="EmptyState" xml:space="preserve">
+    <value>No users found.</value>
+  </data>
+  <data name="TableHeaderName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="TableHeaderEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="TableHeaderPhone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="TableHeaderRoles" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+  <data name="TableHeaderStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="TableHeaderActions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="SaveRoles" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="StatusInactive" xml:space="preserve">
+    <value>Blocked</value>
+  </data>
+  <data name="EditLink" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="ResetPasswordLink" xml:space="preserve">
+    <value>Reset password</value>
+  </data>
+  <data name="NoPhone" xml:space="preserve">
+    <value>Not specified</value>
+  </data>
+  <data name="FallbackName" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+</root>

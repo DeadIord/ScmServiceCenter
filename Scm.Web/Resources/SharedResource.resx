@@ -18,4 +18,40 @@
   <data name="ValidationInvalidFormat" xml:space="preserve">
     <value>Invalid format.</value>
   </data>
+  <data name="UserCreated" xml:space="preserve">
+    <value>User account has been created.</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>User profile has been updated.</value>
+  </data>
+  <data name="PasswordResetSuccess" xml:space="preserve">
+    <value>Password has been reset.</value>
+  </data>
+  <data name="RolesUpdated" xml:space="preserve">
+    <value>User roles have been updated.</value>
+  </data>
+  <data name="RolesUpdateError" xml:space="preserve">
+    <value>Unable to update user roles.</value>
+  </data>
+  <data name="StatusUpdated" xml:space="preserve">
+    <value>User status has been updated.</value>
+  </data>
+  <data name="StatusUpdateError" xml:space="preserve">
+    <value>Unable to update user status.</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User was not found.</value>
+  </data>
+  <data name="RoleRulesDescription" xml:space="preserve">
+    <value>Access to modules depends on assigned roles: administrators manage users, storekeepers work with stock, while managers and accountants review reports.</value>
+  </data>
+  <data name="Validation_Required" xml:space="preserve">
+    <value>This field is required.</value>
+  </data>
+  <data name="Validation_Email" xml:space="preserve">
+    <value>Enter a valid email address.</value>
+  </data>
+  <data name="Validation_PasswordsNotMatch" xml:space="preserve">
+    <value>Passwords do not match.</value>
+  </data>
 </root>

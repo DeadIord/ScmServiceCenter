@@ -8,11 +8,12 @@ using Microsoft.Extensions.Logging;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
+using Scm.Web.Authorization;
 using Scm.Web.Models.Orders;
 
 namespace Scm.Web.Controllers;
 
-[Authorize(Roles = "Admin,Manager,Technician")]
+[Authorize(Policy = RolePolicies.OperationsStaff)]
 public class OrdersController : Controller
 {
     private readonly IOrderService m_orderService;
@@ -165,7 +166,7 @@ public class OrdersController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager,Technician")]
+    [Authorize(Policy = RolePolicies.OperationsStaff)]
     public async Task<IActionResult> ChangeStatus(Guid id, OrderStatus to)
     {
         try
@@ -312,7 +313,7 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,Manager,Technician")]
+    [Authorize(Policy = RolePolicies.OperationsStaff)]
     public async Task<IActionResult> Kanban()
     {
         var orders = await m_orderService.GetQueueAsync(null, null);

@@ -43,9 +43,19 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item"><a class="nav-link" asp-controller="Orders" asp-action="Index">@Localizer["OrdersNav"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Orders" asp-action="Kanban">@Localizer["KanbanNav"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Stock" asp-action="Index">@Localizer["StockNav"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Reports" asp-action="Dashboard">@Localizer["ReportsNav"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="ReportDefinitions" asp-action="Index">@Localizer["ReportBuilderNav"]</a></li>
+                        @if (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Storekeeper")))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Stock" asp-action="Index">@Localizer["StockNav"]</a></li>
+                        }
+                        @if (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Accountant")))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Reports" asp-action="Dashboard">@Localizer["ReportsNav"]</a></li>
+                        }
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">@Localizer["UsersNav"]</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="ReportDefinitions" asp-action="Index">@Localizer["ReportBuilderNav"]</a></li>
+                        }
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="crmDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">@Localizer["CrmNav"]</a>
                             <ul class="dropdown-menu" aria-labelledby="crmDropdown">

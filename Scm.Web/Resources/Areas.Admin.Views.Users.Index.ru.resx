@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Управление пользователями</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Команда и доступы</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Добавляйте сотрудников, назначайте права и контролируйте статусы.</value>
+  </data>
+  <data name="CreateButton" xml:space="preserve">
+    <value>Новый сотрудник</value>
+  </data>
+  <data name="AccessRulesTitle" xml:space="preserve">
+    <value>Правила доступа</value>
+  </data>
+  <data name="EmptyState" xml:space="preserve">
+    <value>Пользователи не найдены.</value>
+  </data>
+  <data name="TableHeaderName" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="TableHeaderEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="TableHeaderPhone" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="TableHeaderRoles" xml:space="preserve">
+    <value>Роли</value>
+  </data>
+  <data name="TableHeaderStatus" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="TableHeaderActions" xml:space="preserve">
+    <value>Действия</value>
+  </data>
+  <data name="SaveRoles" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>Активен</value>
+  </data>
+  <data name="StatusInactive" xml:space="preserve">
+    <value>Заблокирован</value>
+  </data>
+  <data name="EditLink" xml:space="preserve">
+    <value>Редактировать</value>
+  </data>
+  <data name="ResetPasswordLink" xml:space="preserve">
+    <value>Сбросить пароль</value>
+  </data>
+  <data name="NoPhone" xml:space="preserve">
+    <value>Не указан</value>
+  </data>
+  <data name="FallbackName" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+</root>

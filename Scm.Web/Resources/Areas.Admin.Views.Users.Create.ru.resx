@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Создание сотрудника</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Новый член команды</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Укажите контактные данные и назначьте роли.</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Назад к списку</value>
+  </data>
+  <data name="DisplayNameLabel" xml:space="preserve">
+    <value>ФИО</value>
+  </data>
+  <data name="DisplayNamePlaceholder" xml:space="preserve">
+    <value>Например, Анна Петрова</value>
+  </data>
+  <data name="EmailLabel" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>name@example.com</value>
+  </data>
+  <data name="PhoneLabel" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="PhonePlaceholder" xml:space="preserve">
+    <value>Дополнительный контактный телефон</value>
+  </data>
+  <data name="PasswordLabel" xml:space="preserve">
+    <value>Временный пароль</value>
+  </data>
+  <data name="ConfirmPasswordLabel" xml:space="preserve">
+    <value>Подтвердите пароль</value>
+  </data>
+  <data name="RolesSection" xml:space="preserve">
+    <value>Роли</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="CreateButton" xml:space="preserve">
+    <value>Создать пользователя</value>
+  </data>
+</root>
