@@ -7,6 +7,7 @@ using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Localization;
 using System.Globalization;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,19 +58,30 @@ builder.Services.AddRazorPages()
     });
 
 var defaultCulture = new CultureInfo("ru-RU");
-var supportedCultures = new[] { defaultCulture };
+var supportedCultures = new[] { defaultCulture, new CultureInfo("en-US") };
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
-var app = builder.Build();
-
-var localizationOptions = new RequestLocalizationOptions
+builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    DefaultRequestCulture = new RequestCulture(defaultCulture),
-    SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures,
-    ApplyCurrentCultureToResponseHeaders = true
-};
+    options.DefaultRequestCulture = new RequestCulture(defaultCulture);
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+    options.ApplyCurrentCultureToResponseHeaders = true;
+
+    var queryProvider = new QueryStringRequestCultureProvider();
+    var cookieProvider = new CookieRequestCultureProvider();
+    var acceptLanguageProvider = new AcceptLanguageHeaderRequestCultureProvider();
+
+    options.RequestCultureProviders = new IRequestCultureProvider[]
+    {
+        queryProvider,
+        cookieProvider,
+        acceptLanguageProvider
+    };
+});
+
+var app = builder.Build();
 
 await ScmDbSeeder.SeedAsync(app.Services);
 
@@ -78,6 +90,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 
 app.UseRequestLocalization(localizationOptions);
 
