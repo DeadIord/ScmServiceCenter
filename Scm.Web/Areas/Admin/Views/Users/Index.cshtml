@@ -64,7 +64,7 @@
                         {
                             foreach (var user in Model.Users)
                             {
-                                @{ var hasRoles = user.Roles.Any(); }
+                                var hasRoles = user.Roles.Any(); 
                                 <tr>
                                     <td class="fw-semibold">@(string.IsNullOrWhiteSpace(user.DisplayName) ? Localizer["DisplayName_Fallback"].Value : user.DisplayName)</td>
                                     <td>@user.UserName</td>

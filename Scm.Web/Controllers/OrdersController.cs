@@ -257,7 +257,7 @@ public class OrdersController : Controller
     {
         try
         {
-            var invoice = await _orderService.CreateInvoiceAsync(id);
+            var invoice = await m_orderService.CreateInvoiceAsync(id);
             var url = Url.Action(nameof(Invoice), new { orderId = id, invoiceId = invoice.Id });
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -276,7 +276,7 @@ public class OrdersController : Controller
     [HttpGet]
     public async Task<IActionResult> Invoice(Guid orderId, Guid invoiceId)
     {
-        var order = await _orderService.GetAsync(orderId);
+        var order = await m_orderService.GetAsync(orderId);
         if (order is null)
         {
             return NotFound();
