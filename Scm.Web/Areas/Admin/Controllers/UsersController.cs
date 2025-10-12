@@ -4,20 +4,23 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Scm.Infrastructure.Identity;
+
 using Scm.Web.Areas.Admin.Models.Users;
 using Scm.Web.Authorization;
+
 
 namespace Scm.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize(Policy = PolicyNames.AdministrationAccess)]
+
 public class UsersController : Controller
 {
     private readonly UserManager<ApplicationUser> m_userManager;
@@ -29,6 +32,7 @@ public class UsersController : Controller
     public UsersController(
         UserManager<ApplicationUser> in_userManager,
         RoleManager<IdentityRole> in_roleManager,
+
         ILogger<UsersController> in_logger,
         IStringLocalizer<UsersController> in_localizer,
         SignInManager<ApplicationUser> in_signInManager)
@@ -80,6 +84,7 @@ public class UsersController : Controller
             Users = items
         };
 
+
         ret = View(model);
         return ret;
     }
@@ -93,6 +98,7 @@ public class UsersController : Controller
         {
             Roles = await buildRoleOptionsAsync(null)
         };
+
         ret = View(model);
         return ret;
     }

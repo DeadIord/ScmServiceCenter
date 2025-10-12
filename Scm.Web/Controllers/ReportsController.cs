@@ -5,6 +5,7 @@ using Scm.Domain.Entities;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Authorization;
 using Scm.Web.Models.Reports;
+using Scm.Web.Security;
 
 namespace Scm.Web.Controllers;
 

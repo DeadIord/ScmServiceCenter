@@ -18,6 +18,7 @@
   <data name="ValidationInvalidFormat" xml:space="preserve">
     <value>Недопустимый формат.</value>
   </data>
+
   <data name="User_ConfirmPassword" xml:space="preserve">
     <value>Подтверждение пароля</value>
   </data>
@@ -35,6 +36,7 @@
   </data>
   <data name="User_Password" xml:space="preserve">
     <value>Пароль</value>
+
   </data>
   <data name="User_Phone" xml:space="preserve">
     <value>Телефон</value>
@@ -50,5 +52,6 @@
   </data>
   <data name="User_Search" xml:space="preserve">
     <value>Поиск</value>
+
   </data>
 </root>

@@ -69,6 +69,9 @@
   <data name="TasksNavDescription" xml:space="preserve">
     <value>Координируйте работу команды и соблюдайте сроки.</value>
   </data>
+  <data name="UsersNav" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
   <data name="TicketsNav" xml:space="preserve">
     <value>Тикеты</value>
   </data>
@@ -102,6 +105,7 @@
   <data name="Toast_StatusUpdateFailed" xml:space="preserve">
     <value>Не удалось обновить статус</value>
   </data>
+
   <data name="UsersNav" xml:space="preserve">
     <value>Пользователи</value>
   </data>
