@@ -6,88 +6,127 @@
     ViewData["Title"] = Localizer["Title"].Value;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3">@Localizer["Heading"]</h1>
-    <a asp-area="Admin" asp-controller="Users" asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-person-plus me-1"></i>@Localizer["Action_Create"]
-    </a>
-</div>
-
-<div class="card shadow-sm">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped mb-0 align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>@Localizer["Column_DisplayName"]</th>
-                        <th>@Localizer["Column_UserName"]</th>
-                        <th>@Localizer["Column_Email"]</th>
-                        <th>@Localizer["Column_Phone"]</th>
-                        <th>@Localizer["Column_Roles"]</th>
-                        <th class="text-center">@Localizer["Column_Status"]</th>
-                        <th class="text-end">@Localizer["Column_Actions"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Users.Any())
-                    {
+<div class="row g-4 justify-content-center">
+    <div class="col-xl-11 col-xxl-10">
+        <div class="card p-4 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                <div>
+                    <h1 class="section-title mb-1">@Localizer["SectionTitle"]</h1>
+                    <p class="section-subtitle mb-0">@Localizer["SectionSubtitle"]</p>
+                </div>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-2"></i>@Localizer["Action_Create"]
+                </a>
+            </div>
+        </div>
+        <div class="card p-4 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-start">
+                <div>
+                    <h2 class="h5 fw-semibold mb-2">@Localizer["InstructionTitle"]</h2>
+                    <p class="mb-0 text-body-secondary">@Localizer["InstructionDescription"]</p>
+                </div>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#adminUsersGuide" aria-expanded="false" aria-controls="adminUsersGuide">
+                    <i class="bi bi-info-circle me-2"></i>@Localizer["InstructionToggle"]
+                </button>
+            </div>
+            <div class="collapse mt-3" id="adminUsersGuide">
+                <div class="bg-light rounded-3 p-3">
+                    <ol class="mb-0 ps-3">
+                        <li class="mb-2">@Localizer["InstructionStepOverview"]</li>
+                        <li class="mb-2">@Localizer["InstructionStepRoles"]</li>
+                        <li class="mb-0">@Localizer["InstructionStepStatus"]</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="card p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle table-sticky mb-0">
+                    <thead>
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">@Localizer["Empty"]</td>
+                            <th>@Localizer["Column_DisplayName"]</th>
+                            <th>@Localizer["Column_UserName"]</th>
+                            <th>@Localizer["Column_Email"]</th>
+                            <th>@Localizer["Column_Phone"]</th>
+                            <th>@Localizer["Column_Roles"]</th>
+                            <th class="text-center">@Localizer["Column_Status"]</th>
+                            <th class="text-end">@Localizer["Column_Actions"]</th>
                         </tr>
-                    }
-                    else
-                    {
-                        foreach (var user in Model.Users)
+                    </thead>
+                    <tbody>
+                        @if (!Model.Users.Any())
                         {
                             <tr>
-                                <td>@(string.IsNullOrWhiteSpace(user.DisplayName) ? Localizer["DisplayName_Fallback"].Value : user.DisplayName)</td>
-                                <td>@user.UserName</td>
-                                <td>@user.Email</td>
-                                <td>@user.PhoneNumber</td>
-                                <td>
-                                    @if (user.Roles.Count == 0)
-                                    {
-                                        <span class="badge bg-secondary">@Localizer["NoRoles"]</span>
-                                    }
-                                    else
-                                    {
-                                        foreach (var role in user.Roles)
+                                <td colspan="7" class="text-center py-5 table-empty">@Localizer["Empty"]</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var user in Model.Users)
+                            {
+                                @{ var hasRoles = user.Roles.Any(); }
+                                <tr>
+                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(user.DisplayName) ? Localizer["DisplayName_Fallback"].Value : user.DisplayName)</td>
+                                    <td>@user.UserName</td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(user.Email))
                                         {
-                                            <span class="badge bg-info text-dark me-1">@role</span>
+                                            <a href="mailto:@user.Email" class="text-decoration-none">@user.Email</a>
                                         }
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    <form asp-area="Admin" asp-controller="Users" asp-action="UpdateStatus" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@user.Id" />
-                                        @if (user.IsActive)
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
                                         {
-                                            <input type="hidden" name="isActive" value="false" />
-                                            <span class="badge bg-success me-2">@Localizer["Status_Active"]</span>
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">@Localizer["Action_Deactivate"]</button>
+                                            <a href="tel:@user.PhoneNumber" class="text-decoration-none">@user.PhoneNumber</a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!hasRoles)
+                                        {
+                                            <span class="badge text-bg-secondary badge-status">@Localizer["NoRoles"]</span>
                                         }
                                         else
                                         {
-                                            <input type="hidden" name="isActive" value="true" />
-                                            <span class="badge bg-danger me-2">@Localizer["Status_Blocked"]</span>
-                                            <button type="submit" class="btn btn-sm btn-outline-success">@Localizer["Action_Activate"]</button>
+                                            foreach (var role in user.Roles)
+                                            {
+                                                <span class="badge text-bg-info text-dark badge-status me-1">@role</span>
+                                            }
                                         }
-                                    </form>
-                                </td>
-                                <td class="text-end">
-                                    <a asp-area="Admin" asp-controller="Users" asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-area="Admin" asp-controller="Users" asp-action="ResetPassword" asp-route-id="@user.Id" class="btn btn-sm btn-outline-warning">
-                                        <i class="bi bi-key"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-area="Admin" asp-controller="Users" asp-action="UpdateStatus" method="post" class="d-inline-flex align-items-center gap-2 justify-content-center">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            @if (user.IsActive)
+                                            {
+                                                <input type="hidden" name="isActive" value="false" />
+                                                <span class="badge text-bg-success badge-status">@Localizer["Status_Active"]</span>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="@Localizer["Action_Deactivate"]">@Localizer["Action_Deactivate"]</button>
+                                            }
+                                            else
+                                            {
+                                                <input type="hidden" name="isActive" value="true" />
+                                                <span class="badge text-bg-danger badge-status">@Localizer["Status_Blocked"]</span>
+                                                <button type="submit" class="btn btn-sm btn-outline-success" aria-label="@Localizer["Action_Activate"]">@Localizer["Action_Activate"]</button>
+                                            }
+                                        </form>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-2">
+                                            <a asp-area="Admin" asp-controller="Users" asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary" aria-label="@Localizer["Action_Edit"]">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-area="Admin" asp-controller="Users" asp-action="ResetPassword" asp-route-id="@user.Id" class="btn btn-sm btn-outline-warning" aria-label="@Localizer["Action_ResetPassword"]">
+                                                <i class="bi bi-key"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

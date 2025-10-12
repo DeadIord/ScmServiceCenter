@@ -63,4 +63,34 @@
   <data name="Action_Activate" xml:space="preserve">
     <value>Активировать</value>
   </data>
+  <data name="Action_Edit" xml:space="preserve">
+    <value>Редактировать</value>
+  </data>
+  <data name="Action_ResetPassword" xml:space="preserve">
+    <value>Сбросить пароль</value>
+  </data>
+  <data name="InstructionDescription" xml:space="preserve">
+    <value>Используйте чек-лист, чтобы быстро оформить сотрудника или обновить его данные.</value>
+  </data>
+  <data name="InstructionStepOverview" xml:space="preserve">
+    <value>Проверьте контактные данные и убедитесь, что они актуальны перед изменениями.</value>
+  </data>
+  <data name="InstructionStepRoles" xml:space="preserve">
+    <value>Выберите роли, которые отражают обязанности сотрудника.</value>
+  </data>
+  <data name="InstructionStepStatus" xml:space="preserve">
+    <value>Используйте переключатель статуса, чтобы включать или временно блокировать доступ.</value>
+  </data>
+  <data name="InstructionTitle" xml:space="preserve">
+    <value>Как работать с пользователями</value>
+  </data>
+  <data name="InstructionToggle" xml:space="preserve">
+    <value>Показать инструкцию</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Приглашайте коллег, управляйте правами и следите за безопасностью доступа.</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Управление пользователями</value>
+  </data>
 </root>

@@ -6,35 +6,46 @@
     ViewData["Title"] = Localizer["Title"].Value;
 }
 
-<h1 class="h3 mb-4">@Localizer["Heading"]</h1>
-
-<form asp-area="Admin" asp-controller="Users" asp-action="Create" method="post" class="card shadow-sm">
-    @Html.AntiForgeryToken()
-    <div class="card-body p-4">
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-        <partial name="_UserForm" model="Model" />
-        <div class="row g-3 mt-4">
-            <div class="col-md-6">
-                <div class="form-floating">
-                    <input asp-for="Password" class="form-control" />
-                    <label asp-for="Password"></label>
-                    <span asp-validation-for="Password" class="text-danger"></span>
+<div class="row g-4 justify-content-center">
+    <div class="col-xl-10 col-xxl-8">
+        <div class="card p-4 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                <div>
+                    <h1 class="section-title mb-1">@Localizer["SectionTitle"]</h1>
+                    <p class="section-subtitle mb-0">@Localizer["SectionSubtitle"]</p>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-floating">
-                    <input asp-for="ConfirmPassword" class="form-control" />
-                    <label asp-for="ConfirmPassword"></label>
-                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                </div>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
+                </a>
             </div>
         </div>
+        <div class="card p-4">
+            <form asp-area="Admin" asp-controller="Users" asp-action="Create" method="post" class="row g-4">
+                @Html.AntiForgeryToken()
+                <div class="col-12">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                </div>
+                <div class="col-12">
+                    <partial name="_UserForm" model="Model" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" placeholder="@Localizer["PasswordPlaceholder"]" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="@Localizer["ConfirmPasswordPlaceholder"]" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary">@Localizer["Action_Cancel"]</a>
+                    <button type="submit" class="btn btn-primary">@Localizer["Action_Save"]</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="card-footer d-flex justify-content-between align-items-center">
-        <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-link text-decoration-none">@Localizer["Action_Cancel"]</a>
-        <button type="submit" class="btn btn-primary">@Localizer["Action_Save"]</button>
-    </div>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

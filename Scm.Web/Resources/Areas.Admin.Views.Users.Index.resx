@@ -63,4 +63,34 @@
   <data name="Action_Activate" xml:space="preserve">
     <value>Activate</value>
   </data>
+  <data name="Action_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Action_ResetPassword" xml:space="preserve">
+    <value>Reset password</value>
+  </data>
+  <data name="InstructionDescription" xml:space="preserve">
+    <value>Follow the checklist to quickly onboard or update employees.</value>
+  </data>
+  <data name="InstructionStepOverview" xml:space="preserve">
+    <value>Review contact details and confirm they are up to date before editing.</value>
+  </data>
+  <data name="InstructionStepRoles" xml:space="preserve">
+    <value>Select the roles that reflect the employee&apos;s responsibilities.</value>
+  </data>
+  <data name="InstructionStepStatus" xml:space="preserve">
+    <value>Use the status switch to activate or temporarily block access.</value>
+  </data>
+  <data name="InstructionTitle" xml:space="preserve">
+    <value>How to manage users</value>
+  </data>
+  <data name="InstructionToggle" xml:space="preserve">
+    <value>Show instructions</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Invite colleagues, control their permissions, and keep access secure.</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>User management</value>
+  </data>
 </root>

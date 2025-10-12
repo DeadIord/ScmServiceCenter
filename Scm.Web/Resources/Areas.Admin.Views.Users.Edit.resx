@@ -24,4 +24,13 @@
   <data name="Action_Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Back to list</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Adjust profile details, update permissions, and keep records consistent.</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Edit employee</value>
+  </data>
 </root>

@@ -24,4 +24,13 @@
   <data name="Action_Save" xml:space="preserve">
     <value>Сохранить</value>
   </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>К списку</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Актуализируйте данные профиля, обновляйте права и поддерживайте порядок.</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Редактирование сотрудника</value>
+  </data>
 </root>

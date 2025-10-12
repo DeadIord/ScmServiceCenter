@@ -15,7 +15,28 @@
   <data name="RolesHeading" xml:space="preserve">
     <value>Назначенные роли</value>
   </data>
+  <data name="RolesDescription" xml:space="preserve">
+    <value>Назначьте одну или несколько ролей, чтобы открыть нужные разделы системы.</value>
+  </data>
   <data name="RolesEmpty" xml:space="preserve">
     <value>Доступные роли не найдены.</value>
+  </data>
+  <data name="DisplayNamePlaceholder" xml:space="preserve">
+    <value>Введите ФИО</value>
+  </data>
+  <data name="UserNamePlaceholder" xml:space="preserve">
+    <value>Введите логин</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>Введите электронную почту</value>
+  </data>
+  <data name="PhonePlaceholder" xml:space="preserve">
+    <value>Введите номер телефона</value>
+  </data>
+  <data name="StatusHeading" xml:space="preserve">
+    <value>Статус пользователя</value>
+  </data>
+  <data name="StatusDescription" xml:space="preserve">
+    <value>Выключите профиль, чтобы временно ограничить доступ без удаления.</value>
   </data>
 </root>
