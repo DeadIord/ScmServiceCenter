@@ -1,0 +1,113 @@
+@model Scm.Web.Models.Orders.OrderInvoiceViewModel
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = $"Счёт для заказа {Model.Order.Number}";
+    string FormatKind(QuoteLineKind in_kind) => in_kind switch
+    {
+        QuoteLineKind.Labor => "Работа",
+        QuoteLineKind.Part => "Запчасть",
+        _ => in_kind.ToString()
+    };
+    string currency = string.IsNullOrWhiteSpace(Model.Invoice.Currency) ? "RUB" : Model.Invoice.Currency;
+    var createdAt = Model.Invoice.CreatedAt.Kind == DateTimeKind.Utc
+        ? Model.Invoice.CreatedAt.ToLocalTime()
+        : Model.Invoice.CreatedAt;
+}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white border-0 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <h1 class="h4 mb-1">Счёт №@Model.Invoice.Id.ToString().Substring(0, 8)</h1>
+                        <div class="text-muted">Дата формирования: @createdAt.ToString("dd.MM.yyyy HH:mm")</div>
+                    </div>
+                    <div class="text-md-end">
+                        <div class="fw-semibold">Заказ №@Model.Order.Number</div>
+                        <div class="text-muted">@Model.Order.ClientName</div>
+                        <div class="text-muted">@Model.Order.ClientPhone</div>
+                        @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
+                        {
+                            <div class="text-muted">@Model.Order.ClientEmail</div>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <div class="fw-semibold mb-2">Информация о заказе</div>
+                                <div class="text-muted small">Устройство: @Model.Order.Device</div>
+                                @if (!string.IsNullOrWhiteSpace(Model.Order.Serial))
+                                {
+                                    <div class="text-muted small">Серийный номер: @Model.Order.Serial</div>
+                                }
+                                <div class="text-muted small">Статус заказа: @Model.Order.Status</div>
+                                @if (Model.Order.SLAUntil.HasValue)
+                                {
+                                    <div class="text-muted small">SLA до: @Model.Order.SLAUntil.Value.ToString("dd.MM.yyyy")</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <div class="fw-semibold mb-2">Реквизиты счёта</div>
+                                <div class="text-muted small">Статус: @Model.Invoice.Status</div>
+                                <div class="text-muted small">Сумма к оплате: @Model.Total.ToString("N2") @currency</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="text-nowrap">Тип</th>
+                                    <th scope="col">Описание</th>
+                                    <th scope="col" class="text-end text-nowrap">Кол-во</th>
+                                    <th scope="col" class="text-end text-nowrap">Цена, @currency</th>
+                                    <th scope="col" class="text-end text-nowrap">Сумма, @currency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var line in Model.Lines)
+                                {
+                                    var lineTotal = line.Price * line.Qty;
+                                    <tr>
+                                        <td class="text-nowrap">@FormatKind(line.Kind)</td>
+                                        <td>@line.Title</td>
+                                        <td class="text-end">@line.Qty.ToString("N2")</td>
+                                        <td class="text-end">@line.Price.ToString("N2")</td>
+                                        <td class="text-end">@lineTotal.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th scope="row" colspan="4" class="text-end">Итого к оплате</th>
+                                    <th class="text-end">@Model.Total.ToString("N2")</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-4 gap-3">
+                        <div class="text-muted small">Оплата счёта подтверждает согласие с условиями ремонта и перечнем работ.</div>
+                        <div class="d-flex flex-column flex-md-row gap-2">
+                            <button type="button" class="btn btn-primary" id="printInvoiceButton">Распечатать счёт</button>
+                            <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@Model.Order.Id">Вернуться к заказу</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const printInvoiceButton = document.getElementById('printInvoiceButton');
+        if (printInvoiceButton) {
+            printInvoiceButton.addEventListener('click', function () {
+                window.print();
+            });
+        }
+    });
+</script>

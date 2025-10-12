@@ -1,7 +1,10 @@
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
@@ -12,29 +15,38 @@ namespace Scm.Web.Controllers;
 [Authorize(Roles = "Admin,Manager,Technician")]
 public class OrdersController : Controller
 {
-    private readonly IOrderService _orderService;
-    private readonly IQuoteService _quoteService;
-    private readonly IMessageService _messageService;
-    private readonly IAccountService _accountService;
-    private readonly IContactService _contactService;
+    private readonly IOrderService m_orderService;
+    private readonly IQuoteService m_quoteService;
+    private readonly IMessageService m_messageService;
+    private readonly IAccountService m_accountService;
+    private readonly IContactService m_contactService;
+    private readonly IMailService m_mailService;
+    private readonly ILogger<OrdersController> m_logger;
+    private readonly IStringLocalizer<OrdersController> m_localizer;
     public OrdersController(
-        IOrderService orderService,
-        IQuoteService quoteService,
-        IMessageService messageService,
-        IAccountService accountService,
-        IContactService contactService)
+        IOrderService in_orderService,
+        IQuoteService in_quoteService,
+        IMessageService in_messageService,
+        IAccountService in_accountService,
+        IContactService in_contactService,
+        IMailService in_mailService,
+        ILogger<OrdersController> in_logger,
+        IStringLocalizer<OrdersController> in_localizer)
     {
-        _orderService = orderService;
-        _quoteService = quoteService;
-        _messageService = messageService;
-        _accountService = accountService;
-        _contactService = contactService;
+        m_orderService = in_orderService;
+        m_quoteService = in_quoteService;
+        m_messageService = in_messageService;
+        m_accountService = in_accountService;
+        m_contactService = in_contactService;
+        m_mailService = in_mailService;
+        m_logger = in_logger;
+        m_localizer = in_localizer;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index(string? q, OrderStatus? status)
     {
-        var orders = await _orderService.GetQueueAsync(q, status);
+        var orders = await m_orderService.GetQueueAsync(q, status);
         var model = new OrdersIndexViewModel
         {
             Query = q,
@@ -45,6 +57,7 @@ public class OrdersController : Controller
                 Number = o.Number,
                 ClientName = o.ClientName,
                 ClientPhone = o.ClientPhone,
+                ClientEmail = o.ClientEmail,
                 Device = o.Device,
                 Status = o.Status,
                 Priority = o.Priority,
@@ -63,13 +76,14 @@ public class OrdersController : Controller
 
         if (contactId.HasValue && contactId.Value != Guid.Empty)
         {
-            var contact = await _contactService.GetAsync(contactId.Value);
+            var contact = await m_contactService.GetAsync(contactId.Value);
             if (contact is not null)
             {
                 dto.ContactId = contact.Id;
                 dto.AccountId = contact.AccountId;
                 dto.ClientName = contact.FullName;
                 dto.ClientPhone = contact.Phone;
+                dto.ClientEmail = contact.Email;
                 accountId = contact.AccountId;
             }
         }
@@ -90,20 +104,24 @@ public class OrdersController : Controller
     {
         if (dto.ContactId.HasValue && dto.ContactId.Value != Guid.Empty)
         {
-            var contact = await _contactService.GetAsync(dto.ContactId.Value);
+            var contact = await m_contactService.GetAsync(dto.ContactId.Value);
             if (contact is null)
             {
-                ModelState.AddModelError(nameof(dto.ContactId), "Контакт не найден");
+                ModelState.AddModelError(nameof(dto.ContactId), m_localizer["Error_ContactNotFound"].Value);
             }
             else
             {
                 if (dto.AccountId.HasValue && dto.AccountId.Value != Guid.Empty && dto.AccountId.Value != contact.AccountId)
                 {
-                    ModelState.AddModelError(nameof(dto.ContactId), "Контакт не относится к выбранному контрагенту");
+                    ModelState.AddModelError(nameof(dto.ContactId), m_localizer["Error_ContactDoesNotBelong"].Value);
                 }
                 else
                 {
                     dto.AccountId = contact.AccountId;
+                    if (string.IsNullOrWhiteSpace(dto.ClientEmail))
+                    {
+                        dto.ClientEmail = contact.Email;
+                    }
                 }
             }
         }
@@ -116,41 +134,30 @@ public class OrdersController : Controller
             return View(dto);
         }
 
-        var order = await _orderService.CreateAsync(dto);
-        TempData["Success"] = $"Заказ {order.Number} создан";
+        var order = await m_orderService.CreateAsync(dto);
+        TempData["Success"] = m_localizer["Notification_OrderCreated", order.Number].Value;
         return RedirectToAction(nameof(Details), new { id = order.Id });
     }
 
     [HttpGet]
     public async Task<IActionResult> Details(Guid id)
     {
-        var order = await _orderService.GetAsync(id);
+        var order = await m_orderService.GetAsync(id);
         if (order is null)
         {
             return NotFound();
         }
 
-        var messages = await _messageService.GetForOrderAsync(id);
-        var total = await _quoteService.GetTotalAsync(id);
+        var messages = await m_messageService.GetForOrderAsync(id);
+        var total = await m_quoteService.GetTotalAsync(id);
 
-        var trackingLink = Url.Action(
-            action: "Track",
-            controller: "Orders",
-            values: new { area = "Client", number = order.Number, token = order.ClientAccessToken },
-            protocol: Request.Scheme) ?? string.Empty;
-
-        var emailTemplate = $"Здравствуйте, {order.ClientName}!" + Environment.NewLine + Environment.NewLine +
-            $"Готова смета по ремонту {order.Device}. Перейдите по ссылке, чтобы согласовать работы:" + Environment.NewLine +
-            trackingLink + Environment.NewLine + Environment.NewLine +
-            "Если у вас есть вопросы, просто ответьте на это письмо." + Environment.NewLine + Environment.NewLine +
-            "С уважением,\nСервисный центр";
+        var trackingLink = BuildTrackingLink(order);
 
         var model = new OrderDetailsViewModel
         {
             Order = order,
             Messages = messages,
             ApprovedTotal = total,
-            ClientEmailTemplate = emailTemplate,
             ClientTrackingLink = trackingLink
         };
 
@@ -163,7 +170,7 @@ public class OrdersController : Controller
     {
         try
         {
-            await _orderService.ChangeStatusAsync(id, to);
+            await m_orderService.ChangeStatusAsync(id, to);
             return Json(new { ok = true, status = to.ToString() });
         }
         catch (Exception ex)
@@ -189,7 +196,7 @@ public class OrdersController : Controller
 
         try
         {
-            await _quoteService.AddLineAsync(dto);
+            await m_quoteService.AddLineAsync(dto);
             return Json(new { success = true });
         }
         catch (Exception ex)
@@ -204,8 +211,60 @@ public class OrdersController : Controller
     {
         try
         {
-            await _quoteService.SubmitForApprovalAsync(orderId);
+            await m_quoteService.SubmitForApprovalAsync(orderId);
+            var order = await m_orderService.GetAsync(orderId);
+            if (order is null)
+            {
+                throw new InvalidOperationException(m_localizer["Error_OrderNotFound"].Value);
+            }
+
+            var recipientEmail = string.IsNullOrWhiteSpace(order.ClientEmail)
+                ? order.Contact?.Email
+                : order.ClientEmail;
+
+            if (string.IsNullOrWhiteSpace(recipientEmail))
+            {
+                throw new InvalidOperationException(m_localizer["Error_ClientEmailMissing"].Value);
+            }
+
+            var trackingLink = BuildTrackingLink(order);
+            if (string.IsNullOrWhiteSpace(trackingLink))
+            {
+                throw new InvalidOperationException(m_localizer["Error_ClientLinkFailed"].Value);
+            }
+            var subject = m_localizer["Email_Subject", order.Number].Value;
+            var body = BuildClientApprovalEmail(order.ClientName, order.Device, trackingLink);
+
+            await m_mailService.SendAsync(
+                recipientEmail,
+                subject,
+                body,
+                false,
+                HttpContext.RequestAborted);
+
             return Json(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            m_logger.LogError(ex, "Failed to send approval request for order {OrderId}", orderId);
+            Response.StatusCode = 400;
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GenerateInvoice(Guid id)
+    {
+        try
+        {
+            var invoice = await m_orderService.CreateInvoiceAsync(id);
+            var url = Url.Action(nameof(Invoice), new { orderId = id, invoiceId = invoice.Id });
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                throw new InvalidOperationException("Не удалось сформировать ссылку на счёт");
+            }
+
+            return Json(new { success = true, url });
         }
         catch (Exception ex)
         {
@@ -215,10 +274,48 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Invoice(Guid orderId, Guid invoiceId)
+    {
+        var order = await m_orderService.GetAsync(orderId);
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        var invoice = order.Invoices.FirstOrDefault(i => i.Id == invoiceId);
+        if (invoice is null)
+        {
+            return NotFound();
+        }
+
+        var lines = order.QuoteLines
+            .Where(l => l.Status == QuoteLineStatus.Approved)
+            .OrderBy(l => l.Kind)
+            .ThenBy(l => l.Title)
+            .ToList();
+
+        if (!lines.Any())
+        {
+            TempData["Error"] = "Нет утверждённых строк сметы для формирования счёта.";
+            return RedirectToAction(nameof(Details), new { id = orderId });
+        }
+
+        var model = new OrderInvoiceViewModel
+        {
+            Order = order,
+            Invoice = invoice,
+            Lines = lines,
+            Total = lines.Sum(l => l.Price * l.Qty)
+        };
+
+        return View(model);
+    }
+
+    [HttpGet]
     [Authorize(Roles = "Admin,Manager,Technician")]
     public async Task<IActionResult> Kanban()
     {
-        var orders = await _orderService.GetQueueAsync(null, null);
+        var orders = await m_orderService.GetQueueAsync(null, null);
         var grouped = orders
             .GroupBy(o => o.Status)
             .Select(g => new OrderKanbanColumnViewModel
@@ -244,10 +341,10 @@ public class OrdersController : Controller
 
     private async Task PopulateCrmSelectionsAsync(Guid? accountId, string? accountSearch, Guid? contactId, string? contactSearch)
     {
-        var accounts = await _accountService.SearchAsync(accountSearch, 50);
+        var accounts = await m_accountService.SearchAsync(accountSearch, 50);
         if (accountId.HasValue && accountId.Value != Guid.Empty && accounts.All(a => a.Id != accountId.Value))
         {
-            var selectedAccount = await _accountService.GetAsync(accountId.Value);
+            var selectedAccount = await m_accountService.GetAsync(accountId.Value);
             if (selectedAccount is not null)
             {
                 accounts.Insert(0, selectedAccount);
@@ -264,19 +361,19 @@ public class OrdersController : Controller
             })
             .Prepend(new SelectListItem
             {
-                Text = "— Без контрагента —",
+                Text = m_localizer["Selection_NoAccount"].Value,
                 Value = string.Empty,
                 Selected = !accountId.HasValue || accountId.Value == Guid.Empty
             })
             .ToList();
 
         var contacts = accountId.HasValue && accountId.Value != Guid.Empty
-            ? await _contactService.GetForAccountAsync(accountId.Value, contactSearch, 50)
-            : (await _contactService.GetListAsync(null, contactSearch)).Take(50).ToList();
+            ? await m_contactService.GetForAccountAsync(accountId.Value, contactSearch, 50)
+            : (await m_contactService.GetListAsync(null, contactSearch)).Take(50).ToList();
 
         if (contactId.HasValue && contactId.Value != Guid.Empty && contacts.All(c => c.Id != contactId.Value))
         {
-            var selectedContact = await _contactService.GetAsync(contactId.Value);
+            var selectedContact = await m_contactService.GetAsync(contactId.Value);
             if (selectedContact is not null)
             {
                 contacts.Insert(0, selectedContact);
@@ -293,21 +390,53 @@ public class OrdersController : Controller
             })
             .Prepend(new SelectListItem
             {
-                Text = "— Без контакта —",
+                Text = m_localizer["Selection_NoContact"].Value,
                 Value = string.Empty,
                 Selected = !contactId.HasValue || contactId.Value == Guid.Empty
             })
             .ToList();
     }
 
-    private static string GetStatusTitle(OrderStatus status) => status switch
+    private string GetStatusTitle(OrderStatus in_status)
     {
-        OrderStatus.Received => "Получены",
-        OrderStatus.Diagnosing => "Диагностика",
-        OrderStatus.WaitingApproval => "Ожидают согласования",
-        OrderStatus.InRepair => "В ремонте",
-        OrderStatus.Ready => "Готовы",
-        OrderStatus.Closed => "Закрыты",
-        _ => status.ToString()
-    };
+        string ret;
+        var key = $"Status_{in_status}";
+        var localized = m_localizer[key];
+        if (localized.ResourceNotFound)
+        {
+            ret = in_status.ToString();
+        }
+        else
+        {
+            ret = localized.Value;
+        }
+
+        return ret;
+    }
+
+    private string BuildTrackingLink(Order in_order)
+    {
+        var ret = Url.Action(
+            action: "Track",
+            controller: "Orders",
+            values: new { area = "Client", number = in_order.Number, token = in_order.ClientAccessToken },
+            protocol: Request.Scheme) ?? string.Empty;
+        return ret;
+    }
+
+    private string BuildClientApprovalEmail(string in_clientName, string in_device, string in_trackingLink)
+    {
+        string ret;
+        var newline = Environment.NewLine + Environment.NewLine;
+        var parts = new[]
+        {
+            m_localizer["Email_Greeting", in_clientName].Value,
+            m_localizer["Email_Intro", in_device].Value,
+            in_trackingLink,
+            m_localizer["Email_Questions"].Value,
+            m_localizer["Email_Signature"].Value
+        };
+        ret = string.Join(newline, parts);
+        return ret;
+    }
 }

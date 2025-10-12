@@ -18,6 +18,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             Number = number,
             ClientName = dto.ClientName.Trim(),
             ClientPhone = dto.ClientPhone.Trim(),
+            ClientEmail = dto.ClientEmail.Trim(),
             AccountId = dto.AccountId,
             ContactId = dto.ContactId,
             Device = dto.Device.Trim(),
@@ -40,7 +41,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
         if (!string.IsNullOrWhiteSpace(q))
         {
             var term = q.Trim();
-            query = query.Where(o => o.Number.Contains(term) || o.ClientName.Contains(term) || o.ClientPhone.Contains(term) || o.Device.Contains(term));
+            query = query.Where(o => o.Number.Contains(term) || o.ClientName.Contains(term) || o.ClientPhone.Contains(term) || o.ClientEmail.Contains(term) || o.Device.Contains(term));
         }
 
         if (status.HasValue)
@@ -76,6 +77,43 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
 
         order.Status = to;
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Invoice> CreateInvoiceAsync(Guid in_orderId, CancellationToken cancellationToken = default)
+    {
+        var order = await _dbContext.Orders
+            .Include(o => o.QuoteLines)
+            .FirstOrDefaultAsync(o => o.Id == in_orderId, cancellationToken);
+
+        if (order is null)
+        {
+            throw new InvalidOperationException("Заказ не найден");
+        }
+
+        var approvedLines = order.QuoteLines
+            .Where(l => l.Status == QuoteLineStatus.Approved)
+            .ToList();
+
+        if (!approvedLines.Any())
+        {
+            throw new InvalidOperationException("Нет утверждённых работ или запчастей для формирования счёта");
+        }
+
+        var amount = approvedLines.Sum(l => l.Price * l.Qty);
+
+        var invoice = new Invoice
+        {
+            OrderId = order.Id,
+            Amount = amount,
+            Currency = "RUB",
+            Status = InvoiceStatus.Draft,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _dbContext.Invoices.Add(invoice);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return invoice;
     }
 
     public string GenerateNumber()

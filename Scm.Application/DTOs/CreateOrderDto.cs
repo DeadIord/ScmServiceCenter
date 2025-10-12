@@ -10,9 +10,14 @@ public sealed class CreateOrderDto
     public string ClientName { get; set; } = string.Empty;
 
     [Required]
-    [Phone]
-    [StringLength(32)]
+    [StringLength(11, MinimumLength = 11)]
+    [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Телефон должен содержать 11 цифр")]
     public string ClientPhone { get; set; } = string.Empty;
+
+    [Required]
+    [EmailAddress]
+    [StringLength(128)]
+    public string ClientEmail { get; set; } = string.Empty;
 
     public Guid? AccountId { get; set; }
         = null;

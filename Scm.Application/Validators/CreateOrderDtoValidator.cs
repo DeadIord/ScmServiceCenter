@@ -20,13 +20,26 @@ public sealed class CreateOrderDtoValidator : IValidator<CreateOrderDto>
         {
             yield return "Телефон обязателен";
         }
-        else if (instance.ClientPhone.Length > 32)
+        else if (instance.ClientPhone.Length != 11)
         {
-            yield return "Телефон слишком длинный";
+            yield return "Телефон должен содержать 11 цифр";
         }
-        else if (!Regex.IsMatch(instance.ClientPhone, @"^[0-9+\-()\s]{5,32}$"))
+        else if (!Regex.IsMatch(instance.ClientPhone, @"^[0-9]{11}$"))
         {
-            yield return "Телефон указан в неверном формате";
+            yield return "Телефон должен состоять только из цифр";
+        }
+
+        if (string.IsNullOrWhiteSpace(instance.ClientEmail))
+        {
+            yield return "Email обязателен";
+        }
+        else if (instance.ClientEmail.Length > 128)
+        {
+            yield return "Email слишком длинный";
+        }
+        else if (!Regex.IsMatch(instance.ClientEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase))
+        {
+            yield return "Email указан в неверном формате";
         }
 
         if (string.IsNullOrWhiteSpace(instance.Device))

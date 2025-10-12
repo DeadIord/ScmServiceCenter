@@ -12,34 +12,103 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OrdersNav" xml:space="preserve">
-    <value>Orders</value>
-  </data>
-  <data name="KanbanNav" xml:space="preserve">
-    <value>Kanban</value>
-  </data>
-  <data name="StockNav" xml:space="preserve">
-    <value>Stock</value>
-  </data>
-  <data name="ReportsNav" xml:space="preserve">
-    <value>Reports</value>
-  </data>
-  <data name="CrmNav" xml:space="preserve">
-    <value>CRM</value>
-  </data>
   <data name="AccountsNav" xml:space="preserve">
     <value>Accounts</value>
+  </data>
+  <data name="BrandName" xml:space="preserve">
+    <value>SCM Service Center</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
   </data>
   <data name="ContactsNav" xml:space="preserve">
     <value>Contacts</value>
   </data>
+  <data name="CrmNav" xml:space="preserve">
+    <value>CRM</value>
+  </data>
   <data name="DealsNav" xml:space="preserve">
     <value>Deals</value>
+  </data>
+  <data name="DealsNavDescription" xml:space="preserve">
+    <value>Manage sales opportunities and forecasts.</value>
+  </data>
+  <data name="FooterTagline" xml:space="preserve">
+    <value>Reliable repair and service in one click</value>
+  </data>
+  <data name="KanbanNav" xml:space="preserve">
+    <value>Kanban</value>
+  </data>
+  <data name="LanguageSwitcherLabel" xml:space="preserve">
+    <value>Change interface language</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="OrdersNav" xml:space="preserve">
+    <value>Orders</value>
+  </data>
+  <data name="ReportBuilderNav" xml:space="preserve">
+    <value>Report builder</value>
+  </data>
+  <data name="ReportsNav" xml:space="preserve">
+    <value>Reports</value>
+  </data>
+  <data name="SiteTitle" xml:space="preserve">
+    <value>SCM Service Center</value>
+  </data>
+  <data name="StockNav" xml:space="preserve">
+    <value>Stock</value>
   </data>
   <data name="TasksNav" xml:space="preserve">
     <value>Tasks</value>
   </data>
+  <data name="TasksNavDescription" xml:space="preserve">
+    <value>Coordinate teamwork and stay on schedule.</value>
+  </data>
+  <data name="UsersNav" xml:space="preserve">
+    <value>Users</value>
+  </data>
   <data name="TicketsNav" xml:space="preserve">
     <value>Tickets</value>
+  </data>
+  <data name="TicketsNavDescription" xml:space="preserve">
+    <value>Support customers and resolve requests faster.</value>
+  </data>
+  <data name="ToggleNavigation" xml:space="preserve">
+    <value>Toggle navigation</value>
+  </data>
+  <data name="ParamType_String" xml:space="preserve">
+    <value>String</value>
+  </data>
+  <data name="ParamType_Int" xml:space="preserve">
+    <value>Integer</value>
+  </data>
+  <data name="ParamType_Decimal" xml:space="preserve">
+    <value>Decimal</value>
+  </data>
+  <data name="ParamType_Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="ParamType_Bool" xml:space="preserve">
+    <value>Boolean</value>
+  </data>
+  <data name="Table_Empty" xml:space="preserve">
+    <value>No records found</value>
+  </data>
+  <data name="Toast_StatusUpdated" xml:space="preserve">
+    <value>Status updated</value>
+  </data>
+  <data name="Toast_StatusUpdateFailed" xml:space="preserve">
+    <value>Failed to update status</value>
+  </data>
+  <data name="StockNavTooltip" xml:space="preserve">
+    <value>Available to administrators and storekeepers only.</value>
+  </data>
+  <data name="ReportsNavTooltip" xml:space="preserve">
+    <value>Available to administrators, managers, and accountants only.</value>
   </data>
 </root>

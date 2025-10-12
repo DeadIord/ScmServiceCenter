@@ -1,0 +1,43 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@model Scm.Web.Areas.Admin.Models.UserEditViewModel
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["Title"].Value;
+}
+
+<div class="row g-4 justify-content-center">
+    <div class="col-xl-10 col-xxl-8">
+        <div class="card p-4 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                <div>
+                    <h1 class="section-title mb-1">@Localizer["SectionTitle"]</h1>
+                    <p class="section-subtitle mb-0">@Localizer["SectionSubtitle"]</p>
+                </div>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
+                </a>
+            </div>
+        </div>
+        <div class="card p-4">
+            <form asp-area="Admin" asp-controller="Users" asp-action="Edit" method="post" class="row g-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div class="col-12">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                </div>
+                <div class="col-12">
+                    <partial name="_UserForm" model="Model" />
+                </div>
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary">@Localizer["Action_Cancel"]</a>
+                    <button type="submit" class="btn btn-primary">@Localizer["Action_Save"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

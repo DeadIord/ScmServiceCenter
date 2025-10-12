@@ -60,7 +60,7 @@ public static class ScmDbSeeder
                     AccountId = demoAccounts[0].Id,
                     FullName = "Анна Петрова",
                     Position = "Офис-менеджер",
-                    Phone = "+7 495 111-22-33",
+                    Phone = "74951112233",
                     Email = "anna.petrowa@technoservice.local"
                 },
                 new()
@@ -68,14 +68,14 @@ public static class ScmDbSeeder
                     AccountId = demoAccounts[0].Id,
                     FullName = "Дмитрий Соколов",
                     Position = "Технический директор",
-                    Phone = "+7 495 111-44-55",
+                    Phone = "74951114455",
                     Email = "d.sokolov@technoservice.local"
                 },
                 new()
                 {
                     AccountId = demoAccounts[1].Id,
                     FullName = "Сергей Иванов",
-                    Phone = "+7 921 555-66-77",
+                    Phone = "79215556677",
                     Email = "sergey@ivanov.spb"
                 }
             };
@@ -104,7 +104,8 @@ public static class ScmDbSeeder
                 {
                     Number = $"SRV-{DateTime.UtcNow:yyyy}-{i:D4}",
                     ClientName = $"Клиент {i}",
-                    ClientPhone = $"+7 900 000-0{i:D2}",
+                    ClientPhone = $"790000000{i:D2}",
+                    ClientEmail = contact?.Email ?? $"client{i}@example.com",
                     AccountId = account?.Id,
                     ContactId = contact?.Id,
                     Device = i % 2 == 0 ? "Смартфон" : "Ноутбук",

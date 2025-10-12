@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Notification_UserCreated" xml:space="preserve">
+    <value>User "{0}" has been created.</value>
+  </data>
+  <data name="Notification_UserUpdated" xml:space="preserve">
+    <value>User "{0}" has been updated.</value>
+  </data>
+  <data name="Notification_PasswordReset" xml:space="preserve">
+    <value>Password for user "{0}" has been reset.</value>
+  </data>
+  <data name="Notification_StatusUpdated" xml:space="preserve">
+    <value>User status has been updated.</value>
+  </data>
+  <data name="Error_UserNotFound" xml:space="preserve">
+    <value>User not found.</value>
+  </data>
+  <data name="Error_CreateFailed" xml:space="preserve">
+    <value>Failed to finish user creation. Please try again.</value>
+  </data>
+  <data name="Error_UpdateFailed" xml:space="preserve">
+    <value>Failed to update user data. Please try again.</value>
+  </data>
+  <data name="Error_StatusUpdateFailed" xml:space="preserve">
+    <value>Failed to update user status.</value>
+  </data>
+  <data name="Error_PasswordValidation" xml:space="preserve">
+    <value>Please correct the highlighted errors.</value>
+  </data>
+</root>

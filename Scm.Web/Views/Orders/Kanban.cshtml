@@ -1,8 +1,11 @@
 @model Scm.Web.Models.Orders.OrderKanbanViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
 @using Scm.Domain.Entities
+@using System.Linq
+@inject IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Канбан";
-    string StatusBadge(OrderStatus status) => status switch
+    ViewData["Title"] = Localizer["Title"].Value;
+    string StatusBadge(OrderStatus in_status) => in_status switch
     {
         OrderStatus.Received => "secondary",
         OrderStatus.Diagnosing => "info",
@@ -12,7 +15,7 @@
         OrderStatus.Closed => "dark",
         _ => "secondary"
     };
-    string PriorityBadge(OrderPriority priority) => priority switch
+    string PriorityBadge(OrderPriority in_priority) => in_priority switch
     {
         OrderPriority.Low => "secondary",
         OrderPriority.Normal => "light text-dark",
@@ -20,15 +23,30 @@
         OrderPriority.Critical => "danger",
         _ => "secondary"
     };
+    string PriorityTitle(OrderPriority in_priority)
+    {
+        string ret;
+        var localized = Localizer[$"Priority_{in_priority}"];
+        if (localized.IsResourceNotFound)
+        {
+            ret = in_priority.ToString();
+        }
+        else
+        {
+            ret = localized.Value;
+        }
+
+        return ret;
+    }
 }
-<h1 class="section-title mb-4">Канбан-доска</h1>
+<h1 class="section-title mb-4">@Localizer["SectionTitle"]</h1>
 <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 row-cols-xxl-6 g-4" id="kanban-board">
     @foreach (var column in Model.Columns)
     {
         <div class="col">
             <div class="card shadow-sm rounded-3 h-100 kanban-status-card">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-                    <span class="fw-semibold">@column.Title</span>
+                    <span class="fw-semibold">@Localizer[$"Status_{column.Status}"]</span>
                     <span class="badge text-bg-@StatusBadge(column.Status) js-column-count">@column.Orders.Count</span>
                 </div>
                 <div class="card-body py-3 kanban-column" data-status="@column.Status" id="col-@column.Status">
@@ -39,12 +57,12 @@
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="fw-semibold">@order.Number</span>
-                                    <span class="badge text-bg-@PriorityBadge(order.Priority)">@order.Priority</span>
+                                    <span class="badge text-bg-@PriorityBadge(order.Priority)">@PriorityTitle(order.Priority)</span>
                                 </div>
                                 <div class="small text-muted">@order.Device</div>
                                 <div class="small">@order.ClientName</div>
                                 <div class="mt-2">
-                                    <span class="badge @slaClass">SLA: @(order.SLAUntil?.ToString("dd.MM") ?? "—")</span>
+                                    <span class="badge @slaClass">@Localizer["SlaShortLabel"]: @(order.SLAUntil?.ToString("dd.MM") ?? Localizer["NoValuePlaceholder"].Value)</span>
                                 </div>
                             </div>
                         </div>

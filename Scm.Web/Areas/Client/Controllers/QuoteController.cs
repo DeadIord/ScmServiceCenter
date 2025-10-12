@@ -1,9 +1,12 @@
+using System;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Persistence;
+using Microsoft.Extensions.Localization;
 
 namespace Scm.Web.Areas.Client.Controllers;
 
@@ -12,71 +15,68 @@ namespace Scm.Web.Areas.Client.Controllers;
 [Route("Client/[controller]")]
 public class QuoteController : Controller
 {
-    private readonly ScmDbContext _dbContext;
-    private readonly IQuoteService _quoteService;
+    private readonly ScmDbContext m_dbContext;
+    private readonly IQuoteService m_quoteService;
+    private readonly IStringLocalizer<QuoteController> m_localizer;
 
-    public QuoteController(ScmDbContext dbContext, IQuoteService quoteService)
+    public QuoteController(
+        ScmDbContext in_dbContext,
+        IQuoteService in_quoteService,
+        IStringLocalizer<QuoteController> in_localizer)
     {
-        _dbContext = dbContext;
-        _quoteService = quoteService;
+        m_dbContext = in_dbContext;
+        m_quoteService = in_quoteService;
+        m_localizer = in_localizer;
     }
 
-    [HttpPost("Approve")]
-    public async Task<IActionResult> Approve(Guid lineId, string token)
+    [HttpPost("Submit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Submit(Guid in_orderId, string in_token, Guid[]? in_approvedLineIds)
     {
-        var line = await _dbContext.QuoteLines
-            .Include(l => l.Order)
-            .FirstOrDefaultAsync(l => l.Id == lineId);
+        IActionResult ret;
+        var order = await m_dbContext.Orders
+            .Include(o => o.QuoteLines)
+            .FirstOrDefaultAsync(o => o.Id == in_orderId);
 
-        if (line?.Order is null || line.Order.ClientAccessToken != token)
+        if (order is null || order.ClientAccessToken != in_token)
         {
-            TempData["Error"] = "Строка сметы не найдена";
-            return RedirectToOrder(line?.Order?.Number, token);
+            TempData["Error"] = m_localizer["Error_OrderNotFound"].Value;
+            ret = RedirectToOrder(order?.Number, in_token);
+        }
+        else
+        {
+            var hasProposed = order.QuoteLines.Any(l => l.Status == QuoteLineStatus.Proposed);
+            if (!hasProposed)
+            {
+                TempData["Error"] = m_localizer["Error_NoLines"].Value;
+                ret = RedirectToOrder(order.Number, in_token);
+            }
+            else
+            {
+                var approvedLineIds = in_approvedLineIds ?? Array.Empty<Guid>();
+                await m_quoteService.ProcessClientApprovalAsync(order.Id, approvedLineIds);
+
+                TempData["Success"] = m_localizer["Notification_QuoteProcessed"].Value;
+                ret = RedirectToOrder(order.Number, in_token);
+            }
         }
 
-        if (line.Status != QuoteLineStatus.Proposed)
-        {
-            TempData["Error"] = "Строка уже обработана";
-            return RedirectToOrder(line.Order.Number, token);
-        }
-
-        await _quoteService.ApproveLineAsync(lineId);
-        TempData["Success"] = "Строка согласована";
-        return RedirectToOrder(line.Order.Number, token);
+        return ret;
     }
 
-    [HttpPost("Reject")]
-    public async Task<IActionResult> Reject(Guid lineId, string token)
+    private RedirectToActionResult RedirectToOrder(string? in_number, string in_token)
     {
-        var line = await _dbContext.QuoteLines
-            .Include(l => l.Order)
-            .FirstOrDefaultAsync(l => l.Id == lineId);
-
-        if (line?.Order is null || line.Order.ClientAccessToken != token)
+        RedirectToActionResult ret;
+        if (string.IsNullOrWhiteSpace(in_number))
         {
-            TempData["Error"] = "Строка сметы не найдена";
-            return RedirectToOrder(line?.Order?.Number, token);
+            TempData["Error"] ??= m_localizer["Error_OrderUnknown"].Value;
+            ret = RedirectToAction("Track", "Orders", new { area = "Client" });
+        }
+        else
+        {
+            ret = RedirectToAction("Track", "Orders", new { area = "Client", number = in_number, token = in_token });
         }
 
-        if (line.Status != QuoteLineStatus.Proposed)
-        {
-            TempData["Error"] = "Строка уже обработана";
-            return RedirectToOrder(line.Order.Number, token);
-        }
-
-        await _quoteService.RejectLineAsync(lineId);
-        TempData["Success"] = "Строка отклонена";
-        return RedirectToOrder(line.Order.Number, token);
-    }
-
-    private RedirectToActionResult RedirectToOrder(string? number, string token)
-    {
-        if (string.IsNullOrWhiteSpace(number))
-        {
-            TempData["Error"] ??= "Не удалось найти заказ";
-            return RedirectToAction("Track", "Orders", new { area = "Client" });
-        }
-
-        return RedirectToAction("Track", "Orders", new { area = "Client", number, token });
+        return ret;
     }
 }
