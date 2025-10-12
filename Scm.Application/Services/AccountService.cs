@@ -17,7 +17,9 @@ public sealed class AccountService(ScmDbContext dbContext) : IAccountService
         if (!string.IsNullOrWhiteSpace(query))
         {
             var term = query.Trim();
-            accounts = accounts.Where(a => a.Name.Contains(term) || (a.Inn != null && a.Inn.Contains(term)));
+            var pattern = $"%{term}%";
+            accounts = accounts.Where(a => EF.Functions.ILike(a.Name, pattern)
+                || (a.Inn != null && EF.Functions.ILike(a.Inn, pattern)));
         }
 
         return await accounts
@@ -32,7 +34,9 @@ public sealed class AccountService(ScmDbContext dbContext) : IAccountService
         if (!string.IsNullOrWhiteSpace(query))
         {
             var term = query.Trim();
-            accounts = accounts.Where(a => a.Name.Contains(term) || (a.Inn != null && a.Inn.Contains(term)));
+            var pattern = $"%{term}%";
+            accounts = accounts.Where(a => EF.Functions.ILike(a.Name, pattern)
+                || (a.Inn != null && EF.Functions.ILike(a.Inn, pattern)));
         }
 
         return await accounts

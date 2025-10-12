@@ -17,7 +17,8 @@ public sealed class ContactInputDto
         = null;
 
     [Required]
-    [StringLength(64)]
+    [StringLength(11, MinimumLength = 11)]
+    [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Телефон должен содержать 11 цифр")]
     public string Phone { get; set; } = string.Empty;
 
     [Required]
