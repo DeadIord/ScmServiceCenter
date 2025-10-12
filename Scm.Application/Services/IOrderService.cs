@@ -13,5 +13,7 @@ public interface IOrderService
 
     Task ChangeStatusAsync(Guid id, OrderStatus to, CancellationToken cancellationToken = default);
 
+    Task<Invoice> CreateInvoiceAsync(Guid in_orderId, CancellationToken cancellationToken = default);
+
     string GenerateNumber();
 }

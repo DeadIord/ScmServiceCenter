@@ -79,6 +79,43 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<Invoice> CreateInvoiceAsync(Guid in_orderId, CancellationToken cancellationToken = default)
+    {
+        var order = await _dbContext.Orders
+            .Include(o => o.QuoteLines)
+            .FirstOrDefaultAsync(o => o.Id == in_orderId, cancellationToken);
+
+        if (order is null)
+        {
+            throw new InvalidOperationException("Заказ не найден");
+        }
+
+        var approvedLines = order.QuoteLines
+            .Where(l => l.Status == QuoteLineStatus.Approved)
+            .ToList();
+
+        if (!approvedLines.Any())
+        {
+            throw new InvalidOperationException("Нет утверждённых работ или запчастей для формирования счёта");
+        }
+
+        var amount = approvedLines.Sum(l => l.Price * l.Qty);
+
+        var invoice = new Invoice
+        {
+            OrderId = order.Id,
+            Amount = amount,
+            Currency = "RUB",
+            Status = InvoiceStatus.Draft,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _dbContext.Invoices.Add(invoice);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return invoice;
+    }
+
     public string GenerateNumber()
     {
         var prefix = $"SRV-{DateTime.UtcNow:yyyy}-";
