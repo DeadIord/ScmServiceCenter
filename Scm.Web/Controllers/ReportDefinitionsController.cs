@@ -10,11 +10,12 @@ using Scm.Application.Services;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
+using Scm.Web.Authorization;
 using Scm.Web.Models.ReportBuilder;
 
 namespace Scm.Web.Controllers;
 
-[Authorize]
+[Authorize(Policy = PolicyNames.ReportsAccess)]
 public class ReportDefinitionsController : Controller
 {
     private static readonly string[] AllowedSchemas = ["public"];
@@ -463,6 +464,11 @@ public class ReportDefinitionsController : Controller
 
     private bool CanAccess(ReportDefinition report, string userId, IEnumerable<string> roles)
     {
+        if (roles.Any(r => string.Equals(r, "Admin", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
         if (report.CreatedBy == userId)
         {
             return true;

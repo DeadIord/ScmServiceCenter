@@ -12,85 +12,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Title" xml:space="preserve">
-    <value>Пользователи</value>
+  <data name="CreateUser" xml:space="preserve">
+    <value>Добавить сотрудника</value>
   </data>
   <data name="Heading" xml:space="preserve">
-    <value>Пользователи</value>
+    <value>Справочник пользователей</value>
   </data>
-  <data name="Action_Create" xml:space="preserve">
-    <value>Добавить пользователя</value>
-  </data>
-  <data name="Column_DisplayName" xml:space="preserve">
-    <value>Отображаемое имя</value>
-  </data>
-  <data name="Column_UserName" xml:space="preserve">
-    <value>Логин</value>
-  </data>
-  <data name="Column_Email" xml:space="preserve">
-    <value>Электронная почта</value>
-  </data>
-  <data name="Column_Phone" xml:space="preserve">
-    <value>Телефон</value>
-  </data>
-  <data name="Column_Roles" xml:space="preserve">
-    <value>Роли</value>
-  </data>
-  <data name="Column_Status" xml:space="preserve">
-    <value>Статус</value>
-  </data>
-  <data name="Column_Actions" xml:space="preserve">
-    <value>Действия</value>
-  </data>
-  <data name="Empty" xml:space="preserve">
-    <value>Пользователи не найдены.</value>
-  </data>
-  <data name="DisplayName_Fallback" xml:space="preserve">
-    <value>Не указано</value>
+  <data name="NoName" xml:space="preserve">
+    <value>Без имени</value>
   </data>
   <data name="NoRoles" xml:space="preserve">
     <value>Роли не назначены</value>
   </data>
-  <data name="Status_Active" xml:space="preserve">
+  <data name="NoUsers" xml:space="preserve">
+    <value>Пользователи не найдены.</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Поиск</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Email или имя</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
     <value>Активен</value>
   </data>
-  <data name="Status_Blocked" xml:space="preserve">
+  <data name="StatusLocked" xml:space="preserve">
     <value>Заблокирован</value>
   </data>
-  <data name="Action_Deactivate" xml:space="preserve">
-    <value>Деактивировать</value>
+  <data name="Subheading" xml:space="preserve">
+    <value>Управление сотрудниками, их ролями и доступом</value>
   </data>
-  <data name="Action_Activate" xml:space="preserve">
-    <value>Активировать</value>
+  <data name="Table_Actions" xml:space="preserve">
+    <value>Действия</value>
   </data>
-  <data name="Action_Edit" xml:space="preserve">
-    <value>Редактировать</value>
+  <data name="Table_Email" xml:space="preserve">
+    <value>Email</value>
   </data>
-  <data name="Action_ResetPassword" xml:space="preserve">
-    <value>Сбросить пароль</value>
+  <data name="Table_Name" xml:space="preserve">
+    <value>Имя</value>
   </data>
-  <data name="InstructionDescription" xml:space="preserve">
-    <value>Используйте чек-лист, чтобы быстро оформить сотрудника или обновить его данные.</value>
+  <data name="Table_Phone" xml:space="preserve">
+    <value>Телефон</value>
   </data>
-  <data name="InstructionStepOverview" xml:space="preserve">
-    <value>Проверьте контактные данные и убедитесь, что они актуальны перед изменениями.</value>
+  <data name="Table_Roles" xml:space="preserve">
+    <value>Роли</value>
   </data>
-  <data name="InstructionStepRoles" xml:space="preserve">
-    <value>Выберите роли, которые отражают обязанности сотрудника.</value>
+  <data name="Table_Status" xml:space="preserve">
+    <value>Статус</value>
   </data>
-  <data name="InstructionStepStatus" xml:space="preserve">
-    <value>Используйте переключатель статуса, чтобы включать или временно блокировать доступ.</value>
-  </data>
-  <data name="InstructionTitle" xml:space="preserve">
-    <value>Как работать с пользователями</value>
-  </data>
-  <data name="InstructionToggle" xml:space="preserve">
-    <value>Показать инструкцию</value>
-  </data>
-  <data name="SectionSubtitle" xml:space="preserve">
-    <value>Приглашайте коллег, управляйте правами и следите за безопасностью доступа.</value>
-  </data>
-  <data name="SectionTitle" xml:space="preserve">
-    <value>Управление пользователями</value>
+  <data name="Title" xml:space="preserve">
+    <value>Пользователи</value>
   </data>
 </root>

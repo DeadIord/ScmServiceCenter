@@ -105,10 +105,9 @@
   <data name="Toast_StatusUpdateFailed" xml:space="preserve">
     <value>Failed to update status</value>
   </data>
-  <data name="StockNavTooltip" xml:space="preserve">
-    <value>Available to administrators and storekeepers only.</value>
-  </data>
-  <data name="ReportsNavTooltip" xml:space="preserve">
-    <value>Available to administrators, managers, and accountants only.</value>
+
+  <data name="UsersNav" xml:space="preserve">
+    <value>Users</value>
+
   </data>
 </root>

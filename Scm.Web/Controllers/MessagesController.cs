@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
+using Scm.Web.Authorization;
 
 namespace Scm.Web.Controllers;
 
-[Authorize(Roles = "Admin,Manager,Technician")]
+[Authorize(Policy = PolicyNames.MessagesAccess)]
 [ApiController]
 [Route("[controller]")]
 public sealed class MessagesController(IMessageService messageService) : ControllerBase
