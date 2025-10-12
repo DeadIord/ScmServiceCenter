@@ -17,19 +17,29 @@
     <div class="row justify-content-center">
         <div class="col-xl-10">
             <div class="card shadow-sm">
-                <div class="card-header bg-white border-0 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div class="card-header bg-white border-0 d-flex flex-column flex-md-row justify-content-between align-items-md-start align-items-xl-center gap-3">
                     <div>
                         <h1 class="h4 mb-1">Счёт №@Model.Invoice.Id.ToString().Substring(0, 8)</h1>
                         <div class="text-muted">Дата формирования: @createdAt.ToString("dd.MM.yyyy HH:mm")</div>
                     </div>
-                    <div class="text-md-end">
-                        <div class="fw-semibold">Заказ №@Model.Order.Number</div>
-                        <div class="text-muted">@Model.Order.ClientName</div>
-                        <div class="text-muted">@Model.Order.ClientPhone</div>
-                        @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
-                        {
-                            <div class="text-muted">@Model.Order.ClientEmail</div>
-                        }
+                    <div class="d-flex flex-column align-items-md-end gap-2 w-100 w-md-auto">
+                        <div class="text-md-end">
+                            <div class="fw-semibold">Заказ №@Model.Order.Number</div>
+                            <div class="text-muted">@Model.Order.ClientName</div>
+                            <div class="text-muted">@Model.Order.ClientPhone</div>
+                            @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
+                            {
+                                <div class="text-muted">@Model.Order.ClientEmail</div>
+                            }
+                        </div>
+                        <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+                            <button type="button" class="btn btn-outline-primary" id="printInvoiceButton">
+                                <i class="bi bi-printer me-2"></i>Распечатать счёт
+                            </button>
+                            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.Order.Id">
+                                <i class="bi bi-arrow-left me-2"></i>Вернуться к заказу
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -91,10 +101,6 @@
                     </div>
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-4 gap-3">
                         <div class="text-muted small">Оплата счёта подтверждает согласие с условиями ремонта и перечнем работ.</div>
-                        <div class="d-flex flex-column flex-md-row gap-2">
-                            <button type="button" class="btn btn-primary" id="printInvoiceButton">Распечатать счёт</button>
-                            <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@Model.Order.Id">Вернуться к заказу</a>
-                        </div>
                     </div>
                 </div>
             </div>
