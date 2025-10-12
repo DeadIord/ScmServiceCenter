@@ -1,0 +1,116 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@model UserIndexViewModel
+@inject IViewLocalizer Localizer
+@{ 
+    ViewData["Title"] = Localizer["Title"].Value;
+    bool canManageUsers = User.IsInRole("Admin");
+}
+<div class="row g-4 justify-content-center">
+    <div class="col-xxl-10">
+        <div class="card p-4 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+                <div>
+                    <h1 class="section-title mb-1">@Localizer["Heading"]</h1>
+                    <p class="section-subtitle mb-0">@Localizer["Subheading"]</p>
+                </div>
+                @if (canManageUsers)
+                {
+                    <a class="btn btn-primary" asp-action="Create">
+                        <i class="bi bi-person-plus me-2"></i>@Localizer["CreateUser"]
+                    </a>
+                }
+            </div>
+        </div>
+        <div class="card p-4 mb-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-8 col-lg-6">
+                    <label class="form-label" asp-for="Query"></label>
+                    <input class="form-control" asp-for="Query" placeholder="@Localizer["SearchPlaceholder"]" />
+                </div>
+                <div class="col-md-4 col-lg-6 text-md-end">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search me-2"></i>@Localizer["Search"]
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card p-4">
+            @if (Model.Users.Count == 0)
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-people fs-1 mb-3 d-block"></i>
+                    <p class="mb-0">@Localizer["NoUsers"]</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["Table_Email"]</th>
+                                <th>@Localizer["Table_Name"]</th>
+                                <th>@Localizer["Table_Phone"]</th>
+                                <th>@Localizer["Table_Roles"]</th>
+                                @if (canManageUsers)
+                                {
+                                    <th>@Localizer["Table_Status"]</th>
+                                    <th class="text-end">@Localizer["Table_Actions"]</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr class="@(user.IsLocked ? "table-warning" : string.Empty)">
+                                <td>
+                                    <span class="fw-semibold">@user.Email</span>
+                                </td>
+                                <td>@(string.IsNullOrWhiteSpace(user.DisplayName) ? Localizer["NoName"].Value : user.DisplayName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "—" : user.PhoneNumber)</td>
+                                <td>
+                                    @if (user.Roles.Count == 0)
+                                    {
+                                        <span class="badge text-bg-secondary">@Localizer["NoRoles"]</span>
+                                    }
+                                    else
+                                    {
+                                        foreach (var role in user.Roles)
+                                        {
+                                            <span class="badge text-bg-light border me-1">@role</span>
+                                        }
+                                    }
+                                </td>
+                                @if (canManageUsers)
+                                {
+                                    <td>
+                                        <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <input type="hidden" name="lockUser" value="@(user.IsLocked ? "true" : "false")" />
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" @(user.IsLocked ? "checked" : string.Empty) onchange="this.previousElementSibling.value = this.checked ? 'true' : 'false'; this.form.submit();" />
+                                                <label class="form-check-label">@(user.IsLocked ? Localizer["StatusLocked"] : Localizer["StatusActive"])</label>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@user.Id">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a class="btn btn-outline-secondary" asp-action="ResetPassword" asp-route-id="@user.Id">
+                                                <i class="bi bi-key"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

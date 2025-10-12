@@ -4,8 +4,10 @@ using Scm.Application.Services;
 using Scm.Application.Validators;
 using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
+using Scm.Web.Authorization;
 using Scm.Web.Localization;
 using Scm.Web.HealthChecks;
+using Scm.Web.Security;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -31,6 +33,27 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ScmDbContext>();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Home/AccessDenied";
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PolicyNames.AdministrationAccess, policy =>
+        policy.RequireRole("Admin"));
+    options.AddPolicy(PolicyNames.OrdersAccess, policy =>
+        policy.RequireRole("Admin", "Manager", "Technician"));
+    options.AddPolicy(PolicyNames.StockAccess, policy =>
+        policy.RequireRole("Admin", "Manager", "Storekeeper"));
+    options.AddPolicy(PolicyNames.ReportsAccess, policy =>
+        policy.RequireRole("Admin", "Manager", "Accountant"));
+    options.AddPolicy(PolicyNames.CrmAccess, policy =>
+        policy.RequireRole("Admin", "Manager", "Technician", "Support"));
+    options.AddPolicy(PolicyNames.MessagesAccess, policy =>
+        policy.RequireRole("Admin", "Manager", "Technician", "Support"));
+});
+
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 builder.Services.AddScoped<IOrderService, OrderService>();
@@ -40,6 +63,13 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AuthorizationPolicies.StockAccess, policy =>
+        policy.RequireRole(AuthorizationPolicies.s_stockAccessRoles));
+    options.AddPolicy(AuthorizationPolicies.ReportsAccess, policy =>
+        policy.RequireRole(AuthorizationPolicies.s_reportsAccessRoles));
+});
 builder.Services.AddSingleton<IValidateOptions<MailOptions>, MailOptionsValidator>();
 builder.Services.AddOptions<MailOptions>()
     .Bind(builder.Configuration.GetSection("Mail"))

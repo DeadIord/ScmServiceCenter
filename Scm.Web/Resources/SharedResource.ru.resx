@@ -18,4 +18,40 @@
   <data name="ValidationInvalidFormat" xml:space="preserve">
     <value>Недопустимый формат.</value>
   </data>
+
+  <data name="User_ConfirmPassword" xml:space="preserve">
+    <value>Подтверждение пароля</value>
+  </data>
+  <data name="User_DisplayName" xml:space="preserve">
+    <value>Отображаемое имя</value>
+  </data>
+  <data name="User_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="User_Id" xml:space="preserve">
+    <value>Идентификатор</value>
+  </data>
+  <data name="User_IsLocked" xml:space="preserve">
+    <value>Блокировка доступа</value>
+  </data>
+  <data name="User_Password" xml:space="preserve">
+    <value>Пароль</value>
+
+  </data>
+  <data name="User_Phone" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="User_RoleDisplay" xml:space="preserve">
+    <value>Название роли</value>
+  </data>
+  <data name="User_RoleName" xml:space="preserve">
+    <value>Роль</value>
+  </data>
+  <data name="User_Roles" xml:space="preserve">
+    <value>Роли</value>
+  </data>
+  <data name="User_Search" xml:space="preserve">
+    <value>Поиск</value>
+
+  </data>
 </root>

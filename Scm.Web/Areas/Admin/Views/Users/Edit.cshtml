@@ -1,0 +1,72 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@model UserEditViewModel
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Title"].Value;
+}
+<div class="row g-4 justify-content-center">
+    <div class="col-xl-8 col-xxl-6">
+        <div class="card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="section-title mb-1">@Localizer["Heading"]</h1>
+                    <p class="section-subtitle mb-0">@Localizer["Subheading"]</p>
+                </div>
+                <a class="btn btn-outline-secondary" asp-action="Index">
+                    <i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]
+                </a>
+            </div>
+        </div>
+        <div class="card p-4">
+            <form asp-action="Edit" method="post" class="row g-4">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="col-12">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="DisplayName" class="form-label"></label>
+                    <input asp-for="DisplayName" class="form-control" />
+                    <span asp-validation-for="DisplayName" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" asp-for="IsLocked" />
+                        <label class="form-check-label" asp-for="IsLocked"></label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <h2 class="h6 fw-semibold mb-3">@Localizer["RolesHeading"]</h2>
+                    <div class="row g-2">
+                        @for (int i = 0; i < Model.Roles.Count; i++)
+                        {
+                            <div class="col-sm-6">
+                                <div class="form-check">
+                                    <input type="hidden" asp-for="Roles[i].RoleName" />
+                                    <input type="hidden" asp-for="Roles[i].DisplayName" />
+                                    <input class="form-check-input" asp-for="Roles[i].IsSelected" />
+                                    <label class="form-check-label" asp-for="Roles[i].IsSelected">@Model.Roles[i].DisplayName</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-12 text-end">
+                    <a class="btn btn-outline-secondary" asp-action="Index">@Localizer["Cancel"]</a>
+                    <button class="btn btn-primary" type="submit">@Localizer["Save"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
