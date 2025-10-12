@@ -464,6 +464,11 @@ public class ReportDefinitionsController : Controller
 
     private bool CanAccess(ReportDefinition report, string userId, IEnumerable<string> roles)
     {
+        if (roles.Any(r => string.Equals(r, "Admin", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
         if (report.CreatedBy == userId)
         {
             return true;

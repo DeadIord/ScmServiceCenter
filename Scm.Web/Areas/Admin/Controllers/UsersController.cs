@@ -232,6 +232,7 @@ public class UsersController : Controller
             return ret;
         }
 
+        bool currentLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value.UtcDateTime > DateTime.UtcNow;
         IdentityResult lockResult = await applyLockoutAsync(user, model.IsLocked);
         if (!lockResult.Succeeded)
         {
@@ -253,6 +254,7 @@ public class UsersController : Controller
 
         IEnumerable<string> toAdd = selectedRoles.Except(currentRoles, StringComparer.OrdinalIgnoreCase);
         IEnumerable<string> toRemove = currentRoles.Except(selectedRoles, StringComparer.OrdinalIgnoreCase);
+        bool rolesChanged = toAdd.Any() || toRemove.Any();
 
         IdentityResult rolesResult = IdentityResult.Success;
         if (toAdd.Any())
@@ -275,6 +277,12 @@ public class UsersController : Controller
             model.Roles = await buildRoleOptionsAsync(selectedRoles);
             ret = View(model);
             return ret;
+        }
+
+        bool lockStatusChanged = currentLocked != model.IsLocked;
+        if (lockStatusChanged || rolesChanged)
+        {
+            await m_userManager.UpdateSecurityStampAsync(user);
         }
 
         await refreshCurrentUserSessionAsync(user, model.IsLocked);
@@ -356,12 +364,18 @@ public class UsersController : Controller
             return ret;
         }
 
+        bool currentLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value.UtcDateTime > DateTime.UtcNow;
         IdentityResult lockResult = await applyLockoutAsync(user, lockUser);
         if (!lockResult.Succeeded)
         {
             TempData["Error"] = m_localizer["Error_StatusUpdateFailed"].Value;
             ret = RedirectToAction(nameof(Index));
             return ret;
+        }
+
+        if (currentLocked != lockUser)
+        {
+            await m_userManager.UpdateSecurityStampAsync(user);
         }
 
         await refreshCurrentUserSessionAsync(user, lockUser);
