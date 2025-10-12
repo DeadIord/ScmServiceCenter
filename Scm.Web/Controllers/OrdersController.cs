@@ -9,10 +9,11 @@ using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
 using Scm.Web.Models.Orders;
+using Scm.Web.Authorization;
 
 namespace Scm.Web.Controllers;
 
-[Authorize(Roles = "Admin,Manager,Technician")]
+[Authorize(Policy = PolicyNames.OrdersAccess)]
 public class OrdersController : Controller
 {
     private readonly IOrderService m_orderService;
@@ -165,7 +166,7 @@ public class OrdersController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager,Technician")]
+    [Authorize(Policy = PolicyNames.OrdersAccess)]
     public async Task<IActionResult> ChangeStatus(Guid id, OrderStatus to)
     {
         try
@@ -257,7 +258,7 @@ public class OrdersController : Controller
     {
         try
         {
-            var invoice = await _orderService.CreateInvoiceAsync(id);
+            var invoice = await m_orderService.CreateInvoiceAsync(id);
             var url = Url.Action(nameof(Invoice), new { orderId = id, invoiceId = invoice.Id });
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -276,7 +277,7 @@ public class OrdersController : Controller
     [HttpGet]
     public async Task<IActionResult> Invoice(Guid orderId, Guid invoiceId)
     {
-        var order = await _orderService.GetAsync(orderId);
+        var order = await m_orderService.GetAsync(orderId);
         if (order is null)
         {
             return NotFound();

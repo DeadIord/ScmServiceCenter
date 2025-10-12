@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CreateUser" xml:space="preserve">
+    <value>Добавить сотрудника</value>
+  </data>
+  <data name="Heading" xml:space="preserve">
+    <value>Справочник пользователей</value>
+  </data>
+  <data name="NoName" xml:space="preserve">
+    <value>Без имени</value>
+  </data>
+  <data name="NoRoles" xml:space="preserve">
+    <value>Роли не назначены</value>
+  </data>
+  <data name="NoUsers" xml:space="preserve">
+    <value>Пользователи не найдены.</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Поиск</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Email или имя</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>Активен</value>
+  </data>
+  <data name="StatusLocked" xml:space="preserve">
+    <value>Заблокирован</value>
+  </data>
+  <data name="Subheading" xml:space="preserve">
+    <value>Управление сотрудниками, их ролями и доступом</value>
+  </data>
+  <data name="Table_Actions" xml:space="preserve">
+    <value>Действия</value>
+  </data>
+  <data name="Table_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Table_Name" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="Table_Phone" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="Table_Roles" xml:space="preserve">
+    <value>Роли</value>
+  </data>
+  <data name="Table_Status" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+</root>

@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
+using Scm.Web.Authorization;
 using Scm.Web.Models.Crm;
 
 namespace Scm.Web.Controllers;
 
-[Authorize(Roles = "Admin,Manager,Technician")]
+[Authorize(Policy = PolicyNames.CrmAccess)]
 public sealed class ContactsController : Controller
 {
     private readonly IContactService _contactService;

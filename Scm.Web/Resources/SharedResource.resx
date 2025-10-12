@@ -18,4 +18,37 @@
   <data name="ValidationInvalidFormat" xml:space="preserve">
     <value>Invalid format.</value>
   </data>
+  <data name="User_ConfirmPassword" xml:space="preserve">
+    <value>Confirm password</value>
+  </data>
+  <data name="User_DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="User_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="User_Id" xml:space="preserve">
+    <value>Identifier</value>
+  </data>
+  <data name="User_IsLocked" xml:space="preserve">
+    <value>Block access</value>
+  </data>
+  <data name="User_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="User_Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="User_RoleDisplay" xml:space="preserve">
+    <value>Role name</value>
+  </data>
+  <data name="User_RoleName" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="User_Roles" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+  <data name="User_Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
 </root>
