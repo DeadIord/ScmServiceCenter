@@ -36,10 +36,19 @@
   <data name="DealsNav" xml:space="preserve">
     <value>Сделки</value>
   </data>
+  <data name="DealsNavDescription" xml:space="preserve">
+    <value>Управляйте воронкой продаж и прогнозами.</value>
+  </data>
   <data name="TasksNav" xml:space="preserve">
     <value>Задачи</value>
   </data>
+  <data name="TasksNavDescription" xml:space="preserve">
+    <value>Координируйте работу команды и соблюдайте сроки.</value>
+  </data>
   <data name="TicketsNav" xml:space="preserve">
     <value>Тикеты</value>
+  </data>
+  <data name="TicketsNavDescription" xml:space="preserve">
+    <value>Поддерживайте клиентов и ускоряйте решения.</value>
   </data>
 </root>
