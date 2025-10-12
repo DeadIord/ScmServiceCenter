@@ -3,4 +3,5 @@
   <Project Path="Scm.Domain/Scm.Domain.csproj" />
   <Project Path="Scm.Infrastructure/Scm.Infrastructure.csproj" />
   <Project Path="Scm.Web/Scm.Web.csproj" />
+  <Project Path="Scm.Web.Tests/Scm.Web.Tests.csproj" />
 </Solution>

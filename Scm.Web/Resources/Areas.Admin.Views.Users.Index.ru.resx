@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+  <data name="Heading" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+  <data name="Action_Create" xml:space="preserve">
+    <value>Добавить пользователя</value>
+  </data>
+  <data name="Column_DisplayName" xml:space="preserve">
+    <value>Отображаемое имя</value>
+  </data>
+  <data name="Column_UserName" xml:space="preserve">
+    <value>Логин</value>
+  </data>
+  <data name="Column_Email" xml:space="preserve">
+    <value>Электронная почта</value>
+  </data>
+  <data name="Column_Phone" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="Column_Roles" xml:space="preserve">
+    <value>Роли</value>
+  </data>
+  <data name="Column_Status" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="Column_Actions" xml:space="preserve">
+    <value>Действия</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Пользователи не найдены.</value>
+  </data>
+  <data name="DisplayName_Fallback" xml:space="preserve">
+    <value>Не указано</value>
+  </data>
+  <data name="NoRoles" xml:space="preserve">
+    <value>Роли не назначены</value>
+  </data>
+  <data name="Status_Active" xml:space="preserve">
+    <value>Активен</value>
+  </data>
+  <data name="Status_Blocked" xml:space="preserve">
+    <value>Заблокирован</value>
+  </data>
+  <data name="Action_Deactivate" xml:space="preserve">
+    <value>Деактивировать</value>
+  </data>
+  <data name="Action_Activate" xml:space="preserve">
+    <value>Активировать</value>
+  </data>
+</root>

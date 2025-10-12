@@ -6,6 +6,7 @@ using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Localization;
 using Scm.Web.HealthChecks;
+using Scm.Web.Security;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -40,6 +41,13 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AuthorizationPolicies.StockAccess, policy =>
+        policy.RequireRole(AuthorizationPolicies.s_stockAccessRoles));
+    options.AddPolicy(AuthorizationPolicies.ReportsAccess, policy =>
+        policy.RequireRole(AuthorizationPolicies.s_reportsAccessRoles));
+});
 builder.Services.AddSingleton<IValidateOptions<MailOptions>, MailOptionsValidator>();
 builder.Services.AddOptions<MailOptions>()
     .Bind(builder.Configuration.GetSection("Mail"))
