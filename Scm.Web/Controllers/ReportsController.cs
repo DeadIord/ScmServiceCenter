@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Persistence;
+using Scm.Web.Authorization;
 using Scm.Web.Models.Reports;
 
 namespace Scm.Web.Controllers;
 
-[Authorize]
+[Authorize(Policy = PolicyNames.ReportsAccess)]
 public class ReportsController : Controller
 {
     private readonly ScmDbContext _dbContext;

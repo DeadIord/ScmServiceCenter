@@ -102,4 +102,7 @@
   <data name="Toast_StatusUpdateFailed" xml:space="preserve">
     <value>Failed to update status</value>
   </data>
+  <data name="UsersNav" xml:space="preserve">
+    <value>Users</value>
+  </data>
 </root>

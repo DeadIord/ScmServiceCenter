@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Scm.Web.Authorization;
 
 namespace Scm.Web.Controllers;
 
-[Authorize(Roles = "Admin,Manager,Technician")]
+[Authorize(Policy = PolicyNames.CrmAccess)]
 public sealed class TasksController : Controller
 {
     private readonly ILogger<TasksController> m_logger;

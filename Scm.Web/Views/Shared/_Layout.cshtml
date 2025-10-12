@@ -18,6 +18,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+@{
+    bool isAuthenticated = SignInManager.IsSignedIn(User);
+    bool canAccessOrders = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Technician"));
+    bool canAccessStock = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Storekeeper"));
+    bool canAccessReports = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Accountant"));
+    bool canAccessCrm = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Technician") || User.IsInRole("Support"));
+    bool canManageUsers = isAuthenticated && User.IsInRole("Admin");
+}
 <body class="app-body d-flex flex-column min-vh-100"
       data-toast-status-updated="@Localizer["Toast_StatusUpdated"]"
       data-toast-status-error="@Localizer["Toast_StatusUpdateFailed"]"
@@ -41,24 +49,40 @@
                 </button>
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Orders" asp-action="Index">@Localizer["OrdersNav"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Orders" asp-action="Kanban">@Localizer["KanbanNav"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Stock" asp-action="Index">@Localizer["StockNav"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Reports" asp-action="Dashboard">@Localizer["ReportsNav"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="ReportDefinitions" asp-action="Index">@Localizer["ReportBuilderNav"]</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="crmDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">@Localizer["CrmNav"]</a>
-                            <ul class="dropdown-menu" aria-labelledby="crmDropdown">
-                                <li><a class="dropdown-item" asp-controller="Accounts" asp-action="Index">@Localizer["AccountsNav"]</a></li>
-                                <li><a class="dropdown-item" asp-controller="Contacts" asp-action="Index">@Localizer["ContactsNav"]</a></li>
-                                <li><a class="dropdown-item" asp-controller="Deals" asp-action="Index">@Localizer["DealsNav"]</a></li>
-                                <li><a class="dropdown-item" asp-controller="Tasks" asp-action="Index">@Localizer["TasksNav"]</a></li>
-                                <li><a class="dropdown-item" asp-controller="Tickets" asp-action="Index">@Localizer["TicketsNav"]</a></li>
-                            </ul>
-                        </li>
+                        @if (canAccessOrders)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Orders" asp-action="Index">@Localizer["OrdersNav"]</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Orders" asp-action="Kanban">@Localizer["KanbanNav"]</a></li>
+                        }
+                        @if (canAccessStock)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Stock" asp-action="Index">@Localizer["StockNav"]</a></li>
+                        }
+                        @if (canAccessReports)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Reports" asp-action="Dashboard">@Localizer["ReportsNav"]</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="ReportDefinitions" asp-action="Index">@Localizer["ReportBuilderNav"]</a></li>
+                        }
+                        @if (canAccessCrm)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="crmDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">@Localizer["CrmNav"]</a>
+                                <ul class="dropdown-menu" aria-labelledby="crmDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Accounts" asp-action="Index">@Localizer["AccountsNav"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Contacts" asp-action="Index">@Localizer["ContactsNav"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Deals" asp-action="Index">@Localizer["DealsNav"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Tasks" asp-action="Index">@Localizer["TasksNav"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Tickets" asp-action="Index">@Localizer["TicketsNav"]</a></li>
+                                </ul>
+                            </li>
+                        }
+                        @if (canManageUsers)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">@Localizer["UsersNav"]</a></li>
+                        }
                     </ul>
                     <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                        @if (SignInManager.IsSignedIn(User))
+                        @if (isAuthenticated)
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
