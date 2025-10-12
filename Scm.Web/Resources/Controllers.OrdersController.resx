@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Email_Greeting" xml:space="preserve">
+    <value>Hello, {0}!</value>
+  </data>
+  <data name="Email_Intro" xml:space="preserve">
+    <value>The estimate for repairing {0} is ready. Follow the link to approve the work:</value>
+  </data>
+  <data name="Email_Questions" xml:space="preserve">
+    <value>If you have any questions, just reply to this email.</value>
+  </data>
+  <data name="Email_Signature" xml:space="preserve">
+    <value>Best regards,
+SCM Service Center</value>
+  </data>
+  <data name="Email_Subject" xml:space="preserve">
+    <value>Estimate for order {0}</value>
+  </data>
+  <data name="Error_ClientEmailMissing" xml:space="preserve">
+    <value>No client email is specified for the order.</value>
+  </data>
+  <data name="Error_ClientLinkFailed" xml:space="preserve">
+    <value>Could not generate the client approval link.</value>
+  </data>
+  <data name="Error_ContactDoesNotBelong" xml:space="preserve">
+    <value>The selected contact does not belong to the chosen account.</value>
+  </data>
+  <data name="Error_ContactNotFound" xml:space="preserve">
+    <value>Contact not found.</value>
+  </data>
+  <data name="Error_OrderNotFound" xml:space="preserve">
+    <value>Order not found.</value>
+  </data>
+  <data name="Notification_OrderCreated" xml:space="preserve">
+    <value>Order {0} has been created.</value>
+  </data>
+  <data name="Selection_NoAccount" xml:space="preserve">
+    <value>— Without account —</value>
+  </data>
+  <data name="Selection_NoContact" xml:space="preserve">
+    <value>— Without contact —</value>
+  </data>
+  <data name="Status_Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="Status_Diagnosing" xml:space="preserve">
+    <value>Diagnosing</value>
+  </data>
+  <data name="Status_InRepair" xml:space="preserve">
+    <value>In repair</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Status_Received" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="Status_WaitingApproval" xml:space="preserve">
+    <value>Awaiting approval</value>
+  </data>
+</root>

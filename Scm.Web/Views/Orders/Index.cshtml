@@ -1,7 +1,9 @@
 @model Scm.Web.Models.Orders.OrdersIndexViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
 @using Scm.Domain.Entities
+@inject IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Заказы";
+    ViewData["Title"] = Localizer["Title"];
     OrderStatus[] statuses = Enum.GetValues<OrderStatus>();
     string StatusBadge(OrderStatus in_status) => in_status switch
     {
@@ -13,16 +15,6 @@
         OrderStatus.Closed => "dark",
         _ => "secondary"
     };
-    string StatusTitle(OrderStatus in_status) => in_status switch
-    {
-        OrderStatus.Received => "Принят",
-        OrderStatus.Diagnosing => "Диагностика",
-        OrderStatus.WaitingApproval => "Ожидает согласования",
-        OrderStatus.InRepair => "В ремонте",
-        OrderStatus.Ready => "Готов",
-        OrderStatus.Closed => "Закрыт",
-        _ => in_status.ToString()
-    };
     string PriorityBadge(OrderPriority in_priority) => in_priority switch
     {
         OrderPriority.Low => "secondary",
@@ -31,41 +23,43 @@
         OrderPriority.Critical => "danger",
         _ => "secondary"
     };
-    string PriorityTitle(OrderPriority in_priority) => in_priority switch
+    string StatusTitle(OrderStatus in_status)
     {
-        OrderPriority.Low => "Низкий",
-        OrderPriority.Normal => "Нормальный",
-        OrderPriority.High => "Высокий",
-        OrderPriority.Critical => "Критичный",
-        _ => in_priority.ToString()
-    };
+        string ret = Localizer[$"Status_{in_status}"];
+        return ret;
+    }
+    string PriorityTitle(OrderPriority in_priority)
+    {
+        string ret = Localizer[$"Priority_{in_priority}"];
+        return ret;
+    }
     string SlaClass(DateTime? in_date) => in_date is null ? "text-muted" : in_date.Value < DateTime.UtcNow ? "text-danger fw-semibold" : "text-success";
 }
 <div class="card p-4 mb-4">
     <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
         <div>
-            <h1 class="section-title mb-1">Очередь заказов</h1>
-            <p class="section-subtitle mb-0">Актуальные ремонты, статусы согласования и связь с клиентами</p>
+            <h1 class="section-title mb-1">@Localizer["SectionTitle"]</h1>
+            <p class="section-subtitle mb-0">@Localizer["SectionSubtitle"]</p>
         </div>
         <div class="d-flex flex-column flex-sm-row gap-2">
-            <a class="btn btn-outline-light text-dark" asp-action="Kanban"><i class="bi bi-columns-gap me-2"></i>Доска Kanban</a>
-            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-circle me-2"></i>Создать заказ</a>
+            <a class="btn btn-outline-light text-dark" asp-action="Kanban"><i class="bi bi-columns-gap me-2"></i>@Localizer["KanbanButton"]</a>
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-circle me-2"></i>@Localizer["CreateOrderButton"]</a>
         </div>
     </div>
 </div>
 <div class="card p-4 mb-4">
     <form method="get" class="row g-3 align-items-end">
         <div class="col-lg-4">
-            <label class="form-label">Поиск</label>
+            <label class="form-label">@Localizer["SearchLabel"]</label>
             <div class="input-group">
-                <input type="text" class="form-control" name="q" value="@Model.Query" placeholder="Номер, клиент, email, устройство" />
+                <input type="text" class="form-control" name="q" value="@Model.Query" placeholder="@Localizer["SearchPlaceholder"]" />
                 <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
             </div>
         </div>
         <div class="col-lg-3">
-            <label class="form-label">Статус</label>
+            <label class="form-label">@Localizer["StatusLabel"]</label>
             <select class="form-select" name="status" onchange="this.form.submit()">
-                <option value="">Все</option>
+                <option value="">@Localizer["StatusAll"]</option>
                 @foreach (var status in statuses)
                 {
                     <option value="@status" selected="@(Model.Status == status ? "selected" : null)">@StatusTitle(status)</option>
@@ -73,7 +67,7 @@
             </select>
         </div>
         <div class="col-lg-5">
-            <label class="form-label">Быстрые фильтры</label>
+            <label class="form-label">@Localizer["QuickFiltersLabel"]</label>
             <div class="d-flex flex-wrap gap-2">
                 @foreach (var status in statuses)
                 {
@@ -89,15 +83,15 @@
         <table class="table table-hover align-middle table-sticky mb-0">
             <thead>
                 <tr>
-                    <th>Номер</th>
-                    <th>Клиент</th>
-                    <th>Email</th>
-                    <th>Телефон</th>
-                    <th>Устройство</th>
-                    <th>Статус</th>
-                    <th>Приоритет</th>
-                    <th>SLA</th>
-                    <th>Создан</th>
+                    <th>@Localizer["NumberColumn"]</th>
+                    <th>@Localizer["ClientColumn"]</th>
+                    <th>@Localizer["EmailColumn"]</th>
+                    <th>@Localizer["PhoneColumn"]</th>
+                    <th>@Localizer["DeviceColumn"]</th>
+                    <th>@Localizer["StatusColumn"]</th>
+                    <th>@Localizer["PriorityColumn"]</th>
+                    <th>@Localizer["SlaColumn"]</th>
+                    <th>@Localizer["CreatedColumn"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -105,7 +99,7 @@
                 @if (!Model.Orders.Any())
                 {
                     <tr>
-                        <td colspan="10" class="text-center py-5 table-empty">Заказы не найдены</td>
+                        <td colspan="10" class="text-center py-5 table-empty">@Localizer["NoOrders"]</td>
                     </tr>
                 }
                 else
@@ -125,10 +119,10 @@
                             <td>@order.Device</td>
                             <td><span class="badge text-bg-@StatusBadge(order.Status) badge-status">@StatusTitle(order.Status)</span></td>
                             <td><span class="badge text-bg-@PriorityBadge(order.Priority) badge-status">@PriorityTitle(order.Priority)</span></td>
-                            <td class="@SlaClass(order.SLAUntil)">@order.SLAUntil?.ToString("dd.MM.yyyy") ?? "—"</td>
+                            <td class="@SlaClass(order.SLAUntil)">@order.SLAUntil?.ToString("dd.MM.yyyy") ?? Localizer["NoValuePlaceholder"].Value</td>
                             <td>@order.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
                             <td class="text-end">
-                                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@order.Id"><i class="bi bi-arrow-right"></i></a>
+                                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@order.Id" aria-label="@Localizer["DetailsButtonAria", order.Number]"><i class="bi bi-arrow-right"></i></a>
                             </td>
                         </tr>
                     }

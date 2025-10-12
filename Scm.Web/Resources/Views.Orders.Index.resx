@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Заказы</value>
+  </data>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Очередь заказов</value>
+  </data>
+  <data name="SectionSubtitle" xml:space="preserve">
+    <value>Актуальные ремонты, статусы согласования и связь с клиентами</value>
+  </data>
+  <data name="KanbanButton" xml:space="preserve">
+    <value>Доска Kanban</value>
+  </data>
+  <data name="CreateOrderButton" xml:space="preserve">
+    <value>Создать заказ</value>
+  </data>
+  <data name="SearchLabel" xml:space="preserve">
+    <value>Поиск</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Номер, клиент, email, устройство</value>
+  </data>
+  <data name="StatusLabel" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="StatusAll" xml:space="preserve">
+    <value>Все</value>
+  </data>
+  <data name="QuickFiltersLabel" xml:space="preserve">
+    <value>Быстрые фильтры</value>
+  </data>
+  <data name="NumberColumn" xml:space="preserve">
+    <value>Номер</value>
+  </data>
+  <data name="ClientColumn" xml:space="preserve">
+    <value>Клиент</value>
+  </data>
+  <data name="EmailColumn" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="PhoneColumn" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="DeviceColumn" xml:space="preserve">
+    <value>Устройство</value>
+  </data>
+  <data name="StatusColumn" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="PriorityColumn" xml:space="preserve">
+    <value>Приоритет</value>
+  </data>
+  <data name="SlaColumn" xml:space="preserve">
+    <value>SLA</value>
+  </data>
+  <data name="CreatedColumn" xml:space="preserve">
+    <value>Создан</value>
+  </data>
+  <data name="NoOrders" xml:space="preserve">
+    <value>Заказы не найдены</value>
+  </data>
+  <data name="NoValuePlaceholder" xml:space="preserve">
+    <value>—</value>
+  </data>
+  <data name="DetailsButtonAria" xml:space="preserve">
+    <value>Открыть заказ {0}</value>
+  </data>
+  <data name="Status_Received" xml:space="preserve">
+    <value>Принят</value>
+  </data>
+  <data name="Status_Diagnosing" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="Status_WaitingApproval" xml:space="preserve">
+    <value>Ожидает согласования</value>
+  </data>
+  <data name="Status_InRepair" xml:space="preserve">
+    <value>В ремонте</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Готов</value>
+  </data>
+  <data name="Status_Closed" xml:space="preserve">
+    <value>Закрыт</value>
+  </data>
+  <data name="Priority_Low" xml:space="preserve">
+    <value>Низкий</value>
+  </data>
+  <data name="Priority_Normal" xml:space="preserve">
+    <value>Нормальный</value>
+  </data>
+  <data name="Priority_High" xml:space="preserve">
+    <value>Высокий</value>
+  </data>
+  <data name="Priority_Critical" xml:space="preserve">
+    <value>Критичный</value>
+  </data>
+</root>
