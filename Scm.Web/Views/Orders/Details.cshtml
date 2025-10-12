@@ -202,7 +202,7 @@
             <div class="d-grid gap-2 mb-4">
                 <button class="btn btn-primary" id="action-submit-quote" data-order-id="@Model.Order.Id"><i class="bi bi-send-check me-2"></i>Отправить смету</button>
                 <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#statusModal"><i class="bi bi-arrow-repeat me-2"></i>Сменить статус</button>
-                <a class="btn btn-outline-success" href="#"><i class="bi bi-receipt me-2"></i>Сформировать счёт</a>
+                <button type="button" class="btn btn-outline-success" id="generate-invoice"><i class="bi bi-receipt me-2"></i>Сформировать счёт</button>
             </div>
             <div class="bg-light rounded-4 p-3">
                 <div class="d-flex align-items-center gap-3 mb-3">
@@ -291,6 +291,26 @@
                 })
                 .catch(err => showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger'));
         }));
+
+        const generateInvoiceButton = document.getElementById('generate-invoice');
+        generateInvoiceButton?.addEventListener('click', () => {
+            generateInvoiceButton.disabled = true;
+            axios.post('@Url.Action("GenerateInvoice")', Qs.stringify({ id: orderId }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                .then(response => {
+                    const invoiceUrl = response.data?.url;
+                    if (invoiceUrl) {
+                        window.location.href = invoiceUrl;
+                    }
+                    showToast('Счёт сформирован', 'bg-success');
+                })
+                .catch(err => {
+                    const message = err?.response?.data?.message ?? 'Не удалось сформировать счёт';
+                    showToast(message, 'bg-danger');
+                })
+                .finally(() => {
+                    generateInvoiceButton.disabled = false;
+                });
+        });
 
         document.getElementById('message-form').addEventListener('submit', function (e) {
             e.preventDefault();
