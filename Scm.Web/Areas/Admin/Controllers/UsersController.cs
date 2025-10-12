@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -430,7 +432,8 @@ public class UsersController : Controller
     private async Task refreshCurrentUserSessionAsync(ApplicationUser in_user, bool in_isLocked)
     {
         string? currentUserId = m_userManager.GetUserId(User);
-        if (string.Equals(in_user.Id, currentUserId, StringComparison.Ordinal))
+        bool isCurrentUser = string.Equals(in_user.Id, currentUserId, StringComparison.Ordinal);
+        if (isCurrentUser)
         {
             if (in_isLocked)
             {
@@ -438,7 +441,31 @@ public class UsersController : Controller
             }
             else
             {
-                await m_signInManager.RefreshSignInAsync(in_user);
+                AuthenticateResult authResult = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+                AuthenticationProperties properties;
+                if (authResult.Succeeded && authResult.Properties is not null)
+                {
+                    Dictionary<string, string?> items = new(authResult.Properties.Items, StringComparer.Ordinal);
+                    properties = new AuthenticationProperties(items)
+                    {
+                        AllowRefresh = authResult.Properties.AllowRefresh,
+                        IsPersistent = authResult.Properties.IsPersistent,
+                        ExpiresUtc = authResult.Properties.ExpiresUtc,
+                        IssuedUtc = DateTimeOffset.UtcNow
+                    };
+                }
+                else
+                {
+                    properties = new AuthenticationProperties
+                    {
+                        IsPersistent = false,
+                        IssuedUtc = DateTimeOffset.UtcNow
+                    };
+                }
+
+                ClaimsPrincipal principal = await m_signInManager.CreateUserPrincipalAsync(in_user);
+                await m_signInManager.SignOutAsync();
+                await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, properties);
             }
         }
     }
