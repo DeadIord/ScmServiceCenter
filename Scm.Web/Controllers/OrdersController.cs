@@ -252,6 +252,65 @@ public class OrdersController : Controller
         }
     }
 
+    [HttpPost]
+    public async Task<IActionResult> GenerateInvoice(Guid id)
+    {
+        try
+        {
+            var invoice = await _orderService.CreateInvoiceAsync(id);
+            var url = Url.Action(nameof(Invoice), new { orderId = id, invoiceId = invoice.Id });
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                throw new InvalidOperationException("Не удалось сформировать ссылку на счёт");
+            }
+
+            return Json(new { success = true, url });
+        }
+        catch (Exception ex)
+        {
+            Response.StatusCode = 400;
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Invoice(Guid orderId, Guid invoiceId)
+    {
+        var order = await _orderService.GetAsync(orderId);
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        var invoice = order.Invoices.FirstOrDefault(i => i.Id == invoiceId);
+        if (invoice is null)
+        {
+            return NotFound();
+        }
+
+        var lines = order.QuoteLines
+            .Where(l => l.Status == QuoteLineStatus.Approved)
+            .OrderBy(l => l.Kind)
+            .ThenBy(l => l.Title)
+            .ToList();
+
+        if (!lines.Any())
+        {
+            TempData["Error"] = "Нет утверждённых строк сметы для формирования счёта.";
+            return RedirectToAction(nameof(Details), new { id = orderId });
+        }
+
+        var model = new OrderInvoiceViewModel
+        {
+            Order = order,
+            Invoice = invoice,
+            Lines = lines,
+            Total = lines.Sum(l => l.Price * l.Qty)
+        };
+
+        return View(model);
+    }
+
     [HttpGet]
     [Authorize(Roles = "Admin,Manager,Technician")]
     public async Task<IActionResult> Kanban()
