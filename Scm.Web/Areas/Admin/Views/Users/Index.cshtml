@@ -96,16 +96,16 @@
                                     <td class="text-center">
                                         <form asp-area="Admin" asp-controller="Users" asp-action="UpdateStatus" method="post" class="d-inline-flex align-items-center gap-2 justify-content-center">
                                             @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <input type="hidden" name="in_id" value="@user.Id" />
                                             @if (user.IsActive)
                                             {
-                                                <input type="hidden" name="isActive" value="false" />
+                                                <input type="hidden" name="in_isActive" value="false" />
                                                 <span class="badge text-bg-success badge-status">@Localizer["Status_Active"]</span>
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="@Localizer["Action_Deactivate"]">@Localizer["Action_Deactivate"]</button>
                                             }
                                             else
                                             {
-                                                <input type="hidden" name="isActive" value="true" />
+                                                <input type="hidden" name="in_isActive" value="true" />
                                                 <span class="badge text-bg-danger badge-status">@Localizer["Status_Blocked"]</span>
                                                 <button type="submit" class="btn btn-sm btn-outline-success" aria-label="@Localizer["Action_Activate"]">@Localizer["Action_Activate"]</button>
                                             }
@@ -113,10 +113,10 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="d-inline-flex gap-2">
-                                            <a asp-area="Admin" asp-controller="Users" asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary" aria-label="@Localizer["Action_Edit"]">
+                                            <a asp-area="Admin" asp-controller="Users" asp-action="Edit" asp-route-in_id="@user.Id" class="btn btn-sm btn-outline-primary" aria-label="@Localizer["Action_Edit"]">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <a asp-area="Admin" asp-controller="Users" asp-action="ResetPassword" asp-route-id="@user.Id" class="btn btn-sm btn-outline-warning" aria-label="@Localizer["Action_ResetPassword"]">
+                                            <a asp-area="Admin" asp-controller="Users" asp-action="ResetPassword" asp-route-in_id="@user.Id" class="btn btn-sm btn-outline-warning" aria-label="@Localizer["Action_ResetPassword"]">
                                                 <i class="bi bi-key"></i>
                                             </a>
                                         </div>

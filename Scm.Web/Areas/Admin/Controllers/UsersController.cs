@@ -35,6 +35,7 @@ public class UsersController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
+        IActionResult ret;
         var users = await m_userManager.Users
             .OrderBy(u => u.UserName)
             .ToListAsync();
@@ -57,19 +58,22 @@ public class UsersController : Controller
             model.Users.Add(item);
         }
 
-        return View(model);
+        ret = View(model);
+        return ret;
     }
 
     [HttpGet]
     public async Task<IActionResult> Create()
     {
+        IActionResult ret;
         var model = new UserCreateViewModel
         {
             IsActive = true
         };
 
         await PopulateRolesAsync(model);
-        return View(model);
+        ret = View(model);
+        return ret;
     }
 
     [HttpPost]
@@ -123,10 +127,10 @@ public class UsersController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Edit(string id)
+    public async Task<IActionResult> Edit(string in_id)
     {
         IActionResult ret;
-        var user = await m_userManager.FindByIdAsync(id);
+        var user = await m_userManager.FindByIdAsync(in_id);
         if (user is null)
         {
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
@@ -208,10 +212,10 @@ public class UsersController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> ResetPassword(string id)
+    public async Task<IActionResult> ResetPassword(string in_id)
     {
         IActionResult ret;
-        var user = await m_userManager.FindByIdAsync(id);
+        var user = await m_userManager.FindByIdAsync(in_id);
         if (user is null)
         {
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
@@ -271,10 +275,10 @@ public class UsersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateStatus(string id, bool isActive)
+    public async Task<IActionResult> UpdateStatus(string in_id, bool in_isActive)
     {
         IActionResult ret = RedirectToAction(nameof(Index));
-        var user = await m_userManager.FindByIdAsync(id);
+        var user = await m_userManager.FindByIdAsync(in_id);
         if (user is null)
         {
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
@@ -283,12 +287,12 @@ public class UsersController : Controller
         {
             try
             {
-                await UpdateLockoutAsync(user, isActive);
+                await UpdateLockoutAsync(user, in_isActive);
                 TempData["Success"] = m_localizer["Notification_StatusUpdated", user.UserName].Value;
             }
             catch (Exception ex)
             {
-                m_logger.LogError(ex, "Failed to update status for user {UserId}", id);
+                m_logger.LogError(ex, "Failed to update status for user {UserId}", in_id);
                 TempData["Error"] = m_localizer["Error_StatusUpdateFailed"].Value;
             }
         }
