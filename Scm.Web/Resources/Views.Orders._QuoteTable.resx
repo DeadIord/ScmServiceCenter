@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="QuoteTitle" xml:space="preserve">
+    <value>Смета заказа</value>
+  </data>
+  <data name="QuoteSubtitle" xml:space="preserve">
+    <value>Фиксация работ, запчастей и статуса согласования</value>
+  </data>
+  <data name="LaborSummary" xml:space="preserve">
+    <value>Работы</value>
+  </data>
+  <data name="PartsSummary" xml:space="preserve">
+    <value>Запчасти</value>
+  </data>
+  <data name="ProposedSummary" xml:space="preserve">
+    <value>На согласовании</value>
+  </data>
+  <data name="ApprovedSummary" xml:space="preserve">
+    <value>Согласовано</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>₽</value>
+  </data>
+  <data name="TitleColumn" xml:space="preserve">
+    <value>Наименование</value>
+  </data>
+  <data name="KindColumn" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="QuantityColumn" xml:space="preserve">
+    <value>Кол-во</value>
+  </data>
+  <data name="PriceColumn" xml:space="preserve">
+    <value>Цена</value>
+  </data>
+  <data name="AmountColumn" xml:space="preserve">
+    <value>Сумма</value>
+  </data>
+  <data name="StatusColumn" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="NoLines" xml:space="preserve">
+    <value>Записей нет</value>
+  </data>
+  <data name="Kind_Labor" xml:space="preserve">
+    <value>Работа</value>
+  </data>
+  <data name="Kind_Part" xml:space="preserve">
+    <value>Запчасть</value>
+  </data>
+  <data name="QuoteStatus_Draft" xml:space="preserve">
+    <value>Черновик</value>
+  </data>
+  <data name="QuoteStatus_Proposed" xml:space="preserve">
+    <value>Отправлено</value>
+  </data>
+  <data name="QuoteStatus_Approved" xml:space="preserve">
+    <value>Согласовано</value>
+  </data>
+  <data name="QuoteStatus_Rejected" xml:space="preserve">
+    <value>Отклонено</value>
+  </data>
+  <data name="AddTitleLabel" xml:space="preserve">
+    <value>Наименование</value>
+  </data>
+  <data name="AddTitlePlaceholder" xml:space="preserve">
+    <value>Например, диагностика</value>
+  </data>
+  <data name="AddKindLabel" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="AddQuantityLabel" xml:space="preserve">
+    <value>Кол-во</value>
+  </data>
+  <data name="AddPriceLabel" xml:space="preserve">
+    <value>Цена</value>
+  </data>
+  <data name="AddButton" xml:space="preserve">
+    <value>Добавить</value>
+  </data>
+</root>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Заказ {0}</value>
+  </data>
+  <data name="HeaderTitle" xml:space="preserve">
+    <value>Заказ №{0}</value>
+  </data>
+  <data name="HeaderSubtitle" xml:space="preserve">
+    <value>Контроль этапов ремонта и коммуникаций с клиентом в одном месте</value>
+  </data>
+  <data name="PriorityBadgeLabel" xml:space="preserve">
+    <value>Приоритет: {0}</value>
+  </data>
+  <data name="SlaLabel" xml:space="preserve">
+    <value>SLA</value>
+  </data>
+  <data name="SlaNotSet" xml:space="preserve">
+    <value>Не задано</value>
+  </data>
+  <data name="InfoBlockTitle" xml:space="preserve">
+    <value>Статус и информация о клиенте</value>
+  </data>
+  <data name="CurrentStatus" xml:space="preserve">
+    <value>Текущий статус</value>
+  </data>
+  <data name="CurrentPriority" xml:space="preserve">
+    <value>Приоритет</value>
+  </data>
+  <data name="SlaDue" xml:space="preserve">
+    <value>SLA до</value>
+  </data>
+  <data name="ChangeStatusLabel" xml:space="preserve">
+    <value>Изменить статус</value>
+  </data>
+  <data name="ChangeStatusButton" xml:space="preserve">
+    <value>Обновить</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="BackToOrders" xml:space="preserve">
+    <value>К списку заказов</value>
+  </data>
+  <data name="ClientLabel" xml:space="preserve">
+    <value>Клиент</value>
+  </data>
+  <data name="DeviceLabel" xml:space="preserve">
+    <value>Устройство</value>
+  </data>
+  <data name="SerialLabel" xml:space="preserve">
+    <value>Серийный номер</value>
+  </data>
+  <data name="AccountLabel" xml:space="preserve">
+    <value>Контрагент</value>
+  </data>
+  <data name="ContactLabel" xml:space="preserve">
+    <value>Контакт</value>
+  </data>
+  <data name="ClientTokenLabel" xml:space="preserve">
+    <value>Токен доступа клиента</value>
+  </data>
+  <data name="ClientLinkLabel" xml:space="preserve">
+    <value>Ссылка для клиента</value>
+  </data>
+  <data name="QuoteTab" xml:space="preserve">
+    <value>Смета</value>
+  </data>
+  <data name="MessagesTab" xml:space="preserve">
+    <value>Сообщения</value>
+  </data>
+  <data name="SubmitQuoteButton" xml:space="preserve">
+    <value>Отправить на согласование</value>
+  </data>
+  <data name="ClientAuthor" xml:space="preserve">
+    <value>Клиент</value>
+  </data>
+  <data name="StaffAuthor" xml:space="preserve">
+    <value>Сотрудник</value>
+  </data>
+  <data name="MessageLabel" xml:space="preserve">
+    <value>Сообщение</value>
+  </data>
+  <data name="SendMessageButton" xml:space="preserve">
+    <value>Отправить</value>
+  </data>
+  <data name="QuickActionsTitle" xml:space="preserve">
+    <value>Быстрые действия</value>
+  </data>
+  <data name="QuickSubmitQuote" xml:space="preserve">
+    <value>Отправить смету</value>
+  </data>
+  <data name="QuickChangeStatus" xml:space="preserve">
+    <value>Сменить статус</value>
+  </data>
+  <data name="QuickCreateInvoice" xml:space="preserve">
+    <value>Сформировать счёт</value>
+  </data>
+  <data name="HistoryTitle" xml:space="preserve">
+    <value>История отправок</value>
+  </data>
+  <data name="HistorySubtitle" xml:space="preserve">
+    <value>Журнал обновляется автоматически после отправки письма клиенту</value>
+  </data>
+  <data name="HistoryPointMail" xml:space="preserve">
+    <value>Клиент получает письмо с ссылкой на согласование</value>
+  </data>
+  <data name="HistoryPointToken" xml:space="preserve">
+    <value>Ссылка защищена уникальным токеном клиента</value>
+  </data>
+  <data name="ModalTitle" xml:space="preserve">
+    <value>Смена статуса заказа</value>
+  </data>
+  <data name="ModalDescription" xml:space="preserve">
+    <value>Выберите новый этап обработки заказа. Клиент увидит обновление после сохранения.</value>
+  </data>
+  <data name="ModalApply" xml:space="preserve">
+    <value>Применить</value>
+  </data>
+  <data name="ToastStatusUpdated" xml:space="preserve">
+    <value>Статус обновлён</value>
+  </data>
+  <data name="ToastGenericError" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="ToastLineAdded" xml:space="preserve">
+    <value>Строка добавлена</value>
+  </data>
+  <data name="ToastLineError" xml:space="preserve">
+    <value>Не удалось добавить строку</value>
+  </data>
+  <data name="ToastQuoteSubmitted" xml:space="preserve">
+    <value>Смета отправлена на согласование</value>
+  </data>
+  <data name="ToastMessageSent" xml:space="preserve">
+    <value>Сообщение отправлено</value>
+  </data>
+  <data name="ToastMessageError" xml:space="preserve">
+    <value>Не удалось отправить сообщение</value>
+  </data>
+  <data name="Status_Received" xml:space="preserve">
+    <value>Принят</value>
+  </data>
+  <data name="Status_Diagnosing" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="Status_WaitingApproval" xml:space="preserve">
+    <value>Ожидает согласования</value>
+  </data>
+  <data name="Status_InRepair" xml:space="preserve">
+    <value>В ремонте</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Готов</value>
+  </data>
+  <data name="Status_Closed" xml:space="preserve">
+    <value>Закрыт</value>
+  </data>
+  <data name="Priority_Low" xml:space="preserve">
+    <value>Низкий</value>
+  </data>
+  <data name="Priority_Normal" xml:space="preserve">
+    <value>Нормальный</value>
+  </data>
+  <data name="Priority_High" xml:space="preserve">
+    <value>Высокий</value>
+  </data>
+  <data name="Priority_Critical" xml:space="preserve">
+    <value>Критичный</value>
+  </data>
+</root>

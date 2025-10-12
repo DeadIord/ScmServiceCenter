@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Email_Greeting" xml:space="preserve">
+    <value>Здравствуйте, {0}!</value>
+  </data>
+  <data name="Email_Intro" xml:space="preserve">
+    <value>Готова смета по ремонту {0}. Перейдите по ссылке, чтобы согласовать работы:</value>
+  </data>
+  <data name="Email_Questions" xml:space="preserve">
+    <value>Если у вас есть вопросы, просто ответьте на это письмо.</value>
+  </data>
+  <data name="Email_Signature" xml:space="preserve">
+    <value>С уважением,
+Сервисный центр</value>
+  </data>
+  <data name="Email_Subject" xml:space="preserve">
+    <value>Смета для заказа {0}</value>
+  </data>
+  <data name="Error_ClientEmailMissing" xml:space="preserve">
+    <value>Для заказа не указан email клиента.</value>
+  </data>
+  <data name="Error_ClientLinkFailed" xml:space="preserve">
+    <value>Не удалось сформировать ссылку для клиента.</value>
+  </data>
+  <data name="Error_ContactDoesNotBelong" xml:space="preserve">
+    <value>Выбранный контакт не относится к указанному контрагенту.</value>
+  </data>
+  <data name="Error_ContactNotFound" xml:space="preserve">
+    <value>Контакт не найден.</value>
+  </data>
+  <data name="Error_OrderNotFound" xml:space="preserve">
+    <value>Заказ не найден.</value>
+  </data>
+  <data name="Notification_OrderCreated" xml:space="preserve">
+    <value>Заказ {0} создан.</value>
+  </data>
+  <data name="Selection_NoAccount" xml:space="preserve">
+    <value>— Без контрагента —</value>
+  </data>
+  <data name="Selection_NoContact" xml:space="preserve">
+    <value>— Без контакта —</value>
+  </data>
+  <data name="Status_Closed" xml:space="preserve">
+    <value>Закрыты</value>
+  </data>
+  <data name="Status_Diagnosing" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="Status_InRepair" xml:space="preserve">
+    <value>В ремонте</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Готовы</value>
+  </data>
+  <data name="Status_Received" xml:space="preserve">
+    <value>Получены</value>
+  </data>
+  <data name="Status_WaitingApproval" xml:space="preserve">
+    <value>Ожидают согласования</value>
+  </data>
+</root>

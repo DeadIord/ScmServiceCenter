@@ -1,25 +1,44 @@
 @model Scm.Domain.Entities.Order
+@using Microsoft.AspNetCore.Mvc.Localization
 @using Scm.Domain.Entities
+@using System.Linq
+@inject IViewLocalizer Localizer
 @{
     var lines = Model.QuoteLines;
-    decimal approvedTotal = lines.Where(l => l.Status == QuoteLineStatus.Approved).Sum(l => l.Price * l.Qty);
-    decimal proposedTotal = lines.Where(l => l.Status == QuoteLineStatus.Proposed).Sum(l => l.Price * l.Qty);
-    int laborCount = lines.Count(l => l.Kind == QuoteLineKind.Labor);
-    int partCount = lines.Count(l => l.Kind == QuoteLineKind.Part);
-    string KindTitle(QuoteLineKind in_kind) => in_kind switch
+    decimal approvedTotal = lines.Where(line => line.Status == QuoteLineStatus.Approved).Sum(line => line.Price * line.Qty);
+    decimal proposedTotal = lines.Where(line => line.Status == QuoteLineStatus.Proposed).Sum(line => line.Price * line.Qty);
+    int laborCount = lines.Count(line => line.Kind == QuoteLineKind.Labor);
+    int partCount = lines.Count(line => line.Kind == QuoteLineKind.Part);
+    string KindTitle(QuoteLineKind in_kind)
     {
-        QuoteLineKind.Labor => "Работа",
-        QuoteLineKind.Part => "Запчасть",
-        _ => in_kind.ToString()
-    };
-    string StatusTitle(QuoteLineStatus in_status) => in_status switch
+        string ret;
+        var localized = Localizer[$"Kind_{in_kind}"];
+        if (localized.IsResourceNotFound)
+        {
+            ret = in_kind.ToString();
+        }
+        else
+        {
+            ret = localized.Value;
+        }
+
+        return ret;
+    }
+    string StatusTitle(QuoteLineStatus in_status)
     {
-        QuoteLineStatus.Draft => "Черновик",
-        QuoteLineStatus.Proposed => "Отправлено",
-        QuoteLineStatus.Approved => "Согласовано",
-        QuoteLineStatus.Rejected => "Отклонено",
-        _ => in_status.ToString()
-    };
+        string ret;
+        var localized = Localizer[$"QuoteStatus_{in_status}"];
+        if (localized.IsResourceNotFound)
+        {
+            ret = in_status.ToString();
+        }
+        else
+        {
+            ret = localized.Value;
+        }
+
+        return ret;
+    }
     string StatusBadge(QuoteLineStatus in_status) => in_status switch
     {
         QuoteLineStatus.Draft => "secondary",
@@ -33,25 +52,25 @@
     <div class="card-body">
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
-                <h5 class="fw-semibold mb-1">Смета заказа</h5>
-                <p class="section-subtitle mb-0">Фиксация работ, запчастей и статуса согласования</p>
+                <h5 class="fw-semibold mb-1">@Localizer["QuoteTitle"]</h5>
+                <p class="section-subtitle mb-0">@Localizer["QuoteSubtitle"]</p>
             </div>
             <div class="quote-summary">
                 <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">Работы</div>
+                    <div class="small text-uppercase text-muted">@Localizer["LaborSummary"]</div>
                     <div class="fs-5 fw-semibold">@laborCount</div>
                 </div>
                 <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">Запчасти</div>
+                    <div class="small text-uppercase text-muted">@Localizer["PartsSummary"]</div>
                     <div class="fs-5 fw-semibold">@partCount</div>
                 </div>
                 <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">На согласовании</div>
-                    <div class="fs-5 fw-semibold">@proposedTotal.ToString("N2") ₽</div>
+                    <div class="small text-uppercase text-muted">@Localizer["ProposedSummary"]</div>
+                    <div class="fs-5 fw-semibold">@proposedTotal.ToString("N2") @Localizer["Currency"].Value</div>
                 </div>
                 <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">Согласовано</div>
-                    <div class="fs-5 fw-semibold" id="quote-total">@approvedTotal.ToString("N2") ₽</div>
+                    <div class="small text-uppercase text-muted">@Localizer["ApprovedSummary"]</div>
+                    <div class="fs-5 fw-semibold" id="quote-total">@approvedTotal.ToString("N2") @Localizer["Currency"].Value</div>
                 </div>
             </div>
         </div>
@@ -59,24 +78,24 @@
             <table class="table table-hover align-middle table-sticky mb-0">
                 <thead>
                     <tr>
-                        <th>Наименование</th>
-                        <th class="text-center">Тип</th>
-                        <th class="text-end">Кол-во</th>
-                        <th class="text-end">Цена</th>
-                        <th class="text-end">Сумма</th>
-                        <th class="text-end">Статус</th>
+                        <th>@Localizer["TitleColumn"]</th>
+                        <th class="text-center">@Localizer["KindColumn"]</th>
+                        <th class="text-end">@Localizer["QuantityColumn"]</th>
+                        <th class="text-end">@Localizer["PriceColumn"]</th>
+                        <th class="text-end">@Localizer["AmountColumn"]</th>
+                        <th class="text-end">@Localizer["StatusColumn"]</th>
                     </tr>
                 </thead>
                 <tbody id="quote-lines">
                     @if (!lines.Any())
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-5 table-empty">Записей нет</td>
+                            <td colspan="6" class="text-center py-5 table-empty">@Localizer["NoLines"]</td>
                         </tr>
                     }
                     else
                     {
-                        foreach (var line in lines.OrderBy(l => l.Kind).ThenBy(l => l.Title))
+                        foreach (var line in lines.OrderBy(line => line.Kind).ThenBy(line => line.Title))
                         {
                             var badge = StatusBadge(line.Status);
                             <tr>
@@ -97,26 +116,26 @@
         <form id="add-line-form" class="row g-3 border-top pt-3 mt-3">
             <input type="hidden" name="OrderId" value="@Model.Id" />
             <div class="col-md-4">
-                <label class="form-label">Наименование</label>
-                <input class="form-control" name="Title" placeholder="Например, диагностика" required />
+                <label class="form-label">@Localizer["AddTitleLabel"]</label>
+                <input class="form-control" name="Title" placeholder="@Localizer["AddTitlePlaceholder"]" required />
             </div>
             <div class="col-md-2">
-                <label class="form-label">Тип</label>
+                <label class="form-label">@Localizer["AddKindLabel"]</label>
                 <select class="form-select" name="Kind">
-                    <option value="Labor">Работа</option>
-                    <option value="Part">Запчасть</option>
+                    <option value="Labor">@Localizer["Kind_Labor"]</option>
+                    <option value="Part">@Localizer["Kind_Part"]</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Кол-во</label>
+                <label class="form-label">@Localizer["AddQuantityLabel"]</label>
                 <input class="form-control" type="number" step="0.01" name="Qty" value="1" min="0.01" />
             </div>
             <div class="col-md-2">
-                <label class="form-label">Цена</label>
+                <label class="form-label">@Localizer["AddPriceLabel"]</label>
                 <input class="form-control" type="number" step="0.01" name="Price" value="0" min="0" />
             </div>
             <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-circle me-2"></i>Добавить</button>
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-circle me-2"></i>@Localizer["AddButton"]</button>
             </div>
         </form>
     </div>

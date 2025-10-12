@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action_Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Description_ClientPortal" xml:space="preserve">
+    <value>Enter the order number and access token from the SMS to track the repair and approve the estimate.</value>
+  </data>
+  <data name="Form_CommentLabel" xml:space="preserve">
+    <value>Your comment</value>
+  </data>
+  <data name="Form_Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Heading_ClientPortal" xml:space="preserve">
+    <value>Client portal</value>
+  </data>
+  <data name="Heading_Communication" xml:space="preserve">
+    <value>Communication with technician</value>
+  </data>
+  <data name="Heading_Estimate" xml:space="preserve">
+    <value>Estimate for approval</value>
+  </data>
+  <data name="Heading_FinalStep" xml:space="preserve">
+    <value>Step 4: Completion</value>
+  </data>
+  <data name="Heading_Status" xml:space="preserve">
+    <value>Order status</value>
+  </data>
+  <data name="Label_AccessToken" xml:space="preserve">
+    <value>Access token</value>
+  </data>
+  <data name="Label_OrderNumber" xml:space="preserve">
+    <value>Order number</value>
+  </data>
+  <data name="Message_FromClient" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="Message_FromService" xml:space="preserve">
+    <value>Service center</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Order tracking</value>
+  </data>
+  <data name="Quote_AllReviewed" xml:space="preserve">
+    <value>All work items have been reviewed. Please wait for the status update.</value>
+  </data>
+  <data name="Quote_ApproveYes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Quote_Header_Approve" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Quote_Header_Price" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="Quote_Header_Qty" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="Quote_Header_Title" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="Quote_HelpText" xml:space="preserve">
+    <value>Clear the items that should not be performed. After sending, the decision will be available to the technician.</value>
+  </data>
+  <data name="Quote_Submit" xml:space="preserve">
+    <value>Submit decision</value>
+  </data>
+  <data name="Quote_TableEmpty" xml:space="preserve">
+    <value>No records found</value>
+  </data>
+  <data name="QuoteLineKind_Labor" xml:space="preserve">
+    <value>Labor</value>
+  </data>
+  <data name="QuoteLineKind_Part" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Status_Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="Status_Diagnosing" xml:space="preserve">
+    <value>Diagnosing</value>
+  </data>
+  <data name="Status_InRepair" xml:space="preserve">
+    <value>Approved by client</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Status_Received" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="Status_WaitingApproval" xml:space="preserve">
+    <value>Awaiting approval</value>
+  </data>
+  <data name="Summary_Client" xml:space="preserve">
+    <value>Client</value>
+  </data>
+  <data name="Summary_Description" xml:space="preserve">
+    <value>After approval the technician will start the repair. Keep an eye on the status updates.</value>
+  </data>
+  <data name="Summary_Device" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Summary_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Summary_OrderNumber" xml:space="preserve">
+    <value>Order number</value>
+  </data>
+  <data name="Summary_Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Text_CurrentStatus" xml:space="preserve">
+    <value>Current status:</value>
+  </data>
+</root>
