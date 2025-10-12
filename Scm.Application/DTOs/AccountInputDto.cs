@@ -12,7 +12,8 @@ public sealed class AccountInputDto
     [Required]
     public AccountType Type { get; set; } = AccountType.Company;
 
-    [StringLength(32)]
+    [StringLength(12)]
+    [RegularExpression(@"^$|^[0-9]{10}([0-9]{2})?$", ErrorMessage = "ИНН должен содержать 10 или 12 цифр")]
     public string? Inn { get; set; }
         = null;
 

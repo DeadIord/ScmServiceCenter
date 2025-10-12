@@ -58,7 +58,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Телефон</label>
-                    <input class="form-control" asp-for="ClientPhone" placeholder="+7" />
+                    <input class="form-control" asp-for="ClientPhone" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="11 цифр" />
                     <span asp-validation-for="ClientPhone" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
