@@ -44,6 +44,7 @@ public class UsersController : Controller
     public async Task<IActionResult> Index(string? query)
     {
         IActionResult ret;
+        m_logger.LogInformation("Запрос списка пользователей. Фильтр: {Query}", query);
         IQueryable<ApplicationUser> usersQuery = m_userManager.Users;
         if (!string.IsNullOrWhiteSpace(query))
         {
@@ -60,6 +61,7 @@ public class UsersController : Controller
         foreach (ApplicationUser user in users)
         {
             IList<string> roles = await m_userManager.GetRolesAsync(user);
+            m_logger.LogDebug("Пользователь {UserId} ({Email}) роли: {Roles}", user.Id, user.Email, string.Join(',', roles));
             UserListItemViewModel item = new()
             {
                 Id = user.Id,
@@ -86,6 +88,7 @@ public class UsersController : Controller
     public async Task<IActionResult> Create()
     {
         IActionResult ret;
+        m_logger.LogInformation("Отображение формы создания пользователя");
         UserCreateViewModel model = new()
         {
             Roles = await buildRoleOptionsAsync(null)
@@ -99,8 +102,10 @@ public class UsersController : Controller
     public async Task<IActionResult> Create(UserCreateViewModel model)
     {
         IActionResult ret;
+        m_logger.LogInformation("Попытка создания пользователя {Email}", model.Email);
         if (!ModelState.IsValid)
         {
+            m_logger.LogWarning("Модель создания пользователя {Email} некорректна: {Errors}", model.Email, string.Join(';', ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
             model.Roles = await buildRoleOptionsAsync(model.Roles.Where(r => r.IsSelected).Select(r => r.RoleName).ToList());
             ret = View(model);
             return ret;
@@ -118,6 +123,7 @@ public class UsersController : Controller
         IdentityResult createResult = await m_userManager.CreateAsync(user, model.Password);
         if (!createResult.Succeeded)
         {
+            m_logger.LogError("Не удалось создать пользователя {Email}: {Errors}", model.Email, string.Join(';', createResult.Errors.Select(e => e.Description)));
             foreach (IdentityError error in createResult.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -136,6 +142,7 @@ public class UsersController : Controller
         IdentityResult lockResult = await applyLockoutAsync(user, model.IsLocked);
         if (!lockResult.Succeeded)
         {
+            m_logger.LogError("Не удалось применить статус блокировки при создании пользователя {UserId}", user.Id);
             foreach (IdentityError error in lockResult.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -152,6 +159,7 @@ public class UsersController : Controller
             IdentityResult roleResult = await m_userManager.AddToRolesAsync(user, selectedRoles);
             if (!roleResult.Succeeded)
             {
+                m_logger.LogError("Не удалось назначить роли {Roles} пользователю {UserId}: {Errors}", string.Join(',', selectedRoles), user.Id, string.Join(';', roleResult.Errors.Select(e => e.Description)));
                 foreach (IdentityError error in roleResult.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
@@ -165,6 +173,7 @@ public class UsersController : Controller
         }
 
         TempData["Success"] = m_localizer["Notification_UserCreated", user.Email ?? string.Empty].Value;
+        m_logger.LogInformation("Пользователь {UserId} создан администратором {AdminId}", user.Id, m_userManager.GetUserId(User));
         ret = RedirectToAction(nameof(Index));
         return ret;
     }
@@ -173,9 +182,11 @@ public class UsersController : Controller
     public async Task<IActionResult> Edit(string id)
     {
         IActionResult ret;
+        m_logger.LogInformation("Запрошено редактирование пользователя {UserId}", id);
         ApplicationUser? user = await m_userManager.FindByIdAsync(id);
         if (user is null)
         {
+            m_logger.LogWarning("Пользователь {UserId} не найден для редактирования", id);
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
             ret = RedirectToAction(nameof(Index));
             return ret;
@@ -201,8 +212,10 @@ public class UsersController : Controller
     public async Task<IActionResult> Edit(UserEditViewModel model)
     {
         IActionResult ret;
+        m_logger.LogInformation("Попытка сохранить пользователя {UserId}", model.Id);
         if (!ModelState.IsValid)
         {
+            m_logger.LogWarning("Модель редактирования пользователя {UserId} некорректна: {Errors}", model.Id, string.Join(';', ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
             model.Roles = await buildRoleOptionsAsync(model.Roles.Where(r => r.IsSelected).Select(r => r.RoleName).ToList());
             ret = View(model);
             return ret;
@@ -211,6 +224,7 @@ public class UsersController : Controller
         ApplicationUser? user = await m_userManager.FindByIdAsync(model.Id);
         if (user is null)
         {
+            m_logger.LogWarning("Пользователь {UserId} не найден при сохранении", model.Id);
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
             ret = RedirectToAction(nameof(Index));
             return ret;
@@ -224,6 +238,7 @@ public class UsersController : Controller
         IdentityResult updateResult = await m_userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
         {
+            m_logger.LogError("Не удалось обновить пользователя {UserId}: {Errors}", model.Id, string.Join(';', updateResult.Errors.Select(e => e.Description)));
             foreach (IdentityError error in updateResult.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -238,6 +253,7 @@ public class UsersController : Controller
         IdentityResult lockResult = await applyLockoutAsync(user, model.IsLocked);
         if (!lockResult.Succeeded)
         {
+            m_logger.LogError("Не удалось изменить статус блокировки пользователя {UserId}", model.Id);
             foreach (IdentityError error in lockResult.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -261,16 +277,19 @@ public class UsersController : Controller
         IdentityResult rolesResult = IdentityResult.Success;
         if (toAdd.Any())
         {
+            m_logger.LogInformation("Для пользователя {UserId} будут назначены роли: {Roles}", model.Id, string.Join(',', toAdd));
             rolesResult = await m_userManager.AddToRolesAsync(user, toAdd);
         }
 
         if (rolesResult.Succeeded && toRemove.Any())
         {
+            m_logger.LogInformation("У пользователя {UserId} будут удалены роли: {Roles}", model.Id, string.Join(',', toRemove));
             rolesResult = await m_userManager.RemoveFromRolesAsync(user, toRemove);
         }
 
         if (!rolesResult.Succeeded)
         {
+            m_logger.LogError("Не удалось обновить роли пользователя {UserId}: {Errors}", model.Id, string.Join(';', rolesResult.Errors.Select(e => e.Description)));
             foreach (IdentityError error in rolesResult.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -284,10 +303,12 @@ public class UsersController : Controller
         bool lockStatusChanged = currentLocked != model.IsLocked;
         if (lockStatusChanged || rolesChanged)
         {
+            m_logger.LogInformation("Обновление security stamp пользователя {UserId}. Изменение блокировки: {LockChanged}. Изменение ролей: {RolesChanged}", model.Id, lockStatusChanged, rolesChanged);
             await m_userManager.UpdateSecurityStampAsync(user);
         }
 
         await refreshCurrentUserSessionAsync(user, model.IsLocked);
+        m_logger.LogInformation("Данные пользователя {UserId} сохранены", model.Id);
 
         TempData["Success"] = m_localizer["Notification_UserUpdated", user.Email ?? string.Empty].Value;
         ret = RedirectToAction(nameof(Index));
@@ -298,9 +319,11 @@ public class UsersController : Controller
     public async Task<IActionResult> ResetPassword(string id)
     {
         IActionResult ret;
+        m_logger.LogInformation("Запрошен сброс пароля пользователя {UserId}", id);
         ApplicationUser? user = await m_userManager.FindByIdAsync(id);
         if (user is null)
         {
+            m_logger.LogWarning("Пользователь {UserId} не найден для сброса пароля", id);
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
             ret = RedirectToAction(nameof(Index));
             return ret;
@@ -321,8 +344,10 @@ public class UsersController : Controller
     public async Task<IActionResult> ResetPassword(UserResetPasswordViewModel model)
     {
         IActionResult ret;
+        m_logger.LogInformation("Попытка сбросить пароль пользователя {UserId}", model.Id);
         if (!ModelState.IsValid)
         {
+            m_logger.LogWarning("Модель сброса пароля пользователя {UserId} некорректна: {Errors}", model.Id, string.Join(';', ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
             ret = View(model);
             return ret;
         }
@@ -330,6 +355,7 @@ public class UsersController : Controller
         ApplicationUser? user = await m_userManager.FindByIdAsync(model.Id);
         if (user is null)
         {
+            m_logger.LogWarning("Пользователь {UserId} не найден при сохранении пароля", model.Id);
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
             ret = RedirectToAction(nameof(Index));
             return ret;
@@ -339,6 +365,7 @@ public class UsersController : Controller
         IdentityResult resetResult = await m_userManager.ResetPasswordAsync(user, token, model.Password);
         if (!resetResult.Succeeded)
         {
+            m_logger.LogError("Не удалось сбросить пароль пользователя {UserId}: {Errors}", model.Id, string.Join(';', resetResult.Errors.Select(e => e.Description)));
             foreach (IdentityError error in resetResult.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -349,6 +376,7 @@ public class UsersController : Controller
         }
 
         TempData["Success"] = m_localizer["Notification_PasswordReset", user.Email ?? string.Empty].Value;
+        m_logger.LogInformation("Пароль пользователя {UserId} сброшен", model.Id);
         ret = RedirectToAction(nameof(Index));
         return ret;
     }
@@ -358,9 +386,11 @@ public class UsersController : Controller
     public async Task<IActionResult> UpdateStatus(string id, bool lockUser)
     {
         IActionResult ret;
+        m_logger.LogInformation("Запрошено обновление статуса пользователя {UserId}. Блокировка: {LockUser}", id, lockUser);
         ApplicationUser? user = await m_userManager.FindByIdAsync(id);
         if (user is null)
         {
+            m_logger.LogWarning("Пользователь {UserId} не найден при смене статуса", id);
             TempData["Error"] = m_localizer["Error_UserNotFound"].Value;
             ret = RedirectToAction(nameof(Index));
             return ret;
@@ -370,6 +400,7 @@ public class UsersController : Controller
         IdentityResult lockResult = await applyLockoutAsync(user, lockUser);
         if (!lockResult.Succeeded)
         {
+            m_logger.LogError("Не удалось изменить статус блокировки пользователя {UserId}", id);
             TempData["Error"] = m_localizer["Error_StatusUpdateFailed"].Value;
             ret = RedirectToAction(nameof(Index));
             return ret;
@@ -377,10 +408,12 @@ public class UsersController : Controller
 
         if (currentLocked != lockUser)
         {
+            m_logger.LogInformation("Security stamp пользователя {UserId} будет обновлён из-за смены блокировки", id);
             await m_userManager.UpdateSecurityStampAsync(user);
         }
 
         await refreshCurrentUserSessionAsync(user, lockUser);
+        m_logger.LogInformation("Статус пользователя {UserId} изменён", id);
 
         TempData["Success"] = m_localizer["Notification_StatusUpdated", user.Email ?? string.Empty].Value;
         ret = RedirectToAction(nameof(Index));
@@ -433,15 +466,18 @@ public class UsersController : Controller
     {
         string? currentUserId = m_userManager.GetUserId(User);
         bool isCurrentUser = string.Equals(in_user.Id, currentUserId, StringComparison.Ordinal);
+        m_logger.LogDebug("Обновление сессии. Пользователь {UserId}. Текущий пользователь: {IsCurrent}. Заблокирован: {IsLocked}", in_user.Id, isCurrentUser, in_isLocked);
         if (isCurrentUser)
         {
             if (in_isLocked)
             {
+                m_logger.LogInformation("Пользователь {UserId} заблокирован и будет разлогинен", in_user.Id);
                 await m_signInManager.SignOutAsync();
             }
             else
             {
                 AuthenticateResult authResult = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+                m_logger.LogDebug("Результат повторной аутентификации пользователя {UserId}: {Succeeded}", in_user.Id, authResult.Succeeded);
                 AuthenticationProperties properties;
                 if (authResult.Succeeded && authResult.Properties is not null)
                 {
@@ -464,9 +500,14 @@ public class UsersController : Controller
                 }
 
                 ClaimsPrincipal principal = await m_signInManager.CreateUserPrincipalAsync(in_user);
+                m_logger.LogDebug("Выпуск новой куки для пользователя {UserId}", in_user.Id);
                 await m_signInManager.SignOutAsync();
                 await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, properties);
             }
+        }
+        else
+        {
+            m_logger.LogDebug("Пользователь {UserId} не является текущим, обновление сессии не требуется", in_user.Id);
         }
     }
 }
