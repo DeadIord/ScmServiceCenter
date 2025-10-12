@@ -22,17 +22,20 @@ public class UsersController : Controller
     private readonly RoleManager<IdentityRole> m_roleManager;
     private readonly ILogger<UsersController> m_logger;
     private readonly IStringLocalizer<UsersController> m_localizer;
+    private readonly SignInManager<ApplicationUser> m_signInManager;
 
     public UsersController(
         UserManager<ApplicationUser> in_userManager,
         RoleManager<IdentityRole> in_roleManager,
         ILogger<UsersController> in_logger,
-        IStringLocalizer<UsersController> in_localizer)
+        IStringLocalizer<UsersController> in_localizer,
+        SignInManager<ApplicationUser> in_signInManager)
     {
         m_userManager = in_userManager;
         m_roleManager = in_roleManager;
         m_logger = in_logger;
         m_localizer = in_localizer;
+        m_signInManager = in_signInManager;
     }
 
     [HttpGet]
@@ -274,6 +277,8 @@ public class UsersController : Controller
             return ret;
         }
 
+        await refreshCurrentUserSessionAsync(user, model.IsLocked);
+
         TempData["Success"] = m_localizer["Notification_UserUpdated", user.Email ?? string.Empty].Value;
         ret = RedirectToAction(nameof(Index));
         return ret;
@@ -359,6 +364,8 @@ public class UsersController : Controller
             return ret;
         }
 
+        await refreshCurrentUserSessionAsync(user, lockUser);
+
         TempData["Success"] = m_localizer["Notification_StatusUpdated", user.Email ?? string.Empty].Value;
         ret = RedirectToAction(nameof(Index));
         return ret;
@@ -404,5 +411,21 @@ public class UsersController : Controller
         }
 
         return ret;
+    }
+
+    private async Task refreshCurrentUserSessionAsync(ApplicationUser in_user, bool in_isLocked)
+    {
+        string? currentUserId = m_userManager.GetUserId(User);
+        if (string.Equals(in_user.Id, currentUserId, StringComparison.Ordinal))
+        {
+            if (in_isLocked)
+            {
+                await m_signInManager.SignOutAsync();
+            }
+            else
+            {
+                await m_signInManager.RefreshSignInAsync(in_user);
+            }
+        }
     }
 }

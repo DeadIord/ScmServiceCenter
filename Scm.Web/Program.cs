@@ -32,6 +32,11 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ScmDbContext>();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Home/AccessDenied";
+});
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(PolicyNames.AdministrationAccess, policy =>
