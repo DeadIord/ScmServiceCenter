@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Scm.Application.Services;
 using Scm.Application.Validators;
 using Scm.Infrastructure.Identity;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Localization;
+using Scm.Web.HealthChecks;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,8 +40,14 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
-builder.Services.Configure<MailOptions>(builder.Configuration.GetSection("Mail"));
+builder.Services.AddSingleton<IValidateOptions<MailOptions>, MailOptionsValidator>();
+builder.Services.AddOptions<MailOptions>()
+    .Bind(builder.Configuration.GetSection("Mail"))
+    .ValidateOnStart();
 builder.Services.AddScoped<IMailService, MailService>();
+
+builder.Services.AddHealthChecks()
+    .AddCheck<MailConfigurationHealthCheck>("mail_delivery");
 
 builder.Services.AddScoped<ReceivePartDtoValidator>();
 
@@ -61,15 +69,19 @@ var supportedCultures = new[] { defaultCulture };
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
-var app = builder.Build();
-
-var localizationOptions = new RequestLocalizationOptions
+builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    DefaultRequestCulture = new RequestCulture(defaultCulture),
-    SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures,
-    ApplyCurrentCultureToResponseHeaders = true
-};
+    options.DefaultRequestCulture = new RequestCulture(defaultCulture);
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+    options.ApplyCurrentCultureToResponseHeaders = true;
+    options.RequestCultureProviders = new IRequestCultureProvider[]
+    {
+        new AcceptLanguageHeaderRequestCultureProvider()
+    };
+});
+
+var app = builder.Build();
 
 await ScmDbSeeder.SeedAsync(app.Services);
 
@@ -78,6 +90,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 
 app.UseRequestLocalization(localizationOptions);
 
@@ -97,5 +111,7 @@ app.MapControllerRoute(
     pattern: "{controller=Orders}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
+app.MapHealthChecks("/health");
 
 await app.RunAsync();

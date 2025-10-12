@@ -12,32 +12,56 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OrdersNav" xml:space="preserve">
-    <value>Заказы</value>
-  </data>
-  <data name="KanbanNav" xml:space="preserve">
-    <value>Канбан</value>
-  </data>
-  <data name="StockNav" xml:space="preserve">
-    <value>Склад</value>
-  </data>
-  <data name="ReportsNav" xml:space="preserve">
-    <value>Отчёты</value>
-  </data>
-  <data name="CrmNav" xml:space="preserve">
-    <value>CRM</value>
-  </data>
   <data name="AccountsNav" xml:space="preserve">
     <value>Контрагенты</value>
   </data>
+  <data name="BrandName" xml:space="preserve">
+    <value>SCM сервис-центр</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
   <data name="ContactsNav" xml:space="preserve">
     <value>Контакты</value>
+  </data>
+  <data name="CrmNav" xml:space="preserve">
+    <value>CRM</value>
   </data>
   <data name="DealsNav" xml:space="preserve">
     <value>Сделки</value>
   </data>
   <data name="DealsNavDescription" xml:space="preserve">
     <value>Управляйте воронкой продаж и прогнозами.</value>
+  </data>
+  <data name="FooterTagline" xml:space="preserve">
+    <value>Надёжный ремонт и сервис в один клик</value>
+  </data>
+  <data name="KanbanNav" xml:space="preserve">
+    <value>Канбан</value>
+  </data>
+  <data name="LanguageSwitcherLabel" xml:space="preserve">
+    <value>Сменить язык интерфейса</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Войти</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Выйти</value>
+  </data>
+  <data name="OrdersNav" xml:space="preserve">
+    <value>Заказы</value>
+  </data>
+  <data name="ReportBuilderNav" xml:space="preserve">
+    <value>Конструктор отчётов</value>
+  </data>
+  <data name="ReportsNav" xml:space="preserve">
+    <value>Отчёты</value>
+  </data>
+  <data name="SiteTitle" xml:space="preserve">
+    <value>SCM сервис-центр</value>
+  </data>
+  <data name="StockNav" xml:space="preserve">
+    <value>Склад</value>
   </data>
   <data name="TasksNav" xml:space="preserve">
     <value>Задачи</value>
@@ -50,5 +74,32 @@
   </data>
   <data name="TicketsNavDescription" xml:space="preserve">
     <value>Поддерживайте клиентов и ускоряйте решения.</value>
+  </data>
+  <data name="ToggleNavigation" xml:space="preserve">
+    <value>Переключить навигацию</value>
+  </data>
+  <data name="ParamType_String" xml:space="preserve">
+    <value>Строка</value>
+  </data>
+  <data name="ParamType_Int" xml:space="preserve">
+    <value>Целое число</value>
+  </data>
+  <data name="ParamType_Decimal" xml:space="preserve">
+    <value>Десятичное</value>
+  </data>
+  <data name="ParamType_Date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="ParamType_Bool" xml:space="preserve">
+    <value>Логическое</value>
+  </data>
+  <data name="Table_Empty" xml:space="preserve">
+    <value>Записей нет</value>
+  </data>
+  <data name="Toast_StatusUpdated" xml:space="preserve">
+    <value>Статус обновлён</value>
+  </data>
+  <data name="Toast_StatusUpdateFailed" xml:space="preserve">
+    <value>Не удалось обновить статус</value>
   </data>
 </root>

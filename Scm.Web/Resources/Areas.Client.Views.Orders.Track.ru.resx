@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action_Show" xml:space="preserve">
+    <value>Показать</value>
+  </data>
+  <data name="Description_ClientPortal" xml:space="preserve">
+    <value>Введите номер заказа и токен доступа из SMS, чтобы отслеживать ремонт и согласовывать смету.</value>
+  </data>
+  <data name="Form_CommentLabel" xml:space="preserve">
+    <value>Ваш комментарий</value>
+  </data>
+  <data name="Form_Send" xml:space="preserve">
+    <value>Отправить</value>
+  </data>
+  <data name="Heading_ClientPortal" xml:space="preserve">
+    <value>Личный кабинет клиента</value>
+  </data>
+  <data name="Heading_Communication" xml:space="preserve">
+    <value>Связь с мастером</value>
+  </data>
+  <data name="Heading_Estimate" xml:space="preserve">
+    <value>Смета на согласовании</value>
+  </data>
+  <data name="Heading_FinalStep" xml:space="preserve">
+    <value>Шаг 4: Завершение</value>
+  </data>
+  <data name="Heading_Status" xml:space="preserve">
+    <value>Статус заказа</value>
+  </data>
+  <data name="Label_AccessToken" xml:space="preserve">
+    <value>Токен доступа</value>
+  </data>
+  <data name="Label_OrderNumber" xml:space="preserve">
+    <value>Номер заказа</value>
+  </data>
+  <data name="Message_FromClient" xml:space="preserve">
+    <value>Вы</value>
+  </data>
+  <data name="Message_FromService" xml:space="preserve">
+    <value>Сервис-центр</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Отслеживание заказа</value>
+  </data>
+  <data name="Quote_AllReviewed" xml:space="preserve">
+    <value>Все работы уже рассмотрены. Ожидайте обновление статуса заказа.</value>
+  </data>
+  <data name="Quote_ApproveYes" xml:space="preserve">
+    <value>Да</value>
+  </data>
+  <data name="Quote_Header_Approve" xml:space="preserve">
+    <value>Выполнять</value>
+  </data>
+  <data name="Quote_Header_Price" xml:space="preserve">
+    <value>Цена</value>
+  </data>
+  <data name="Quote_Header_Qty" xml:space="preserve">
+    <value>Кол-во</value>
+  </data>
+  <data name="Quote_Header_Title" xml:space="preserve">
+    <value>Наименование</value>
+  </data>
+  <data name="Quote_HelpText" xml:space="preserve">
+    <value>Снимите отметку с позиций, которые не нужно выполнять. После отправки решение будет доступно мастеру.</value>
+  </data>
+  <data name="Quote_Submit" xml:space="preserve">
+    <value>Отправить решение</value>
+  </data>
+  <data name="Quote_TableEmpty" xml:space="preserve">
+    <value>Записей нет</value>
+  </data>
+  <data name="QuoteLineKind_Labor" xml:space="preserve">
+    <value>Работа</value>
+  </data>
+  <data name="QuoteLineKind_Part" xml:space="preserve">
+    <value>Запчасть</value>
+  </data>
+  <data name="Status_Closed" xml:space="preserve">
+    <value>Закрыт</value>
+  </data>
+  <data name="Status_Diagnosing" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="Status_InRepair" xml:space="preserve">
+    <value>Подтверждён клиентом</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Готов</value>
+  </data>
+  <data name="Status_Received" xml:space="preserve">
+    <value>Принят</value>
+  </data>
+  <data name="Status_WaitingApproval" xml:space="preserve">
+    <value>Ожидает согласования</value>
+  </data>
+  <data name="Summary_Client" xml:space="preserve">
+    <value>Клиент</value>
+  </data>
+  <data name="Summary_Description" xml:space="preserve">
+    <value>После подтверждения сметы мастер приступит к ремонту. Следите за обновлениями статуса.</value>
+  </data>
+  <data name="Summary_Device" xml:space="preserve">
+    <value>Устройство</value>
+  </data>
+  <data name="Summary_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Summary_OrderNumber" xml:space="preserve">
+    <value>Номер заказа</value>
+  </data>
+  <data name="Summary_Phone" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="Text_CurrentStatus" xml:space="preserve">
+    <value>Текущий статус:</value>
+  </data>
+</root>
