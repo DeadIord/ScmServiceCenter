@@ -1,8 +1,221 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model Scm.Web.Models.Home.HomeIndexViewModel
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = "Главная";
+    
+    string StatusBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+    
+    string StatusTitle(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "Принят",
+        OrderStatus.Diagnosing => "Диагностика",
+        OrderStatus.WaitingApproval => "Ожидает согласования",
+        OrderStatus.InRepair => "В ремонте",
+        OrderStatus.Ready => "Готов",
+        OrderStatus.Closed => "Закрыт",
+        _ => status.ToString()
+    };
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section с заголовком, кнопкой и карточками функций -->
+<div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="card-body p-5 text-white">
+        <div class="row align-items-start">
+            <!-- Левая часть: Заголовок и кнопка -->
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold mb-3">ScmServiceCenter - CRM для сервисный центров и мастерских</h1>
+                <p class="lead mb-4">Упорядочивайте заявки. контролируйте сроки и остатки на складе,
+                                    общайтесь с клиентами лр•ззрачно и быст;хз. Открытый код модулыная
+                                    архитектура. локальная установка еез подлисок.</p>
+                <a href="@Url.Action("Create", "Orders")" class="btn btn-light btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Создать заказ
+                </a>
+            </div>
+            
+            <!-- Правая часть: Грид 2x2 с карточками функций -->
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <!-- Приём заявок -->
+                    <div class="col-6">
+                        <a href="@Url.Action("Create", "Orders")" class="text-decoration-none">
+                            <div class="card h-100 bg-white bg-opacity-10 border-0 text-white hover-card">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-clipboard-check fs-2 mb-2"></i>
+                                    <h6 class="card-title mb-0">Приём заявок</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Планирование -->
+                    <div class="col-6">
+                        <a href="@Url.Action("Kanban", "Orders")" class="text-decoration-none">
+                            <div class="card h-100 bg-white bg-opacity-10 border-0 text-white hover-card">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-kanban fs-2 mb-2"></i>
+                                    <h6 class="card-title mb-0">Планирование</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Склад -->
+                    <div class="col-6">
+                        <a href="@Url.Action("Index", "Stock")" class="text-decoration-none">
+                            <div class="card h-100 bg-white bg-opacity-10 border-0 text-white hover-card">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-box-seam fs-2 mb-2"></i>
+                                    <h6 class="card-title mb-0">Склад</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Отчёты -->
+                    <div class="col-6">
+                        <a href="@Url.Action("Dashboard", "Reports")" class="text-decoration-none">
+                            <div class="card h-100 bg-white bg-opacity-10 border-0 text-white hover-card">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-graph-up fs-2 mb-2"></i>
+                                    <h6 class="card-title mb-0">Отчёты</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Текущие заявки (ТОП 3, урезанная таблица) -->
+<div class="card mb-4">
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Текущие заявки</h5>
+            <a href="@Url.Action("Index", "Orders")" class="btn btn-sm btn-primary">
+                Просмотреть все заказы <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Номер заявки</th>
+                        <th>Устройство</th>
+                        <th>Статус</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.RecentOrders.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Активных заказов нет
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var order in Model.RecentOrders.Take(3))
+                        {
+                            <tr>
+                                <td class="fw-semibold">@order.Number</td>
+                                <td>@order.Device</td>
+                                <td>
+                                    <span class="badge text-bg-@StatusBadge(order.Status)">
+                                        @StatusTitle(order.Status)
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-primary" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard метрики (1 ряд, 4 колонки) -->
+<div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="card-subtitle text-muted mb-0">Новые заявки</h6>
+                    <i class="bi bi-inbox text-primary fs-4"></i>
+                </div>
+                <h2 class="display-4 fw-bold mb-0">@Model.NewOrdersCount</h2>
+                <small class="text-muted">Статус: Принят</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="card-subtitle text-muted mb-0">В работе</h6>
+                    <i class="bi bi-gear text-info fs-4"></i>
+                </div>
+                <h2 class="display-4 fw-bold mb-0">@Model.InProgressCount</h2>
+                <small class="text-muted">Диагностика + Ремонт</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="card-subtitle text-muted mb-0">Запчастей на складе</h6>
+                    <i class="bi bi-box-seam text-success fs-4"></i>
+                </div>
+                <h2 class="display-4 fw-bold mb-0">@Model.PartsInStockCount</h2>
+                <small class="text-muted">Общее количество</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="card-subtitle text-muted mb-0">Просроченные</h6>
+                    <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
+                </div>
+                <h2 class="display-4 fw-bold mb-0 text-danger">@Model.OverdueCount</h2>
+                <small class="text-muted">Истёк SLA</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        background-color: rgba(255, 255, 255, 0.2) !important;
+    }
+</style>
