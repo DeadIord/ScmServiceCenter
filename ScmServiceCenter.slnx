@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Scm.Application/Scm.Application.csproj" />
+  <Project Path="Scm.Domain/Scm.Domain.csproj" />
+  <Project Path="Scm.Infrastructure/Scm.Infrastructure.csproj" />
+  <Project Path="Scm.Web/Scm.Web.csproj" />
+</Solution>

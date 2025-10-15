@@ -1,0 +1,132 @@
+@model Scm.Web.Models.ReportBuilder.ReportPreviewViewModel
+@{
+    ViewData["Title"] = ViewData["Title"] ?? $"Предпросмотр: {Model.Title}";
+    var columnCount = Math.Max(1, Model.Columns.Count);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">@Model.Title</h1>
+        <p class="text-muted mb-0">Первые 200 строк для проверки запроса</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Назад к списку</a>
+</div>
+
+<div class="card shadow-sm rounded-3 mb-4">
+    <div class="card-header bg-white">
+        <h2 class="h5 mb-0">Параметры</h2>
+    </div>
+    <div class="card-body">
+        <form asp-action="Preview" method="post" class="row g-3">
+            <input type="hidden" name="id" value="@Model.ReportId" />
+            @foreach (var parameter in Model.Parameters)
+            {
+                var name = parameter.Name;
+                var value = Model.Values.TryGetValue(name, out var current) ? current : parameter.DefaultValue;
+                <div class="col-md-4">
+                    <label class="form-label">@name</label>
+                    @switch (parameter.Type?.ToLowerInvariant())
+                    {
+                        case "date":
+                            <input type="date" class="form-control" name="values[@name]" value="@value" />
+                            break;
+                        case "int":
+                        case "integer":
+                            <input type="number" step="1" class="form-control" name="values[@name]" value="@value" />
+                            break;
+                        case "decimal":
+                        case "numeric":
+                            <input type="number" step="0.01" class="form-control" name="values[@name]" value="@value" />
+                            break;
+                        case "bool":
+                        case "boolean":
+                            <select class="form-select" name="values[@name]">
+                                <option value="">(не указано)</option>
+                                <option value="true" selected="@(string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Истина</option>
+                                <option value="false" selected="@(string.Equals(value, "false", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Ложь</option>
+                            </select>
+                            break;
+                        default:
+                            <input type="text" class="form-control" name="values[@name]" value="@value" />
+                            break;
+                    }
+                    <div class="form-text">Тип: @parameter.Type</div>
+                </div>
+            }
+            <div class="col-12 d-flex justify-content-between align-items-center mt-2">
+                <span class="text-muted">Если LIMIT не указан, автоматически применяется ограничение 200 строк.</span>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-play-fill"></i> Предпросмотр</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">@Model.Error</div>
+}
+else
+{
+    <div class="card shadow-sm rounded-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">Результат (@Model.Rows.Count строк)</h2>
+            <div class="d-flex gap-2">
+                <form asp-action="ExportCsv" method="post">
+                    <input type="hidden" name="id" value="@Model.ReportId" />
+                    @foreach (var parameter in Model.Parameters)
+                    {
+                        var name = parameter.Name;
+                        var value = Model.Values.TryGetValue(name, out var current) ? current : parameter.DefaultValue;
+                        <input type="hidden" name="values[@name]" value="@value" />
+                    }
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv"></i> Экспорт CSV</button>
+                </form>
+                <form asp-action="ExportXlsx" method="post">
+                    <input type="hidden" name="id" value="@Model.ReportId" />
+                    @foreach (var parameter in Model.Parameters)
+                    {
+                        var name = parameter.Name;
+                        var value = Model.Values.TryGetValue(name, out var current) ? current : parameter.DefaultValue;
+                        <input type="hidden" name="values[@name]" value="@value" />
+                    }
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-earmark-excel"></i> Экспорт XLSX</button>
+                </form>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm align-middle table-sticky mb-0">
+                    <thead class="table-light">
+                        <tr>
+                        @foreach (var column in Model.Columns)
+                        {
+                            <th>@column</th>
+                        }
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.Rows.Any())
+                    {
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr>
+                            @foreach (var column in Model.Columns)
+                            {
+                                row.TryGetValue(column, out var cellValue);
+                                <td>@(cellValue ?? "")</td>
+                            }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="@columnCount" class="text-center py-4 table-empty">Записей нет</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

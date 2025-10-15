@@ -1,0 +1,349 @@
+@model Scm.Web.Models.Orders.OrderDetailsViewModel
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = $"Заказ {Model.Order.Number}";
+    OrderStatus[] statuses = Enum.GetValues<OrderStatus>();
+    OrderPriority priority = Model.Order.Priority;
+    string StatusBadge(OrderStatus in_status) => in_status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+    string StatusTitle(OrderStatus in_status) => in_status switch
+    {
+        OrderStatus.Received => "Принят",
+        OrderStatus.Diagnosing => "Диагностика",
+        OrderStatus.WaitingApproval => "Ожидает согласования",
+        OrderStatus.InRepair => "В ремонте",
+        OrderStatus.Ready => "Готов",
+        OrderStatus.Closed => "Закрыт",
+        _ => in_status.ToString()
+    };
+    string PriorityBadge(OrderPriority in_priority) => in_priority switch
+    {
+        OrderPriority.Low => "secondary",
+        OrderPriority.Normal => "light text-dark",
+        OrderPriority.High => "warning",
+        OrderPriority.Critical => "danger",
+        _ => "secondary"
+    };
+    string PriorityTitle(OrderPriority in_priority) => in_priority switch
+    {
+        OrderPriority.Low => "Низкий",
+        OrderPriority.Normal => "Нормальный",
+        OrderPriority.High => "Высокий",
+        OrderPriority.Critical => "Критичный",
+        _ => in_priority.ToString()
+    };
+}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <h1 class="section-title mb-1">Заказ №@Model.Order.Number</h1>
+                    <p class="section-subtitle mb-0">Контроль этапов ремонта и коммуникаций с клиентом в одном месте</p>
+                </div>
+                <div class="status-legend">
+                    <span class="badge text-bg-@StatusBadge(Model.Order.Status) badge-status">@StatusTitle(Model.Order.Status)</span>
+                    <span class="badge text-bg-@PriorityBadge(priority) badge-status">Приоритет: @PriorityTitle(priority)</span>
+                    <span class="badge badge-light-alt">SLA: @(Model.Order.SLAUntil?.ToString("dd.MM.yyyy") ?? "Не задано")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-8">
+        <div class="card p-4 mb-4">
+            <h5 class="fw-semibold mb-3">Статус и информация о клиенте</h5>
+            <div class="order-info-grid mb-4">
+                <div class="order-meta">
+                    <span class="order-meta-label">Текущий статус</span>
+                    <span class="order-meta-value">@StatusTitle(Model.Order.Status)</span>
+                </div>
+                <div class="order-meta">
+                    <span class="order-meta-label">Приоритет</span>
+                    <span class="order-meta-value">@PriorityTitle(priority)</span>
+                </div>
+                <div class="order-meta">
+                    <span class="order-meta-label">SLA до</span>
+                    <span class="order-meta-value">@(Model.Order.SLAUntil?.ToString("dd.MM.yyyy") ?? "Не задано")</span>
+                </div>
+            </div>
+            <div class="row g-3 align-items-end mb-4">
+                <div class="col-lg-8">
+                    <label class="form-label">Изменить статус</label>
+                    <div class="input-group">
+                        <select class="form-select" id="status-select">
+                            @foreach (var status in statuses)
+                            {
+                                <option value="@status" selected="@(status == Model.Order.Status ? "selected" : null)">@StatusTitle(status)</option>
+                            }
+                        </select>
+                        <button class="btn btn-primary" id="change-status-btn" data-order-id="@Model.Order.Id">Обновить</button>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <a class="btn btn-outline-secondary w-100" asp-action="Index">К списку заказов</a>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="order-meta">
+                        <span class="order-meta-label">Клиент</span>
+                        <span class="order-meta-value">@Model.Order.ClientName</span>
+                        <a class="text-decoration-none" href="tel:@Model.Order.ClientPhone">@Model.Order.ClientPhone</a>
+                        @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
+                        {
+                            <a class="text-decoration-none" href="mailto:@Model.Order.ClientEmail">@Model.Order.ClientEmail</a>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="order-meta">
+                        <span class="order-meta-label">Устройство</span>
+                        <span class="order-meta-value">@Model.Order.Device</span>
+                        @if (!string.IsNullOrWhiteSpace(Model.Order.Serial))
+                        {
+                            <span class="text-muted">Серийный номер: @Model.Order.Serial</span>
+                        }
+                    </div>
+                </div>
+                @if (Model.Order.Account is not null)
+                {
+                    <div class="col-md-6">
+                        <div class="order-meta">
+                            <span class="order-meta-label">Контрагент</span>
+                            <a class="order-meta-value text-decoration-none" asp-controller="Accounts" asp-action="Details" asp-route-id="@Model.Order.AccountId">@Model.Order.Account.Name</a>
+                        </div>
+                    </div>
+                }
+                @if (Model.Order.Contact is not null)
+                {
+                    <div class="col-md-6">
+                        <div class="order-meta">
+                            <span class="order-meta-label">Контакт</span>
+                            <span class="order-meta-value">@Model.Order.Contact.FullName</span>
+                            <a class="text-decoration-none" href="mailto:@Model.Order.Contact.Email">@Model.Order.Contact.Email</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <hr class="my-4" />
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Токен доступа клиента</label>
+                    <input class="form-control" value="@Model.Order.ClientAccessToken" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Ссылка для клиента</label>
+                    <input class="form-control" value="@Model.ClientTrackingLink" readonly />
+                </div>
+            </div>
+        </div>
+        <div class="card p-4">
+            <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-md-3" id="order-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="quote-tab" data-bs-toggle="tab" data-bs-target="#quote" type="button" role="tab">Смета</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab">Сообщения</button>
+                </li>
+            </ul>
+            <div class="tab-content pt-4">
+                <div class="tab-pane fade show active" id="quote" role="tabpanel">
+                    @await Html.PartialAsync("_QuoteTable", Model.Order)
+                    <div class="d-flex flex-column flex-md-row justify-content-end gap-2">
+                        <button class="btn btn-primary" id="submit-quote" data-order-id="@Model.Order.Id"><i class="bi bi-send me-2"></i>Отправить на согласование</button>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="messages" role="tabpanel">
+                    <div class="card shadow-sm rounded-3 mb-3">
+                        <div class="card-body" id="messages-container">
+                            @foreach (var message in Model.Messages)
+                            {
+                                var alignment = message.FromClient ? "justify-content-start" : "justify-content-end";
+                                var bubble = message.FromClient ? "message-bubble message-bubble-client" : "message-bubble message-bubble-staff";
+                                <div class="d-flex @alignment mb-3">
+                                    <div class="@bubble">
+                                        <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
+                                            <div class="fw-semibold">@(message.FromClient ? "Клиент" : "Сотрудник")</div>
+                                            <small class="text-muted">@message.AtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                        </div>
+                                        <div class="white-space-pre-wrap">@message.Text</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <form id="message-form" class="card shadow-sm rounded-3">
+                        <div class="card-body">
+                            <input type="hidden" name="OrderId" value="@Model.Order.Id" />
+                            <div class="mb-3">
+                                <label class="form-label">Сообщение</label>
+                                <textarea class="form-control" name="Text" rows="3" required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-chat-text me-2"></i>Отправить</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="card p-4 sticky-actions">
+            <h5 class="fw-semibold mb-3">Быстрые действия</h5>
+            <div class="d-grid gap-2 mb-4">
+                <button class="btn btn-primary" id="action-submit-quote" data-order-id="@Model.Order.Id"><i class="bi bi-send-check me-2"></i>Отправить смету</button>
+                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#statusModal"><i class="bi bi-arrow-repeat me-2"></i>Сменить статус</button>
+                <a class="btn btn-outline-success" href="#"><i class="bi bi-receipt me-2"></i>Сформировать счёт</a>
+            </div>
+            <div class="bg-light rounded-4 p-3">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="brand-icon flex-shrink-0"><i class="bi bi-shield-check"></i></div>
+                    <div>
+                        <div class="fw-semibold">История отправок</div>
+                        <div class="text-muted small">Журнал обновляется автоматически после отправки письма клиенту</div>
+                    </div>
+                </div>
+                <ul class="list-unstyled small mb-0 text-muted">
+                    <li><i class="bi bi-envelope-paper-heart me-2 text-primary"></i>Клиент получает письмо с ссылкой на согласование</li>
+                    <li><i class="bi bi-lock me-2 text-primary"></i>Ссылка защищена уникальным токеном клиента</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Смена статуса заказа</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Выберите новый этап обработки заказа. Клиент увидит обновление после сохранения.</p>
+                <select class="form-select" id="modal-status-select">
+                    @foreach (var status in statuses)
+                    {
+                        <option value="@status" selected="@(status == Model.Order.Status ? "selected" : null)">@StatusTitle(status)</option>
+                    }
+                </select>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="modal-change-status">Применить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const orderId = '@Model.Order.Id';
+        const messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function updateStatus(selectId) {
+            const status = document.getElementById(selectId).value;
+            axios.post('@Url.Action("ChangeStatus")', Qs.stringify({ id: orderId, to: status }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                .then(() => {
+                    showToast('Статус обновлён', 'bg-success');
+                    setTimeout(() => window.location.reload(), 600);
+                })
+                .catch(err => showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger'));
+        }
+
+        document.getElementById('change-status-btn').addEventListener('click', function () {
+            updateStatus('status-select');
+        });
+
+        document.getElementById('modal-change-status').addEventListener('click', function () {
+            updateStatus('modal-status-select');
+        });
+
+        document.getElementById('add-line-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            axios.post('@Url.Action("AddQuoteLine")', new URLSearchParams(formData))
+                .then(() => {
+                    showToast('Строка добавлена', 'bg-success');
+                    setTimeout(() => window.location.reload(), 400);
+                })
+                .catch(err => showToast(err.response?.data?.errors?.join('\n') ?? 'Не удалось добавить строку', 'bg-danger'));
+        });
+
+        const submitButtons = [document.getElementById('submit-quote'), document.getElementById('action-submit-quote')];
+        submitButtons.forEach(btn => btn?.addEventListener('click', () => {
+            axios.post('@Url.Action("SubmitQuote")', Qs.stringify({ orderId }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+                .then(() => {
+                    showToast('Смета отправлена на согласование', 'bg-success');
+                    setTimeout(() => window.location.reload(), 600);
+                })
+                .catch(err => showToast(err.response?.data?.message ?? 'Ошибка', 'bg-danger'));
+        }));
+
+        document.getElementById('message-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const payload = {
+                orderId: formData.get('OrderId'),
+                text: formData.get('Text')
+            };
+            axios.post('@Url.Action("Add", "Messages")', payload)
+                .then(response => {
+                    const message = response.data;
+                    appendMessage(message);
+                    this.reset();
+                    showToast('Сообщение отправлено', 'bg-success');
+                })
+                .catch(err => showToast(err.response?.data?.message ?? 'Не удалось отправить сообщение', 'bg-danger'));
+        });
+
+        function appendMessage(message) {
+            const container = document.getElementById('messages-container');
+            if (!container) {
+                return;
+            }
+            const wrapper = document.createElement('div');
+            wrapper.className = `d-flex ${message.fromClient ? 'justify-content-start' : 'justify-content-end'} mb-3`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${message.fromClient ? 'message-bubble-client' : 'message-bubble-staff'}`;
+
+            const header = document.createElement('div');
+            header.className = 'd-flex justify-content-between align-items-center gap-3 mb-2';
+
+            const author = document.createElement('div');
+            author.className = 'fw-semibold';
+            author.textContent = message.fromClient ? 'Клиент' : 'Сотрудник';
+
+            const timestamp = document.createElement('small');
+            timestamp.className = 'text-muted';
+            timestamp.textContent = new Date(message.atUtc).toLocaleString();
+
+            header.appendChild(author);
+            header.appendChild(timestamp);
+
+            const text = document.createElement('div');
+            text.className = 'white-space-pre-wrap';
+            text.textContent = message.text;
+
+            bubble.appendChild(header);
+            bubble.appendChild(text);
+
+            wrapper.appendChild(bubble);
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+}

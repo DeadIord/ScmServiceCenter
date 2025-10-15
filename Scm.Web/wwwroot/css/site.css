@@ -1,0 +1,262 @@
+:root {
+  --scm-primary: #4f46e5;
+  --scm-primary-dark: #312e81;
+  --scm-accent: #22d3ee;
+  --scm-surface: #f8fafc;
+  --scm-surface-dark: #e2e8f0;
+  --scm-shadow: 0 25px 45px rgba(15, 23, 42, 0.15);
+}
+
+.app-body {
+  font-family: 'Montserrat', 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.09) 0%, rgba(15, 23, 42, 0.02) 60%), var(--scm-surface);
+  color: #0f172a;
+}
+
+.app-header {
+  background: radial-gradient(circle at top left, rgba(34, 211, 238, 0.25), transparent 55%),
+    linear-gradient(90deg, var(--scm-primary) 0%, #4338ca 100%);
+}
+
+.navbar-brand {
+  font-size: 1.1rem;
+  letter-spacing: 0.01em;
+}
+
+.navbar .nav-link {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85) !important;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus,
+.navbar .nav-link.active {
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.app-main {
+  flex: 1 0 auto;
+}
+
+.app-footer {
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.toast-container {
+  z-index: 1080;
+}
+
+.card {
+  border: none;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--scm-shadow);
+  backdrop-filter: blur(6px);
+}
+
+.card-header,
+.card-footer {
+  background-color: transparent;
+  border: none;
+}
+
+.badge-status {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
+.form-control,
+.form-select {
+  border-radius: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 0.65rem 1rem;
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(79, 70, 229, 0.6);
+  box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.15);
+}
+
+.btn {
+  border-radius: 0.9rem;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--scm-primary) 0%, var(--scm-primary-dark) 100%);
+  border: none;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(135deg, var(--scm-primary-dark) 0%, #1e1b4b 100%);
+}
+
+.table {
+  --bs-table-bg: transparent;
+}
+
+.table thead th {
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+  background-color: rgba(226, 232, 240, 0.4);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(79, 70, 229, 0.08);
+}
+
+.table-sticky thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table-empty {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.section-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.status-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.status-legend .badge {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 75%;
+  border-radius: 1.15rem;
+  padding: 0.85rem 1.15rem;
+  box-shadow: var(--scm-shadow);
+}
+
+.message-bubble-client {
+  background-color: rgba(255, 255, 255, 0.95);
+  color: inherit;
+}
+
+.message-bubble-staff {
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  color: #ffffff;
+}
+
+.white-space-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.quote-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.quote-summary-item {
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.quote-summary-item:last-child {
+  background: rgba(34, 211, 238, 0.12);
+}
+
+.order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.order-meta {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.order-meta-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
+.order-meta-value {
+  font-weight: 600;
+}
+
+.badge-light-alt {
+  background-color: rgba(255, 255, 255, 0.65);
+  color: #0f172a;
+}
+
+.sticky-actions {
+  position: sticky;
+  top: 100px;
+}
+
+.kanban-status-card {
+  border: none;
+}
+
+.kanban-column {
+  min-height: 200px;
+}
+
+@media (max-width: 991.98px) {
+  .card {
+    border-radius: 1rem;
+  }
+
+  .navbar .nav-link {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .message-bubble {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .section-title {
+    font-size: 1.45rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .quote-summary,
+  .order-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

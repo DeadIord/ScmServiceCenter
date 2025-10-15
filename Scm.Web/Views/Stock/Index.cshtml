@@ -1,0 +1,65 @@
+@model Scm.Web.Models.Stock.StockIndexViewModel
+@{
+    ViewData["Title"] = Model.OnlyLowStock ? "Низкий остаток" : "Склад";
+    var receiveModel = new ReceivePartDto();
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="section-title mb-1">@ViewData["Title"]</h1>
+        <p class="text-muted mb-0">Управление запасами и приходами</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="LowStock"><i class="bi bi-exclamation-triangle me-2"></i>Низкий остаток</a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiveModal"><i class="bi bi-box-arrow-in-down me-2"></i>Приход</button>
+    </div>
+</div>
+<div class="card shadow-sm rounded-3 p-4">
+    <form method="get" class="row g-3 align-items-end mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Поиск</label>
+            <div class="input-group">
+                <input class="form-control" name="q" value="@Model.Query" placeholder="SKU или наименование" />
+                <button class="btn btn-outline-secondary" type="submit">Найти</button>
+            </div>
+        </div>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle table-sticky mb-0">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Наименование</th>
+                    <th class="text-end">Остаток</th>
+                    <th class="text-end">Порог</th>
+                    <th class="text-end">Розничная цена</th>
+                    <th>Активен</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Parts.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 table-empty">Записей нет</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var part in Model.Parts)
+                    {
+                        <tr>
+                            <td>@part.Sku</td>
+                            <td>@part.Title</td>
+                            <td class="text-end">@part.StockQty.ToString("N2") @part.Unit</td>
+                            <td class="text-end">@part.ReorderPoint.ToString("N2")</td>
+                            <td class="text-end">@part.PriceOut.ToString("N2") ₽</td>
+                            <td>@(part.IsActive ? "Да" : "Нет")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+@await Html.PartialAsync("_ReceiveModal", receiveModel)
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

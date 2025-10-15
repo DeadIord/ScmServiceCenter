@@ -1,0 +1,139 @@
+@model Scm.Web.Models.Orders.OrdersIndexViewModel
+@using Scm.Domain.Entities
+@{
+    ViewData["Title"] = "Заказы";
+    OrderStatus[] statuses = Enum.GetValues<OrderStatus>();
+    string StatusBadge(OrderStatus in_status) => in_status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+    string StatusTitle(OrderStatus in_status) => in_status switch
+    {
+        OrderStatus.Received => "Принят",
+        OrderStatus.Diagnosing => "Диагностика",
+        OrderStatus.WaitingApproval => "Ожидает согласования",
+        OrderStatus.InRepair => "В ремонте",
+        OrderStatus.Ready => "Готов",
+        OrderStatus.Closed => "Закрыт",
+        _ => in_status.ToString()
+    };
+    string PriorityBadge(OrderPriority in_priority) => in_priority switch
+    {
+        OrderPriority.Low => "secondary",
+        OrderPriority.Normal => "light text-dark",
+        OrderPriority.High => "warning",
+        OrderPriority.Critical => "danger",
+        _ => "secondary"
+    };
+    string PriorityTitle(OrderPriority in_priority) => in_priority switch
+    {
+        OrderPriority.Low => "Низкий",
+        OrderPriority.Normal => "Нормальный",
+        OrderPriority.High => "Высокий",
+        OrderPriority.Critical => "Критичный",
+        _ => in_priority.ToString()
+    };
+    string SlaClass(DateTime? in_date) => in_date is null ? "text-muted" : in_date.Value < DateTime.UtcNow ? "text-danger fw-semibold" : "text-success";
+}
+<div class="card p-4 mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+        <div>
+            <h1 class="section-title mb-1">Очередь заказов</h1>
+            <p class="section-subtitle mb-0">Актуальные ремонты, статусы согласования и связь с клиентами</p>
+        </div>
+        <div class="d-flex flex-column flex-sm-row gap-2">
+            <a class="btn btn-outline-light text-dark" asp-action="Kanban"><i class="bi bi-columns-gap me-2"></i>Доска Kanban</a>
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-circle me-2"></i>Создать заказ</a>
+        </div>
+    </div>
+</div>
+<div class="card p-4 mb-4">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-lg-4">
+            <label class="form-label">Поиск</label>
+            <div class="input-group">
+                <input type="text" class="form-control" name="q" value="@Model.Query" placeholder="Номер, клиент, email, устройство" />
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <label class="form-label">Статус</label>
+            <select class="form-select" name="status" onchange="this.form.submit()">
+                <option value="">Все</option>
+                @foreach (var status in statuses)
+                {
+                    <option value="@status" selected="@(Model.Status == status ? "selected" : null)">@StatusTitle(status)</option>
+                }
+            </select>
+        </div>
+        <div class="col-lg-5">
+            <label class="form-label">Быстрые фильтры</label>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var status in statuses)
+                {
+                    bool selected = Model.Status == status;
+                    <a class="badge rounded-pill text-decoration-none px-3 py-2 badge-status text-bg-@StatusBadge(status) @(selected ? "shadow" : string.Empty)" href="@Url.Action("Index", new { status = selected ? (OrderStatus?)null : status, q = Model.Query })">@StatusTitle(status)</a>
+                }
+            </div>
+        </div>
+    </form>
+</div>
+<div class="card p-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle table-sticky mb-0">
+            <thead>
+                <tr>
+                    <th>Номер</th>
+                    <th>Клиент</th>
+                    <th>Email</th>
+                    <th>Телефон</th>
+                    <th>Устройство</th>
+                    <th>Статус</th>
+                    <th>Приоритет</th>
+                    <th>SLA</th>
+                    <th>Создан</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Orders.Any())
+                {
+                    <tr>
+                        <td colspan="10" class="text-center py-5 table-empty">Заказы не найдены</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@order.Number</td>
+                            <td>@order.ClientName</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(order.ClientEmail))
+                                {
+                                    <a href="mailto:@order.ClientEmail" class="text-decoration-none">@order.ClientEmail</a>
+                                }
+                            </td>
+                            <td><a href="tel:@order.ClientPhone" class="text-decoration-none">@order.ClientPhone</a></td>
+                            <td>@order.Device</td>
+                            <td><span class="badge text-bg-@StatusBadge(order.Status) badge-status">@StatusTitle(order.Status)</span></td>
+                            <td><span class="badge text-bg-@PriorityBadge(order.Priority) badge-status">@PriorityTitle(order.Priority)</span></td>
+                            <td class="@SlaClass(order.SLAUntil)">@order.SLAUntil?.ToString("dd.MM.yyyy") ?? "—"</td>
+                            <td>@order.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@order.Id"><i class="bi bi-arrow-right"></i></a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

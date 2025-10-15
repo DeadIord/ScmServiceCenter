@@ -1,0 +1,119 @@
+@model Scm.Web.Models.ReportBuilder.ReportDefinitionEditViewModel
+@{
+    ViewData["Title"] ??= Model.Id.HasValue ? $"Редактирование: {Model.Title}" : "Новый отчёт";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+        <p class="text-muted mb-0">Опишите запрос, параметры и доступ к отчёту</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Назад к списку</a>
+</div>
+
+<form asp-action="Edit" method="post" class="card shadow-sm rounded-3">
+    <div class="card-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Id" />
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Visibility" class="form-label"></label>
+                <select asp-for="Visibility" class="form-select" asp-items="Html.GetEnumSelectList<Scm.Domain.Entities.ReportVisibility>()"></select>
+            </div>
+            <div class="col-md-12">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-md-12">
+                <label asp-for="SqlText" class="form-label"></label>
+                <textarea asp-for="SqlText" class="form-control font-monospace" rows="8" spellcheck="false"></textarea>
+                <small class="form-text text-muted">Допускаются только SELECT-запросы. В запросе обязательно используйте параметризацию вида @@имя.</small>
+                <span asp-validation-for="SqlText" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="AllowedRoles" class="form-label"></label>
+                <select asp-for="AllowedRoles" asp-items="Model.AvailableRoles" class="form-select" multiple size="5"></select>
+                <small class="form-text text-muted">При видимости "Команда" и "Организация" можно ограничить доступ ролями.</small>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+                <div class="form-check mt-4">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label"></label>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2 class="h5 mb-0">Параметры запроса</h2>
+                <button type="button" class="btn btn-sm btn-primary" id="add-parameter">
+                    <i class="bi bi-plus"></i> Добавить параметр
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle table-sticky mb-0" id="parameters-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40%">Имя параметра</th>
+                            <th style="width: 25%">Тип</th>
+                            <th>Значение по умолчанию</th>
+                            <th class="text-end">&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (!Model.Parameters.Any())
+                    {
+                        <tr class="table-empty-row">
+                            <td colspan="4" class="text-center py-4 table-empty">Записей нет</td>
+                        </tr>
+                    }
+                    @for (var i = 0; i < Model.Parameters.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                <input asp-for="Parameters[i].Name" class="form-control" placeholder="@@example_param" />
+                                <span asp-validation-for="Parameters[i].Name" class="text-danger"></span>
+                            </td>
+                            <td>
+                                <select asp-for="Parameters[i].Type" class="form-select">
+                                    <option value="string">Строка</option>
+                                    <option value="int">Целое число</option>
+                                    <option value="decimal">Десятичное</option>
+                                    <option value="date">Дата</option>
+                                    <option value="bool">Логическое</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input asp-for="Parameters[i].DefaultValue" class="form-control" />
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-parameter"><i class="bi bi-x"></i></button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a asp-action="Preview" asp-route-id="@Model.Id" class="btn btn-outline-secondary @(Model.Id.HasValue ? string.Empty : "disabled")">Предпросмотр</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        if (typeof initReportParametersEditor === 'function') {
+            initReportParametersEditor();
+        }
+    </script>
+}

@@ -1,0 +1,174 @@
+@model Scm.Web.Areas.Client.Models.ClientOrderViewModel
+@using System.Linq
+@using Scm.Domain.Entities
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Отслеживание заказа";
+    string StatusBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+    string StatusTitle(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "Принят",
+        OrderStatus.Diagnosing => "Диагностика",
+        OrderStatus.WaitingApproval => "Ожидает согласования",
+        OrderStatus.InRepair => "Подтверждён клиентом",
+        OrderStatus.Ready => "Готов",
+        OrderStatus.Closed => "Закрыт",
+        _ => status.ToString()
+    };
+}
+<div class="row justify-content-center mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm rounded-3 p-4">
+            <h1 class="section-title mb-3">Личный кабинет клиента</h1>
+            <p class="text-muted">Введите номер заказа и токен доступа из SMS, чтобы отслеживать ремонт и согласовывать смету.</p>
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Номер заказа</label>
+                    <input class="form-control" name="number" value="@ViewBag.Number" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Токен доступа</label>
+                    <input class="form-control" name="token" value="@ViewBag.Token" required />
+                </div>
+                <div class="col-12 text-end">
+                    <button class="btn btn-primary" type="submit">Показать</button>
+                </div>
+            </form>
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger mt-3 mb-0">@ViewBag.Error</div>
+            }
+            @if (TempData["Success"] is string successMessage)
+            {
+                <div class="alert alert-success mt-3 mb-0">@successMessage</div>
+            }
+            @if (TempData["Error"] is string errorMessage)
+            {
+                <div class="alert alert-danger mt-3 mb-0">@errorMessage</div>
+            }
+        </div>
+    </div>
+</div>
+@if (Model.Order is not null)
+{
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm rounded-3 p-4">
+                <h2 class="fs-3 fw-semibold">Статус заказа</h2>
+                <p class="text-muted">Текущий статус: <span class="badge text-bg-@StatusBadge(Model.Order.Status) badge-status">@StatusTitle(Model.Order.Status)</span></p>
+                <h3 class="fs-4 fw-semibold mt-4">Смета на согласовании</h3>
+                <form asp-area="Client" asp-controller="Quote" asp-action="Submit" method="post" class="mt-3">
+                    <input type="hidden" name="in_orderId" value="@Model.Order.Id" />
+                    <input type="hidden" name="in_token" value="@Model.Order.ClientAccessToken" />
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle table-sticky mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Наименование</th>
+                                    <th class="text-end">Кол-во</th>
+                                    <th class="text-end">Цена</th>
+                                    <th class="text-end">Выполнять</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!Model.QuoteLines.Any())
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 table-empty">Записей нет</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var line in Model.QuoteLines)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-semibold">@line.Title</div>
+                                                <div class="small text-muted">@(line.Kind switch { QuoteLineKind.Labor => "Работа", QuoteLineKind.Part => "Запчасть", _ => string.Empty })</div>
+                                            </td>
+                                            <td class="text-end">@line.Qty.ToString("N2")</td>
+                                            <td class="text-end">@line.Price.ToString("N2") ₽</td>
+                                            <td class="text-end">
+                                                <div class="form-check form-switch d-inline-flex align-items-center justify-content-end gap-2">
+                                                    <input class="form-check-input" type="checkbox" id="line-@line.Id" name="in_approvedLineIds" value="@line.Id" checked />
+                                                    <label class="form-check-label" for="line-@line.Id">Да</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (Model.QuoteLines.Any())
+                    {
+                        <div class="alert alert-info mt-3" role="alert">
+                            Снимите отметку с позиций, которые не нужно выполнять. После отправки решение будет доступно мастеру.
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-success" type="submit">Отправить решение</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mt-3" role="alert">
+                            Все работы уже рассмотрены. Ожидайте обновление статуса заказа.
+                        </div>
+                    }
+                </form>
+                <h3 class="fs-4 fw-semibold mt-4">Связь с мастером</h3>
+                <div class="card shadow-sm rounded-3 mb-3">
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        @foreach (var message in Model.Messages.OrderByDescending(m => m.AtUtc))
+                        {
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <div class="fw-semibold">@(message.FromClient ? "Вы" : "Сервис-центр")</div>
+                                    <small class="text-muted">@message.AtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                </div>
+                                <div>@message.Text</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <form asp-action="PostMessage" method="post" class="row g-3">
+                    <input type="hidden" name="OrderId" value="@Model.Order.Id" />
+                    <input type="hidden" name="number" value="@Model.Order.Number" />
+                    <input type="hidden" name="token" value="@Model.Order.ClientAccessToken" />
+                    <div class="col-12">
+                        <label class="form-label">Ваш комментарий</label>
+                        <textarea class="form-control" name="Text" rows="3" required></textarea>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button class="btn btn-primary" type="submit">Отправить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm rounded-3 p-4">
+                <h3 class="fs-4 fw-semibold mb-3">Шаг 4: Завершение</h3>
+                <p class="text-muted">После подтверждения сметы мастер приступит к ремонту. Следите за обновлениями статуса.</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Номер заказа: <span class="fw-semibold">@Model.Order.Number</span></li>
+                    <li class="list-group-item">Устройство: <span class="fw-semibold">@Model.Order.Device</span></li>
+                    <li class="list-group-item">Клиент: <span class="fw-semibold">@Model.Order.ClientName</span></li>
+                    <li class="list-group-item">Телефон: <a href="tel:@Model.Order.ClientPhone">@Model.Order.ClientPhone</a></li>
+                    @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
+                    {
+                        <li class="list-group-item">Email: <a href="mailto:@Model.Order.ClientEmail">@Model.Order.ClientEmail</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
