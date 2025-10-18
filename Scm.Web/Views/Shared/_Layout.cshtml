@@ -75,6 +75,12 @@
             </div>
         </nav>
     </header>
+
+    @RenderSection("Hero", required: false)
+    @RenderSection("Features", required: false)
+    @RenderSection("TableSections", required: false)
+
+
     <main class="app-main flex-grow-1 py-4">
         <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>
         <div class="container-xxl">
@@ -82,9 +88,62 @@
         </div>
     </main>
 
-    <footer class="app-footer text-center text-muted py-4 mt-auto">
-        <div class="container-xxl small">
-            © @DateTime.UtcNow.Year SCM сервис-центр. Надёжный ремонт и сервис в один клик.
+  
+
+    
+
+    @RenderSection("CTAsection", required: false)
+
+    <footer id="contact">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3">
+                    <i class="bi bi-tools me-2"></i>
+                        @* <img src="/svg/logo/crm.svg" alt="logo" class="me-1" width="32" height="32" style="vertical-align: -0.425em;"> *@
+                        ScmServiceCenter
+                    </h5>
+                    <p class="text-col multiline-text">
+                        SCM сервис-центр.
+                        Надёжный ремонт и сервис в один клик.
+                    </p>
+                    <div class="social-icons mt-3">
+                        <a href="#"><i class="bi bi-telegram"></i></a>
+                        <a href="#"><i class="bi bi-telegram"></i></a>
+                        <a href="#"><i class="bi bi-telegram"></i></a>
+                        <a href="#"><i class="bi bi-telegram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3">Быстрые ссылки</h5>
+                    <div class="footer-links">
+                        <a href="#" class="d-block mb-2">О системе</a>
+                        <a href="#" class="d-block mb-2">Тарифы</a>
+                        <a href="#" class="d-block mb-2">Интеграции</a>
+                        <a href="#" class="d-block mb-2">База знаний</a>
+                        <a href="#" class="d-block mb-2">API документация</a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3">Контакты</h5>
+                    <p class="text-col mb-2">
+                        <i class="bi bi-telephone me-2"></i> +7 (495) 123-45-67
+                    </p>
+                    <p class="text-col mb-2">
+                        <i class="bi bi-envelope me-2"></i> info@scmservicecenter.ru
+                    </p>
+                    <p class="text-col mb-2">
+                        <i class="bi bi-clock me-2"></i> Пн-Пт: 9:00 - 18:00
+                    </p>
+                    <p class="text-col">
+                        <i class="bi bi-headset me-2"></i> Техподдержка 24/7
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4 bg-secondary">
+            <div class="text-center">
+                <p>&copy; @DateTime.UtcNow.Year ScmServiceCenter. Все права защищены.</p>
+            </div>
         </div>
     </footer>
 
@@ -112,5 +171,53 @@
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <style>
+
+        @* Footer *@
+        footer {
+            background-color: #1f2937;
+            color: white;
+            padding: 50px 0 20px;
+        }
+        
+        .text-col{
+            color: #9ca3af;
+        }
+
+        .multiline-text {
+            white-space: pre-line;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-icons a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+        
+        .social-icons a:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+    </style>
+
 </body>
 </html>

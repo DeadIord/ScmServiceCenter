@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Scm.Infrastructure\Scm.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\svg\" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,104 @@
+    /* Анимация Hero иконки  */
+:root {
+    --animation-duration: 5s;
+    --highlight-color: #b4a4b9;
+}
+
+.hero-image-container {
+    animation: hero-fade-in 1s 0.5s linear forwards;
+    opacity: 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    max-width: 600px; 
+    aspect-ratio: 16 / 9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem; 
+}
+
+.hero-image-image {
+    position: absolute;
+    bottom: 0;
+    width: 80%; 
+    max-width: 500px; 
+    height: auto;
+    object-fit: contain;
+    z-index: 1;
+}
+
+@keyframes hero-fade-in {
+    100% { opacity: 1; }
+}
+
+.window-background {
+    position: absolute;
+    background: linear-gradient(135deg, #6685ea 0%, #4ba29e 100%);
+    width: 30%;
+    height: 55%;
+    top: 8%;
+    left: 15%;
+    border-radius: 8px;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.screen-container {
+    animation: move-emails var(--animation-duration) infinite ease-out;
+    position: absolute;
+    width: 15.5%; 
+    height: 21.35%; 
+    bottom: 33.60%; 
+    left: 51.35%; 
+    transform: translateX(-50%); 
+    background: #fff url('/svg/home_pc_animation/emails.svg') repeat-y;
+    background-size: 100% auto;
+    border-radius: 0 2px 2px 0;
+    scale: 0.7;
+    z-index: 2;
+}
+
+.notification {
+    animation: move-notification var(--animation-duration) infinite cubic-bezier(0.81, -0.46, 0.19, 1.33);
+    position: absolute;
+    bottom: 51.5%; 
+    left: 60%; 
+    width: 5%; 
+    height: 4%;
+    background: #fff url('/svg/home_pc_animation/notification.svg');
+    background-size: 100%;
+    border-radius: 2px;
+    z-index: 3;
+    scale: 0.9;
+}
+
+@keyframes background-color {
+    0% { background: rgb(11, 134, 216); }
+    20%, 30% { background: #5ab6fc; }
+    100% { background: #98bff9 }
+}
+
+@keyframes move-emails {
+    0%, 24% {
+        background-position: 0 -4.6em;
+        animation-timing-function: cubic-bezier(0.81, -0.46, 0.19, 1.33);
+    }
+    34%, 60% { background-position: 0 0; }
+    90%, 100% { background-position: 0 -78%; }
+}
+
+@keyframes move-notification {
+    0%, 20% {
+        transform: translateX(0.25em);
+        opacity: 0;
+    }
+    50%, 58% {
+        transform: none;
+        opacity: 1;
+    }
+    70%, 100% {
+        transform: translateX(-0.25em);
+        opacity: 0;
+    }
+}

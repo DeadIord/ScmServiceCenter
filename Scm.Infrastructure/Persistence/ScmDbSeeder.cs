@@ -14,6 +14,7 @@ public static class ScmDbSeeder
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ScmDbContext>();
         await context.Database.MigrateAsync();
+        //await context.Database.MigrateAsync();
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
