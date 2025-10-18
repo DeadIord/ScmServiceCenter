@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Error_NoLines" xml:space="preserve">
+    <value>No items are pending approval.</value>
+  </data>
+  <data name="Error_OrderNotFound" xml:space="preserve">
+    <value>Order not found.</value>
+  </data>
+  <data name="Error_OrderUnknown" xml:space="preserve">
+    <value>Order could not be located.</value>
+  </data>
+  <data name="Notification_QuoteProcessed" xml:space="preserve">
+    <value>The estimate has been processed.</value>
+  </data>
+</root>

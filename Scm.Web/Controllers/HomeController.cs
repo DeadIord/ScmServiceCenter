@@ -29,14 +29,14 @@ namespace Scm.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Получаем все заказы
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             var allOrders = await _orderService.GetQueueAsync(null, null);
 
-            // Получаем общее количество запчастей на складе
-            // ВАЖНО: В базе поле называется StockQty, а не Quantity!
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+            // пїЅпїЅпїЅпїЅпїЅ: пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ StockQty, пїЅ пїЅпїЅ Quantity!
             var partsCount = await _dbContext.Parts.SumAsync(p => (int)p.StockQty);
 
-            // Считаем метрики
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             var now = DateTime.UtcNow;
             var newOrders = allOrders.Count(o => o.Status == OrderStatus.Received);
             var inProgress = allOrders.Count(o =>
@@ -49,7 +49,7 @@ namespace Scm.Web.Controllers
                 o.Status != OrderStatus.Closed &&
                 o.Status != OrderStatus.Ready);
 
-            // Берем последние 10 активных заказов
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 10 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             var recentOrders = allOrders
                 .Where(o => o.Status != OrderStatus.Closed)
                 .OrderByDescending(o => o.CreatedAtUtc)

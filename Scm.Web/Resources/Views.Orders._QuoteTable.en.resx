@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="QuoteTitle" xml:space="preserve">
+    <value>Order quote</value>
+  </data>
+  <data name="QuoteSubtitle" xml:space="preserve">
+    <value>Track labour, parts, and approval status</value>
+  </data>
+  <data name="LaborSummary" xml:space="preserve">
+    <value>Labour</value>
+  </data>
+  <data name="PartsSummary" xml:space="preserve">
+    <value>Parts</value>
+  </data>
+  <data name="ProposedSummary" xml:space="preserve">
+    <value>Pending approval</value>
+  </data>
+  <data name="ApprovedSummary" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>RUB</value>
+  </data>
+  <data name="TitleColumn" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="KindColumn" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="QuantityColumn" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="PriceColumn" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="AmountColumn" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="StatusColumn" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="NoLines" xml:space="preserve">
+    <value>No entries</value>
+  </data>
+  <data name="Kind_Labor" xml:space="preserve">
+    <value>Labour</value>
+  </data>
+  <data name="Kind_Part" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="QuoteStatus_Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="QuoteStatus_Proposed" xml:space="preserve">
+    <value>Proposed</value>
+  </data>
+  <data name="QuoteStatus_Approved" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="QuoteStatus_Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="AddTitleLabel" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="AddTitlePlaceholder" xml:space="preserve">
+    <value>For example, diagnostics</value>
+  </data>
+  <data name="AddKindLabel" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="AddQuantityLabel" xml:space="preserve">
+    <value>Qty</value>
+  </data>
+  <data name="AddPriceLabel" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="AddButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+</root>

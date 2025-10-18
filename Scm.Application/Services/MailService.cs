@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -59,11 +60,18 @@ public sealed class MailService : IMailService
         mailMessage.To.Add(mailAddressTo);
 
         var smtpUser = m_options.User.Trim();
-        var smtpPassword = m_options.Password;
+        var smtpPassword = m_options.GetSanitizedPassword();
 
         if (string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
         {
             throw new InvalidOperationException("Учетные данные SMTP не заданы");
+        }
+
+        if (smtpPassword.Length != 16 || smtpPassword.Any(ch => !char.IsLetterOrDigit(ch)))
+        {
+            const string invalidPasswordMessage = "Пароль SMTP должен содержать 16 латинских символов без пробелов";
+            m_logger.LogError(invalidPasswordMessage);
+            throw new InvalidOperationException(invalidPasswordMessage);
         }
 
         using var smtpClient = new SmtpClient(hostAddress, m_options.Port)
