@@ -11,4 +11,8 @@ public interface IMailService
         string in_body,
         bool in_isHtml = false,
         CancellationToken in_cancellationToken = default);
+
+    Task<string> SendAsync(
+        MailSendRequest in_request,
+        CancellationToken in_cancellationToken = default);
 }

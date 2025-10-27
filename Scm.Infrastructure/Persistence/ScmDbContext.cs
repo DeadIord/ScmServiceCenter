@@ -17,6 +17,9 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<ReportDefinition> ReportDefinitions => Set<ReportDefinition>();
     public DbSet<ReportExecutionLog> ReportExecutionLogs => Set<ReportExecutionLog>();
+    public DbSet<Ticket> Tickets => Set<Ticket>();
+    public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
+    public DbSet<TicketAttachment> TicketAttachments => Set<TicketAttachment>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -31,5 +34,8 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
         builder.ApplyConfiguration(new ContactConfiguration());
         builder.ApplyConfiguration(new ReportDefinitionConfiguration());
         builder.ApplyConfiguration(new ReportExecutionLogConfiguration());
+        builder.ApplyConfiguration(new TicketConfiguration());
+        builder.ApplyConfiguration(new TicketMessageConfiguration());
+        builder.ApplyConfiguration(new TicketAttachmentConfiguration());
     }
 }
