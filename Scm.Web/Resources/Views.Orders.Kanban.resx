@@ -54,4 +54,16 @@
   <data name="Priority_Critical" xml:space="preserve">
     <value>Критичный</value>
   </data>
+  <data name="TotalOrdersLabel" xml:space="preserve">
+    <value>Всего заявок</value>
+  </data>
+  <data name="LegendLabel" xml:space="preserve">
+    <value>Статусы</value>
+  </data>
+  <data name="CreatedAtLabel" xml:space="preserve">
+    <value>Создан</value>
+  </data>
+  <data name="ColumnEmptyMessage" xml:space="preserve">
+    <value>Перетащите заявку сюда, чтобы начать работу</value>
+  </data>
 </root>
