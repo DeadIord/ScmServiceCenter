@@ -234,19 +234,19 @@
                             <h3 class="h5 fw-semibold mb-3">@Localizer["ReplyHeading"]</h3>
                             <form asp-action="Reply" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-3">
                                 @Html.AntiForgeryToken()
-                                <input asp-for="SelectedTicket!.Reply.TicketId" type="hidden" />
-                                <input asp-for="SelectedTicket!.Reply.ReplyToExternalId" type="hidden" />
+                                <input type="hidden" name="TicketId" value="@Model.SelectedTicket!.Reply.TicketId" />
+                                <input type="hidden" name="ReplyToExternalId" value="@Model.SelectedTicket!.Reply.ReplyToExternalId" />
                                 <div>
-                                    <label asp-for="SelectedTicket!.Reply.Subject" class="form-label">@Localizer["Subject"]</label>
-                                    <input asp-for="SelectedTicket!.Reply.Subject" class="form-control" />
+                                    <label for="reply-subject" class="form-label">@Localizer["Subject"]</label>
+                                    <input id="reply-subject" name="Subject" value="@Model.SelectedTicket!.Reply.Subject" class="form-control" />
                                 </div>
                                 <div>
-                                    <label asp-for="SelectedTicket!.Reply.Body" class="form-label">@Localizer["MessageBody"]</label>
-                                    <textarea asp-for="SelectedTicket!.Reply.Body" class="form-control" rows="6"></textarea>
+                                    <label for="reply-body" class="form-label">@Localizer["MessageBody"]</label>
+                                    <textarea id="reply-body" name="Body" class="form-control" rows="6">@Model.SelectedTicket!.Reply.Body</textarea>
                                 </div>
                                 <div>
-                                    <label asp-for="SelectedTicket!.Reply.Attachments" class="form-label">@Localizer["AddAttachments"]</label>
-                                    <input asp-for="SelectedTicket!.Reply.Attachments" class="form-control" type="file" multiple />
+                                    <label for="reply-attachments" class="form-label">@Localizer["AddAttachments"]</label>
+                                    <input id="reply-attachments" name="Attachments" class="form-control" type="file" multiple />
                                     <div class="form-text">@Localizer["AttachmentsHint"]</div>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
