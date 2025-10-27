@@ -98,7 +98,10 @@ public sealed class TicketsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Reply(TicketReplyInputModel in_model, CancellationToken in_cancellationToken)
+    public async Task<IActionResult> Reply(
+        [FromForm]
+        [Bind(Prefix = "SelectedTicket.Reply")] TicketReplyInputModel in_model,
+        CancellationToken in_cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -138,6 +141,7 @@ public sealed class TicketsController : Controller
         try
         {
             await m_ticketService.AddAgentReplyAsync(in_model.TicketId, reply, userId, in_cancellationToken);
+            TempData.Remove("Tickets.Error");
             TempData["Tickets.Success"] = "Ответ отправлен клиенту";
         }
         catch (InvalidOperationException ex)

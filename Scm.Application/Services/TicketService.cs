@@ -1,6 +1,8 @@
+using System;
 using System.Text.RegularExpressions;
 using Ganss.Xss;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Scm.Application.DTOs;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Persistence;
@@ -134,6 +136,8 @@ public sealed class TicketService : ITicketService
         var referenceList = referencesSet.ToList();
         var inReplyTo = referenceList.FirstOrDefault();
 
+        var messageId = GenerateAgentMessageId();
+
         var agentMessage = new TicketMessage
         {
             TicketId = ticket.Id,
@@ -144,7 +148,8 @@ public sealed class TicketService : ITicketService
             SenderName = senderName,
             SentAtUtc = DateTime.UtcNow,
             CreatedByUserId = in_userId,
-            ExternalReferences = referenceList.Any() ? string.Join(' ', referenceList) : null
+            ExternalReferences = referenceList.Any() ? string.Join(' ', referenceList) : null,
+            ExternalId = messageId
         };
 
         foreach (var attachment in in_reply.Attachments)
@@ -163,27 +168,6 @@ public sealed class TicketService : ITicketService
             }
         }
 
-        var mailRequest = new MailSendRequest
-        {
-            To = ticket.ClientEmail,
-            Subject = subject,
-            Body = sanitizedHtml,
-            IsHtml = true,
-            InReplyTo = inReplyTo,
-            References = referenceList,
-            Attachments = agentMessage.Attachments
-                .Select(a => new MailSendAttachment
-                {
-                    FileName = a.FileName,
-                    ContentType = a.ContentType,
-                    Content = a.Content
-                })
-                .ToList()
-        };
-
-        var messageId = await m_mailService.SendAsync(mailRequest, in_cancellationToken);
-        agentMessage.ExternalId = messageId;
-
         ticket.Messages.Add(agentMessage);
         ticket.UpdatedAtUtc = agentMessage.SentAtUtc;
 
@@ -197,7 +181,72 @@ public sealed class TicketService : ITicketService
             ticket.Status = TicketStatus.Pending;
         }
 
-        await m_dbContext.SaveChangesAsync(in_cancellationToken);
+        var startedTransaction = false;
+        IDbContextTransaction? transaction = null;
+
+        try
+        {
+            if (m_dbContext.Database.CurrentTransaction is null)
+            {
+                transaction = await m_dbContext.Database.BeginTransactionAsync(in_cancellationToken);
+                startedTransaction = true;
+            }
+
+            await m_dbContext.SaveChangesAsync(in_cancellationToken);
+
+            var mailRequest = new MailSendRequest
+            {
+                To = ticket.ClientEmail,
+                Subject = subject,
+                Body = sanitizedHtml,
+                IsHtml = true,
+                InReplyTo = inReplyTo,
+                References = referenceList,
+                MessageId = agentMessage.ExternalId,
+                Attachments = agentMessage.Attachments
+                    .Select(a => new MailSendAttachment
+                    {
+                        FileName = a.FileName,
+                        ContentType = a.ContentType,
+                        Content = a.Content
+                    })
+                    .ToList()
+            };
+
+            var actualMessageId = await m_mailService.SendAsync(mailRequest, in_cancellationToken);
+            if (!string.IsNullOrWhiteSpace(actualMessageId) &&
+                !string.Equals(actualMessageId, agentMessage.ExternalId, StringComparison.OrdinalIgnoreCase))
+            {
+                agentMessage.ExternalId = actualMessageId;
+                if (string.Equals(ticket.ExternalThreadId, messageId, StringComparison.OrdinalIgnoreCase))
+                {
+                    ticket.ExternalThreadId = actualMessageId;
+                }
+
+                await m_dbContext.SaveChangesAsync(in_cancellationToken);
+            }
+
+            if (startedTransaction && transaction is not null)
+            {
+                await transaction.CommitAsync(in_cancellationToken);
+            }
+        }
+        catch
+        {
+            if (startedTransaction && transaction is not null)
+            {
+                await transaction.RollbackAsync(in_cancellationToken);
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (startedTransaction && transaction is not null)
+            {
+                await transaction.DisposeAsync();
+            }
+        }
 
         return agentMessage;
     }
@@ -409,5 +458,10 @@ public sealed class TicketService : ITicketService
         }
 
         return ret;
+    }
+
+    private static string GenerateAgentMessageId()
+    {
+        return $"{Guid.NewGuid():N}@tickets.scm.local";
     }
 }
