@@ -25,7 +25,7 @@ public sealed class TicketsController : Controller
 
     [HttpGet]
     public async Task<IActionResult> Index(
-        [FromQuery(Name = "id")] Guid? in_ticketId,
+        [FromRoute(Name = "id")] Guid? in_ticketId,
         [FromQuery(Name = "status")] TicketStatus? in_status,
         [FromQuery(Name = "q")] string? in_term,
         CancellationToken in_cancellationToken)
