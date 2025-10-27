@@ -8,6 +8,7 @@ using Scm.Web.Authorization;
 using Scm.Web.Localization;
 using Scm.Web.HealthChecks;
 using Scm.Web.Security;
+using Scm.Web.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
 using System.Globalization;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AuthorizationPolicies.StockAccess, policy =>
@@ -75,6 +77,11 @@ builder.Services.AddOptions<MailOptions>()
     .Bind(builder.Configuration.GetSection("Mail"))
     .ValidateOnStart();
 builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddSingleton<IValidateOptions<TicketInboxOptions>, TicketInboxOptionsValidator>();
+builder.Services.AddOptions<TicketInboxOptions>()
+    .Bind(builder.Configuration.GetSection("TicketInbox"))
+    .ValidateOnStart();
+builder.Services.AddHostedService<TicketInboxHostedService>();
 
 builder.Services.AddHealthChecks()
     .AddCheck<MailConfigurationHealthCheck>("mail_delivery");
