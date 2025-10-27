@@ -15,22 +15,85 @@
   <data name="Title" xml:space="preserve">
     <value>Тикеты</value>
   </data>
-  <data name="Heading" xml:space="preserve">
-    <value>Обращения клиентов</value>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Поиск по теме, клиенту или почте</value>
   </data>
-  <data name="Description" xml:space="preserve">
-    <value>Собирайте запросы, расставляйте приоритеты и ускоряйте ответы.</value>
+  <data name="SearchAction" xml:space="preserve">
+    <value>Искать</value>
   </data>
-  <data name="PrimaryAction" xml:space="preserve">
-    <value>Создать тикет</value>
+  <data name="Filter.All" xml:space="preserve">
+    <value>Все</value>
   </data>
-  <data name="SecondaryAction" xml:space="preserve">
-    <value>Настроить каналы</value>
+  <data name="Status.Open" xml:space="preserve">
+    <value>Новые</value>
+  </data>
+  <data name="Status.Pending" xml:space="preserve">
+    <value>Ожидание клиента</value>
+  </data>
+  <data name="Status.Resolved" xml:space="preserve">
+    <value>Решённые</value>
+  </data>
+  <data name="Status.Closed" xml:space="preserve">
+    <value>Закрытые</value>
   </data>
   <data name="EmptyTitle" xml:space="preserve">
-    <value>Раздел в разработке</value>
+    <value>Тикет не выбран</value>
   </data>
   <data name="EmptyDescription" xml:space="preserve">
-    <value>Инструменты службы поддержки пока недоступны. Совсем скоро они появятся здесь.</value>
+    <value>Здесь появятся обращения из почты, как только они будут получены.</value>
+  </data>
+  <data name="AwaitingReply" xml:space="preserve">
+    <value>Ожидает ответа</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="UpdateStatus" xml:space="preserve">
+    <value>Обновить статус</value>
+  </data>
+  <data name="Message.Client" xml:space="preserve">
+    <value>Клиент</value>
+  </data>
+  <data name="Message.Agent" xml:space="preserve">
+    <value>Команда</value>
+  </data>
+  <data name="Attachments" xml:space="preserve">
+    <value>Вложения</value>
+  </data>
+  <data name="VideoNotSupported" xml:space="preserve">
+    <value>Ваш браузер не поддерживает воспроизведение видео.</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Скачать</value>
+  </data>
+  <data name="ReplyHeading" xml:space="preserve">
+    <value>Ответить клиенту</value>
+  </data>
+  <data name="Subject" xml:space="preserve">
+    <value>Тема</value>
+  </data>
+  <data name="MessageBody" xml:space="preserve">
+    <value>Сообщение</value>
+  </data>
+  <data name="AddAttachments" xml:space="preserve">
+    <value>Прикрепить файлы</value>
+  </data>
+  <data name="AttachmentsHint" xml:space="preserve">
+    <value>Изображения и видео будут отображаться в карточке сообщения.</value>
+  </data>
+  <data name="SendReply" xml:space="preserve">
+    <value>Отправить ответ</value>
+  </data>
+  <data name="FileSize.Bytes" xml:space="preserve">
+    <value>{0:0} Б</value>
+  </data>
+  <data name="FileSize.Kilobytes" xml:space="preserve">
+    <value>{0:0.##} КБ</value>
+  </data>
+  <data name="FileSize.Megabytes" xml:space="preserve">
+    <value>{0:0.##} МБ</value>
+  </data>
+  <data name="FileSize.Gigabytes" xml:space="preserve">
+    <value>{0:0.##} ГБ</value>
   </data>
 </root>

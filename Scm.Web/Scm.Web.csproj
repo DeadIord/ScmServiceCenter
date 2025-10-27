@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.20" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="ClosedXML" Version="0.102.0" />
+    <PackageReference Include="MailKit" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>
