@@ -21,8 +21,19 @@ function updateKanbanColumnCounts(board) {
     board.querySelectorAll('.kanban-column').forEach(column => {
         const header = column.previousElementSibling;
         const badge = header ? header.querySelector('.js-column-count') : null;
+        const items = column.querySelectorAll('.kanban-item');
+        const placeholder = column.querySelector('.kanban-empty');
+
         if (badge) {
-            badge.textContent = column.querySelectorAll('.kanban-item').length;
+            badge.textContent = items.length;
+        }
+
+        if (placeholder) {
+            if (items.length) {
+                placeholder.classList.add('d-none');
+            } else {
+                placeholder.classList.remove('d-none');
+            }
         }
     });
 }
@@ -52,17 +63,17 @@ window.initKanbanBoard = function () {
             return;
         }
 
+        updateKanbanColumnCounts(board);
+
         const previousStatus = from.dataset.status;
         const newStatus = to.dataset.status;
 
         if (!previousStatus || !newStatus || previousStatus === newStatus) {
-            updateKanbanColumnCounts(board);
             return;
         }
 
         const orderId = item.dataset.id;
         if (!orderId) {
-            updateKanbanColumnCounts(board);
             return;
         }
 
@@ -82,13 +93,31 @@ window.initKanbanBoard = function () {
         });
     };
 
+    updateKanbanColumnCounts(board);
+
+    const preventPlaceholderDrop = (evt) => {
+        if (!evt || !evt.related || !evt.related.classList) {
+            return true;
+        }
+
+        return !evt.related.classList.contains('kanban-empty');
+    };
+
     board.querySelectorAll('.kanban-column').forEach(column => {
         Sortable.create(column, {
             group: groupName,
-            animation: 150,
+            animation: 220,
             ghostClass: 'kanban-ghost',
             dragClass: 'kanban-dragging',
-            onEnd: handleStatusChange
+            filter: '.kanban-empty',
+            onMove: preventPlaceholderDrop,
+            onStart: () => {
+                board.classList.add('kanban-board-dragging');
+            },
+            onEnd: evt => {
+                board.classList.remove('kanban-board-dragging');
+                handleStatusChange(evt);
+            }
         });
     });
 };
