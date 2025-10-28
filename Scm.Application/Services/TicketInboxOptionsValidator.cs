@@ -31,9 +31,9 @@ public sealed class TicketInboxOptionsValidator : IValidateOptions<TicketInboxOp
             return ValidateOptionsResult.Fail("Не указан пароль IMAP пользователя");
         }
 
-        if (in_options.PollIntervalSeconds < 30)
+        if (in_options.PollIntervalSeconds < 60)
         {
-            return ValidateOptionsResult.Fail("Интервал опроса почты не может быть меньше 30 секунд");
+            return ValidateOptionsResult.Fail("Интервал опроса почты не может быть меньше 60 секунд");
         }
 
         if (in_options.BatchSize <= 0 || in_options.BatchSize > 100)

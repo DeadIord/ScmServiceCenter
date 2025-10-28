@@ -20,7 +20,7 @@ public sealed class TicketInboxOptions
     public string Mailbox { get; set; } = "INBOX";
 
     public int PollIntervalSeconds { get; set; }
-        = 120;
+        = 60;
 
     public int BatchSize { get; set; }
         = 10;

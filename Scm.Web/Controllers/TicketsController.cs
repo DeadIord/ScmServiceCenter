@@ -1,5 +1,7 @@
 using System.IO;
 using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -8,6 +10,7 @@ using Scm.Application.Services;
 using Scm.Domain.Entities;
 using Scm.Web.Authorization;
 using Scm.Web.Models.Tickets;
+using Scm.Web.Services;
 
 namespace Scm.Web.Controllers;
 
@@ -16,10 +19,15 @@ public sealed class TicketsController : Controller
 {
     private readonly ILogger<TicketsController> m_logger;
     private readonly ITicketService m_ticketService;
+    private readonly ITicketInboxPoller m_ticketInboxPoller;
 
-    public TicketsController(ITicketService in_ticketService, ILogger<TicketsController> in_logger)
+    public TicketsController(
+        ITicketService in_ticketService,
+        ITicketInboxPoller in_ticketInboxPoller,
+        ILogger<TicketsController> in_logger)
     {
         m_ticketService = in_ticketService;
+        m_ticketInboxPoller = in_ticketInboxPoller;
         m_logger = in_logger;
     }
 
@@ -182,6 +190,56 @@ public sealed class TicketsController : Controller
         }
 
         return RedirectToAction(nameof(Index), new { id = in_ticketId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PollInbox(CancellationToken in_cancellationToken)
+    {
+        string ret;
+
+        try
+        {
+            var result = await m_ticketInboxPoller.PollAsync(in_cancellationToken);
+
+            if (!result.Enabled)
+            {
+                ret = result.StatusMessage;
+                TempData["Tickets.Error"] = ret;
+            }
+            else
+            {
+                var baseMessage = string.IsNullOrWhiteSpace(result.StatusMessage)
+                    ? "Импорт писем завершён"
+                    : result.StatusMessage;
+
+                ret = string.Format(
+                    "{0}. Найдено {1}, обработано {2}, импортировано {3}, пропущено {4}, ошибок {5}",
+                    baseMessage,
+                    result.TotalMessages,
+                    result.ProcessedMessages,
+                    result.ImportedMessages,
+                    result.SkippedMessages,
+                    result.FailedMessages);
+
+                if (result.FailedMessages > 0)
+                {
+                    TempData["Tickets.Error"] = ret;
+                }
+                else
+                {
+                    TempData["Tickets.Success"] = ret;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ret = "Не удалось выполнить импорт писем";
+            TempData["Tickets.Error"] = ret;
+            m_logger.LogError(ex, "Ошибка при ручном запуске импорта тикетов из почты");
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
