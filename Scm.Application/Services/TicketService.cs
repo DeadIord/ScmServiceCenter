@@ -168,6 +168,7 @@ public sealed class TicketService : ITicketService
             }
         }
 
+        m_dbContext.TicketMessages.Add(agentMessage);
         ticket.Messages.Add(agentMessage);
         ticket.UpdatedAtUtc = agentMessage.SentAtUtc;
 
