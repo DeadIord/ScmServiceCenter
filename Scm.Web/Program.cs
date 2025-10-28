@@ -81,6 +81,7 @@ builder.Services.AddSingleton<IValidateOptions<TicketInboxOptions>, TicketInboxO
 builder.Services.AddOptions<TicketInboxOptions>()
     .Bind(builder.Configuration.GetSection("TicketInbox"))
     .ValidateOnStart();
+builder.Services.AddSingleton<ITicketInboxPoller, TicketInboxPoller>();
 builder.Services.AddHostedService<TicketInboxHostedService>();
 
 builder.Services.AddHealthChecks()

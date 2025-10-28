@@ -81,6 +81,17 @@
                         }
                     </div>
 
+                    <form asp-action="PollInbox" method="post" class="mb-3">
+                        @Html.AntiForgeryToken()
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-repeat me-1"></i>
+                                Получить письма
+                            </button>
+                            <small class="text-muted">Импорт можно выполнять не чаще одного раза в минуту.</small>
+                        </div>
+                    </form>
+
                     <div class="list-group list-group-flush border rounded-3 overflow-auto" style="max-height: calc(100vh - 320px);">
                         @if (!Model.Tickets.Any())
                         {
