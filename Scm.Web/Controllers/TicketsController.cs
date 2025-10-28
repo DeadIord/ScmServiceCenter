@@ -100,7 +100,7 @@ public sealed class TicketsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reply(
         [FromForm]
-        [Bind(Prefix = "SelectedTicket.Reply")] TicketReplyInputModel in_model,
+        [Bind(Prefix = TicketReplyInputModel.FormFieldPrefix)] TicketReplyInputModel in_model,
         CancellationToken in_cancellationToken)
     {
         if (!ModelState.IsValid)
