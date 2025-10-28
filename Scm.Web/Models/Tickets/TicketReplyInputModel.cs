@@ -5,8 +5,6 @@ namespace Scm.Web.Models.Tickets;
 
 public sealed class TicketReplyInputModel
 {
-    public const string FormFieldPrefix = "Reply";
-
     [Required]
     public Guid TicketId { get; set; }
         = Guid.Empty;
