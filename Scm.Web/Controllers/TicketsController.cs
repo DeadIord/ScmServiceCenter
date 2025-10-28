@@ -1,9 +1,11 @@
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
@@ -155,6 +157,16 @@ public sealed class TicketsController : Controller
         {
             TempData["Tickets.Error"] = ex.Message;
             m_logger.LogWarning(ex, "Не удалось отправить ответ по тикету {TicketId}", in_model.TicketId);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            var entryNames = ex.Entries.Select(entry => entry.Metadata.Name).ToList();
+            TempData["Tickets.Error"] = "Не удалось отправить ответ: данные тикета были изменены. Обновите страницу и повторите попытку.";
+            m_logger.LogError(
+                ex,
+                "Конкурентное изменение данных при отправке ответа по тикету {TicketId}. Задействованные сущности: {Entries}",
+                in_model.TicketId,
+                entryNames);
         }
         catch (Exception ex)
         {
