@@ -1,8 +1,12 @@
 @model Scm.Web.Models.Orders.OrderKanbanViewModel
+@using Microsoft.AspNetCore.Mvc.Localization
 @using Scm.Domain.Entities
-@{
-    ViewData["Title"] = "Канбан";
-    string StatusBadge(OrderStatus status) => status switch
+@using System.Linq
+@inject IViewLocalizer Localizer
+@{ 
+    ViewData["Title"] = Localizer["Title"].Value;
+    var totalOrders = Model.Columns.Sum(column => column.Orders.Count);
+    string StatusBadge(OrderStatus in_status) => in_status switch
     {
         OrderStatus.Received => "secondary",
         OrderStatus.Diagnosing => "info",
@@ -12,7 +16,7 @@
         OrderStatus.Closed => "dark",
         _ => "secondary"
     };
-    string PriorityBadge(OrderPriority priority) => priority switch
+    string PriorityBadge(OrderPriority in_priority) => in_priority switch
     {
         OrderPriority.Low => "secondary",
         OrderPriority.Normal => "light text-dark",
@@ -20,39 +24,102 @@
         OrderPriority.Critical => "danger",
         _ => "secondary"
     };
-}
-<h1 class="section-title mb-4">Канбан-доска</h1>
-<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 row-cols-xxl-6 g-4 m-2" id="kanban-board">
-    @foreach (var column in Model.Columns)
+    string PriorityTitle(OrderPriority in_priority)
     {
-        <div class="col">
-            <div class="card shadow-sm rounded-3 h-100 kanban-status-card">
-                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-                    <span class="fw-semibold">@column.Title</span>
-                    <span class="badge text-bg-@StatusBadge(column.Status) js-column-count">@column.Orders.Count</span>
+        string ret;
+        var localized = Localizer[$"Priority_{in_priority}"];
+        if (localized.IsResourceNotFound)
+        {
+            ret = in_priority.ToString();
+        }
+        else
+        {
+            ret = localized.Value;
+        }
+
+        return ret;
+    }
+}
+<h1 class="section-title mb-4">@Localizer["SectionTitle"]</h1>
+<div class="kanban-page">
+    <div class="kanban-toolbar card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="kanban-toolbar-icon d-flex align-items-center justify-content-center">
+                    <i class="bi bi-kanban"></i>
                 </div>
-                <div class="card-body py-3 kanban-column" data-status="@column.Status" id="col-@column.Status">
-                    @foreach (var order in column.Orders.OrderBy(o => o.CreatedAtUtc))
+                <div>
+                    <div class="kanban-toolbar-label text-uppercase small fw-semibold">@Localizer["TotalOrdersLabel"]</div>
+                    <div class="kanban-toolbar-value">@totalOrders</div>
+                </div>
+            </div>
+            <div class="kanban-toolbar-legend d-flex flex-column flex-lg-row gap-2 align-items-lg-center">
+                <span class="kanban-toolbar-legend-label text-uppercase small fw-semibold">@Localizer["LegendLabel"]</span>
+                <div class="kanban-toolbar-legend-items d-flex flex-wrap gap-2">
+                    @foreach (var column in Model.Columns)
                     {
-                        var slaClass = order.SLAUntil.HasValue && order.SLAUntil < DateTime.UtcNow ? "text-bg-danger" : "text-bg-success";
-                        <div class="card shadow-sm rounded-3 mb-3 kanban-item" data-id="@order.Id">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="fw-semibold">@order.Number</span>
-                                    <span class="badge text-bg-@PriorityBadge(order.Priority)">@order.Priority</span>
-                                </div>
-                                <div class="small text-muted">@order.Device</div>
-                                <div class="small">@order.ClientName</div>
-                                <div class="mt-2">
-                                    <span class="badge @slaClass">SLA: @(order.SLAUntil?.ToString("dd.MM") ?? "—")</span>
-                                </div>
-                            </div>
-                        </div>
+                        <span class="badge rounded-pill text-bg-@StatusBadge(column.Status) fw-semibold">
+                            @Localizer[$"Status_{column.Status}"]
+                            <span class="ms-1">(@column.Orders.Count)</span>
+                        </span>
                     }
                 </div>
             </div>
         </div>
-    }
+    </div>
+    <div class="kanban-board" id="kanban-board">
+        @foreach (var column in Model.Columns)
+        {
+            <section class="kanban-column-wrapper">
+                <div class="card shadow-sm border-0 kanban-status-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">@Localizer[$"Status_{column.Status}"]</span>
+                        <span class="badge text-bg-@StatusBadge(column.Status) js-column-count">@column.Orders.Count</span>
+                    </div>
+                    <div class="kanban-column" data-status="@column.Status" id="col-@column.Status">
+                        @foreach (var order in column.Orders.OrderBy(o => o.CreatedAtUtc))
+                        {
+                            var slaClass = order.SLAUntil.HasValue && order.SLAUntil < DateTime.UtcNow ? "text-bg-danger" : "text-bg-success";
+                            var createdAt = order.CreatedAtUtc.ToLocalTime();
+                            <article class="kanban-item" data-id="@order.Id">
+                                <div class="kanban-item-header">
+                                    <div class="kanban-item-number">
+                                        <i class="bi bi-hash"></i>
+                                        <span>@order.Number</span>
+                                    </div>
+                                    <span class="badge text-bg-@PriorityBadge(order.Priority)">@PriorityTitle(order.Priority)</span>
+                                </div>
+                                <div class="kanban-item-body">
+                                    <div class="kanban-item-line text-muted">
+                                        <i class="bi bi-cpu"></i>
+                                        <span>@order.Device</span>
+                                    </div>
+                                    <div class="kanban-item-line">
+                                        <i class="bi bi-person"></i>
+                                        <span>@order.ClientName</span>
+                                    </div>
+                                </div>
+                                <div class="kanban-item-footer">
+                                    <span class="badge @slaClass">@Localizer["SlaShortLabel"]: @(order.SLAUntil?.ToString("dd.MM") ?? Localizer["NoValuePlaceholder"].Value)</span>
+                                    <div class="kanban-item-meta text-muted small">
+                                        <i class="bi bi-calendar-event"></i>
+                                        <span class="fw-semibold">@Localizer["CreatedAtLabel"]:</span>
+                                        <span>@createdAt.ToString("dd.MM.yyyy HH:mm")</span>
+                                    </div>
+                                </div>
+                            </article>
+                        }
+                        <div class="kanban-empty@(column.Orders.Any() ? " d-none" : string.Empty)">
+                            <div class="kanban-empty-icon">
+                                <i class="bi bi-columns-gap"></i>
+                            </div>
+                            <div class="kanban-empty-text">@Localizer["ColumnEmptyMessage"]</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+    </div>
 </div>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" integrity="sha384-8ZrYuoBByxGr2susx1bwyodHtnV1OYpvyRq67Vi/+R0DSf8PS3gsZ0Ljzm+hY9+S" crossorigin="anonymous"></script>

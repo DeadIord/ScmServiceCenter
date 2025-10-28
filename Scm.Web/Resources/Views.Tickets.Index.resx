@@ -15,22 +15,85 @@
   <data name="Title" xml:space="preserve">
     <value>Tickets</value>
   </data>
-  <data name="Heading" xml:space="preserve">
-    <value>Customer tickets</value>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search by subject, client or email</value>
   </data>
-  <data name="Description" xml:space="preserve">
-    <value>Centralise incoming requests, prioritise workloads and speed up replies.</value>
+  <data name="SearchAction" xml:space="preserve">
+    <value>Search</value>
   </data>
-  <data name="PrimaryAction" xml:space="preserve">
-    <value>Create ticket</value>
+  <data name="Filter.All" xml:space="preserve">
+    <value>All</value>
   </data>
-  <data name="SecondaryAction" xml:space="preserve">
-    <value>Configure channels</value>
+  <data name="Status.Open" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Status.Pending" xml:space="preserve">
+    <value>Waiting for client</value>
+  </data>
+  <data name="Status.Resolved" xml:space="preserve">
+    <value>Resolved</value>
+  </data>
+  <data name="Status.Closed" xml:space="preserve">
+    <value>Closed</value>
   </data>
   <data name="EmptyTitle" xml:space="preserve">
-    <value>Workspace under construction</value>
+    <value>No tickets selected</value>
   </data>
   <data name="EmptyDescription" xml:space="preserve">
-    <value>The service desk tools are not ready yet. They will appear here soon.</value>
+    <value>No tickets yet. New conversations from email will appear here automatically.</value>
+  </data>
+  <data name="AwaitingReply" xml:space="preserve">
+    <value>Awaiting reply</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="UpdateStatus" xml:space="preserve">
+    <value>Update status</value>
+  </data>
+  <data name="Message.Client" xml:space="preserve">
+    <value>Client</value>
+  </data>
+  <data name="Message.Agent" xml:space="preserve">
+    <value>Team</value>
+  </data>
+  <data name="Attachments" xml:space="preserve">
+    <value>Attachments</value>
+  </data>
+  <data name="VideoNotSupported" xml:space="preserve">
+    <value>Your browser does not support video playback.</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="ReplyHeading" xml:space="preserve">
+    <value>Reply to client</value>
+  </data>
+  <data name="Subject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="MessageBody" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="AddAttachments" xml:space="preserve">
+    <value>Attach files</value>
+  </data>
+  <data name="AttachmentsHint" xml:space="preserve">
+    <value>Images and videos will be shown in the message preview.</value>
+  </data>
+  <data name="SendReply" xml:space="preserve">
+    <value>Send reply</value>
+  </data>
+  <data name="FileSize.Bytes" xml:space="preserve">
+    <value>{0:0} B</value>
+  </data>
+  <data name="FileSize.Kilobytes" xml:space="preserve">
+    <value>{0:0.##} KB</value>
+  </data>
+  <data name="FileSize.Megabytes" xml:space="preserve">
+    <value>{0:0.##} MB</value>
+  </data>
+  <data name="FileSize.Gigabytes" xml:space="preserve">
+    <value>{0:0.##} GB</value>
   </data>
 </root>

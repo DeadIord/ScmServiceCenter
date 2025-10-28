@@ -3,6 +3,16 @@
 
 // Write your JavaScript code.
 
+const resources = document.body?.dataset ?? {};
+const toastStatusUpdatedText = resources.toastStatusUpdated || 'Status updated';
+const toastStatusErrorText = resources.toastStatusError || 'Could not update status';
+const tableEmptyText = resources.tableEmpty || 'No records found';
+const paramTypeStringText = resources.paramTypeString || 'String';
+const paramTypeIntText = resources.paramTypeInt || 'Integer';
+const paramTypeDecimalText = resources.paramTypeDecimal || 'Decimal';
+const paramTypeDateText = resources.paramTypeDate || 'Date';
+const paramTypeBoolText = resources.paramTypeBool || 'Boolean';
+
 function updateKanbanColumnCounts(board) {
     if (!board) {
         return;
@@ -11,8 +21,19 @@ function updateKanbanColumnCounts(board) {
     board.querySelectorAll('.kanban-column').forEach(column => {
         const header = column.previousElementSibling;
         const badge = header ? header.querySelector('.js-column-count') : null;
+        const items = column.querySelectorAll('.kanban-item');
+        const placeholder = column.querySelector('.kanban-empty');
+
         if (badge) {
-            badge.textContent = column.querySelectorAll('.kanban-item').length;
+            badge.textContent = items.length;
+        }
+
+        if (placeholder) {
+            if (items.length) {
+                placeholder.classList.add('d-none');
+            } else {
+                placeholder.classList.remove('d-none');
+            }
         }
     });
 }
@@ -42,17 +63,17 @@ window.initKanbanBoard = function () {
             return;
         }
 
+        updateKanbanColumnCounts(board);
+
         const previousStatus = from.dataset.status;
         const newStatus = to.dataset.status;
 
         if (!previousStatus || !newStatus || previousStatus === newStatus) {
-            updateKanbanColumnCounts(board);
             return;
         }
 
         const orderId = item.dataset.id;
         if (!orderId) {
-            updateKanbanColumnCounts(board);
             return;
         }
 
@@ -61,10 +82,10 @@ window.initKanbanBoard = function () {
         }).then(() => {
             updateKanbanColumnCounts(board);
             if (typeof showToast === 'function') {
-                showToast('Статус обновлён', 'bg-success');
+                showToast(toastStatusUpdatedText, 'bg-success');
             }
         }).catch(error => {
-            const message = error?.response?.data?.message || 'Не удалось обновить статус';
+            const message = error?.response?.data?.message || toastStatusErrorText;
             if (typeof showToast === 'function') {
                 showToast(message, 'bg-danger');
             }
@@ -72,13 +93,31 @@ window.initKanbanBoard = function () {
         });
     };
 
+    updateKanbanColumnCounts(board);
+
+    const preventPlaceholderDrop = (evt) => {
+        if (!evt || !evt.related || !evt.related.classList) {
+            return true;
+        }
+
+        return !evt.related.classList.contains('kanban-empty');
+    };
+
     board.querySelectorAll('.kanban-column').forEach(column => {
         Sortable.create(column, {
             group: groupName,
-            animation: 150,
+            animation: 220,
             ghostClass: 'kanban-ghost',
             dragClass: 'kanban-dragging',
-            onEnd: handleStatusChange
+            filter: '.kanban-empty',
+            onMove: preventPlaceholderDrop,
+            onStart: () => {
+                board.classList.add('kanban-board-dragging');
+            },
+            onEnd: evt => {
+                board.classList.remove('kanban-board-dragging');
+                handleStatusChange(evt);
+            }
         });
     });
 };
@@ -106,7 +145,7 @@ window.initReportParametersEditor = function () {
         if (!tableBody.querySelector('.table-empty-row')) {
             const emptyRow = document.createElement('tr');
             emptyRow.className = 'table-empty-row';
-            emptyRow.innerHTML = '<td colspan="4" class="text-center py-4 table-empty">Записей нет</td>';
+            emptyRow.innerHTML = `<td colspan="4" class="text-center py-4 table-empty">${tableEmptyText}</td>`;
             tableBody.appendChild(emptyRow);
         }
     };
@@ -132,11 +171,11 @@ window.initReportParametersEditor = function () {
             </td>
             <td>
                 <select class="form-select" name="Parameters[${index}].Type">
-                    <option value="string">Строка</option>
-                    <option value="int">Целое число</option>
-                    <option value="decimal">Десятичное</option>
-                    <option value="date">Дата</option>
-                    <option value="bool">Логическое</option>
+                    <option value="string">${paramTypeStringText}</option>
+                    <option value="int">${paramTypeIntText}</option>
+                    <option value="decimal">${paramTypeDecimalText}</option>
+                    <option value="date">${paramTypeDateText}</option>
+                    <option value="bool">${paramTypeBoolText}</option>
                 </select>
             </td>
             <td>

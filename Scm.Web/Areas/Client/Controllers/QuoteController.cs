@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Persistence;
+using Microsoft.Extensions.Localization;
 
 namespace Scm.Web.Areas.Client.Controllers;
 
@@ -14,13 +15,18 @@ namespace Scm.Web.Areas.Client.Controllers;
 [Route("Client/[controller]")]
 public class QuoteController : Controller
 {
-    private readonly ScmDbContext _dbContext;
-    private readonly IQuoteService _quoteService;
+    private readonly ScmDbContext m_dbContext;
+    private readonly IQuoteService m_quoteService;
+    private readonly IStringLocalizer<QuoteController> m_localizer;
 
-    public QuoteController(ScmDbContext dbContext, IQuoteService quoteService)
+    public QuoteController(
+        ScmDbContext in_dbContext,
+        IQuoteService in_quoteService,
+        IStringLocalizer<QuoteController> in_localizer)
     {
-        _dbContext = dbContext;
-        _quoteService = quoteService;
+        m_dbContext = in_dbContext;
+        m_quoteService = in_quoteService;
+        m_localizer = in_localizer;
     }
 
     [HttpPost("Submit")]
@@ -28,13 +34,13 @@ public class QuoteController : Controller
     public async Task<IActionResult> Submit(Guid in_orderId, string in_token, Guid[]? in_approvedLineIds)
     {
         IActionResult ret;
-        var order = await _dbContext.Orders
+        var order = await m_dbContext.Orders
             .Include(o => o.QuoteLines)
             .FirstOrDefaultAsync(o => o.Id == in_orderId);
 
         if (order is null || order.ClientAccessToken != in_token)
         {
-            TempData["Error"] = "Заказ не найден";
+            TempData["Error"] = m_localizer["Error_OrderNotFound"].Value;
             ret = RedirectToOrder(order?.Number, in_token);
         }
         else
@@ -42,15 +48,15 @@ public class QuoteController : Controller
             var hasProposed = order.QuoteLines.Any(l => l.Status == QuoteLineStatus.Proposed);
             if (!hasProposed)
             {
-                TempData["Error"] = "Нет строк для подтверждения";
+                TempData["Error"] = m_localizer["Error_NoLines"].Value;
                 ret = RedirectToOrder(order.Number, in_token);
             }
             else
             {
                 var approvedLineIds = in_approvedLineIds ?? Array.Empty<Guid>();
-                await _quoteService.ProcessClientApprovalAsync(order.Id, approvedLineIds);
+                await m_quoteService.ProcessClientApprovalAsync(order.Id, approvedLineIds);
 
-                TempData["Success"] = "Смета обработана";
+                TempData["Success"] = m_localizer["Notification_QuoteProcessed"].Value;
                 ret = RedirectToOrder(order.Number, in_token);
             }
         }
@@ -63,7 +69,7 @@ public class QuoteController : Controller
         RedirectToActionResult ret;
         if (string.IsNullOrWhiteSpace(in_number))
         {
-            TempData["Error"] ??= "Не удалось найти заказ";
+            TempData["Error"] ??= m_localizer["Error_OrderUnknown"].Value;
             ret = RedirectToAction("Track", "Orders", new { area = "Client" });
         }
         else

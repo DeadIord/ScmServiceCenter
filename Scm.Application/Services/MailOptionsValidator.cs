@@ -15,7 +15,7 @@ public sealed class MailOptionsValidator : IValidateOptions<MailOptions>
         m_logger = in_logger;
     }
 
-    public ValidateOptionsResult Validate(string in_name, MailOptions in_options)
+    public ValidateOptionsResult Validate(string? in_name, MailOptions in_options)
     {
         var validationMessages = new List<string>();
 

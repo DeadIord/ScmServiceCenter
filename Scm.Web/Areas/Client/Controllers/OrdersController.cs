@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
@@ -13,13 +14,18 @@ namespace Scm.Web.Areas.Client.Controllers;
 [AllowAnonymous]
 public class OrdersController : Controller
 {
-    private readonly ScmDbContext _dbContext;
-    private readonly IMessageService _messageService;
+    private readonly ScmDbContext m_dbContext;
+    private readonly IMessageService m_messageService;
+    private readonly IStringLocalizer<OrdersController> m_localizer;
 
-    public OrdersController(ScmDbContext dbContext, IMessageService messageService)
+    public OrdersController(
+        ScmDbContext in_dbContext,
+        IMessageService in_messageService,
+        IStringLocalizer<OrdersController> in_localizer)
     {
-        _dbContext = dbContext;
-        _messageService = messageService;
+        m_dbContext = in_dbContext;
+        m_messageService = in_messageService;
+        m_localizer = in_localizer;
     }
 
     [HttpGet]
@@ -29,7 +35,7 @@ public class OrdersController : Controller
 
         if (!string.IsNullOrWhiteSpace(number) && !string.IsNullOrWhiteSpace(token))
         {
-            var order = await _dbContext.Orders
+            var order = await m_dbContext.Orders
                 .Include(o => o.QuoteLines)
                 .Include(o => o.Messages.OrderByDescending(m => m.AtUtc))
                 .AsSplitQuery()
@@ -37,7 +43,7 @@ public class OrdersController : Controller
 
             if (order is null)
             {
-                ViewBag.Error = "Заказ не найден. Проверьте номер и токен доступа.";
+                ViewBag.Error = m_localizer["Error_OrderNotFound"].Value;
             }
             else
             {
@@ -63,20 +69,20 @@ public class OrdersController : Controller
     {
         if (dto.OrderId == Guid.Empty || string.IsNullOrWhiteSpace(dto.Text))
         {
-            TempData["Error"] = "Введите сообщение";
+            TempData["Error"] = m_localizer["Error_MessageRequired"].Value;
             return RedirectToAction(nameof(Track), new { number, token });
         }
 
-        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == dto.OrderId);
+        var order = await m_dbContext.Orders.FirstOrDefaultAsync(o => o.Id == dto.OrderId);
         if (order is null || order.Number != number || order.ClientAccessToken != token)
         {
-            TempData["Error"] = "Заказ не найден";
+            TempData["Error"] = m_localizer["Error_OrderLookup"].Value;
             return RedirectToAction(nameof(Track), new { number, token });
         }
 
         dto.FromClient = true;
-        _ = await _messageService.AddAsync(dto, null);
-        TempData["Success"] = "Сообщение отправлено";
+        _ = await m_messageService.AddAsync(dto, null);
+        TempData["Success"] = m_localizer["Notification_MessageSent"].Value;
         return RedirectToAction(nameof(Track), new { number, token });
     }
 }

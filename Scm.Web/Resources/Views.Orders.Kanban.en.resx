@@ -54,4 +54,16 @@
   <data name="Priority_Critical" xml:space="preserve">
     <value>Critical</value>
   </data>
+  <data name="TotalOrdersLabel" xml:space="preserve">
+    <value>Total orders</value>
+  </data>
+  <data name="LegendLabel" xml:space="preserve">
+    <value>Statuses</value>
+  </data>
+  <data name="CreatedAtLabel" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="ColumnEmptyMessage" xml:space="preserve">
+    <value>Drag an order here to get started</value>
+  </data>
 </root>

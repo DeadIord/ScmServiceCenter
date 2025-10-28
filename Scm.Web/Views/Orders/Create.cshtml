@@ -1,39 +1,55 @@
+@using Microsoft.AspNetCore.Mvc.Localization
 @using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Linq
 @model Scm.Application.DTOs.CreateOrderDto
 @using Scm.Domain.Entities
+@inject IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Создание заказа";
+    ViewData["Title"] = Localizer["Title"].Value;
     var accountOptions = ViewBag.Accounts as List<SelectListItem> ?? new();
     var contactOptions = ViewBag.Contacts as List<SelectListItem> ?? new();
     var accountSearch = ViewData["AccountSearch"] as string ?? string.Empty;
     var contactSearch = ViewData["ContactSearch"] as string ?? string.Empty;
+    List<SelectListItem> priorityOptions = Enum.GetValues<OrderPriority>()
+        .Select(priority => new SelectListItem(Localizer[$"Priority_{priority}"].Value, priority.ToString()))
+        .ToList();
+    var accountPlaceholderOption = accountOptions.FirstOrDefault(option => string.IsNullOrEmpty(option.Value));
+    if (accountPlaceholderOption is not null)
+    {
+        accountPlaceholderOption.Text = Localizer["AccountPlaceholder"].Value;
+    }
+    var contactPlaceholderOption = contactOptions.FirstOrDefault(option => string.IsNullOrEmpty(option.Value));
+    if (contactPlaceholderOption is not null)
+    {
+        contactPlaceholderOption.Text = Localizer["ContactPlaceholder"].Value;
+    }
 }
 <div class="row g-4 justify-content-center">
     <div class="col-xl-10 col-xxl-8">
         <div class="card p-4 mb-4">
             <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
                 <div>
-                    <h1 class="section-title mb-1">Новый заказ</h1>
-                    <p class="section-subtitle mb-0">Заполните данные клиента и устройства, чтобы начать работу по ремонту</p>
+                    <h1 class="section-title mb-1">@Localizer["SectionTitle"]</h1>
+                    <p class="section-subtitle mb-0">@Localizer["SectionSubtitle"]</p>
                 </div>
-                <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left me-2"></i>Вернуться к списку</a>
+                <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left me-2"></i>@Localizer["BackToList"]</a>
             </div>
         </div>
         <div class="card p-4 mb-4">
-            <h2 class="h5 fw-semibold mb-3">Поиск в CRM</h2>
+            <h2 class="h5 fw-semibold mb-3">@Localizer["SearchSection"]</h2>
             <form method="get" class="row g-3 align-items-end">
                 <input type="hidden" name="accountId" value="@Model.AccountId" />
                 <input type="hidden" name="contactId" value="@Model.ContactId" />
                 <div class="col-lg-6">
-                    <label class="form-label">Поиск контрагента</label>
-                    <input class="form-control" type="search" name="accountSearch" value="@accountSearch" placeholder="Название или ИНН" />
+                    <label class="form-label">@Localizer["AccountSearchLabel"]</label>
+                    <input class="form-control" type="search" name="accountSearch" value="@accountSearch" placeholder="@Localizer["AccountSearchPlaceholder"]" />
                 </div>
                 <div class="col-lg-6">
-                    <label class="form-label">Поиск контакта</label>
-                    <input class="form-control" type="search" name="contactSearch" value="@contactSearch" placeholder="Имя или email" />
+                    <label class="form-label">@Localizer["ContactSearchLabel"]</label>
+                    <input class="form-control" type="search" name="contactSearch" value="@contactSearch" placeholder="@Localizer["ContactSearchPlaceholder"]" />
                 </div>
                 <div class="col-12 text-end">
-                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search me-2"></i>Обновить списки</button>
+                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search me-2"></i>@Localizer["RefreshLists"]</button>
                 </div>
             </form>
         </div>
@@ -43,51 +59,51 @@
                 <input type="hidden" name="accountSearch" value="@accountSearch" />
                 <input type="hidden" name="contactSearch" value="@contactSearch" />
                 <div class="col-md-6">
-                    <label class="form-label">Контрагент</label>
+                    <label class="form-label">@Localizer["AccountLabel"]</label>
                     <select class="form-select" asp-for="AccountId" asp-items="accountOptions"></select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Контакт</label>
+                    <label class="form-label">@Localizer["ContactLabel"]</label>
                     <select class="form-select" asp-for="ContactId" asp-items="contactOptions"></select>
                     <span asp-validation-for="ContactId" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Имя клиента</label>
-                    <input class="form-control" asp-for="ClientName" placeholder="ФИО клиента" />
+                    <label class="form-label">@Localizer["ClientNameLabel"]</label>
+                    <input class="form-control" asp-for="ClientName" placeholder="@Localizer["ClientNamePlaceholder"]" />
                     <span asp-validation-for="ClientName" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Телефон</label>
-                    <input class="form-control" asp-for="ClientPhone" placeholder="+7" />
+                    <label class="form-label">@Localizer["ClientPhoneLabel"]</label>
+                    <input class="form-control" asp-for="ClientPhone" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="@Localizer["ClientPhonePlaceholder"]" />
                     <span asp-validation-for="ClientPhone" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Email</label>
-                    <input class="form-control" asp-for="ClientEmail" type="email" placeholder="client@domain.ru" />
+                    <label class="form-label">@Localizer["ClientEmailLabel"]</label>
+                    <input class="form-control" asp-for="ClientEmail" type="email" placeholder="@Localizer["ClientEmailPlaceholder"]" />
                     <span asp-validation-for="ClientEmail" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Приоритет</label>
-                    <select class="form-select" asp-for="Priority" asp-items="Html.GetEnumSelectList<OrderPriority>()"></select>
+                    <label class="form-label">@Localizer["PriorityLabel"]</label>
+                    <select class="form-select" asp-for="Priority" asp-items="priorityOptions"></select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Устройство</label>
-                    <input class="form-control" asp-for="Device" placeholder="Например, ноутбук Lenovo" />
+                    <label class="form-label">@Localizer["DeviceLabel"]</label>
+                    <input class="form-control" asp-for="Device" placeholder="@Localizer["DevicePlaceholder"]" />
                     <span asp-validation-for="Device" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Серийный номер</label>
-                    <input class="form-control" asp-for="Serial" placeholder="Серийный номер" />
+                    <label class="form-label">@Localizer["SerialLabel"]</label>
+                    <input class="form-control" asp-for="Serial" placeholder="@Localizer["SerialPlaceholder"]" />
                     <span asp-validation-for="Serial" class="text-danger"></span>
                 </div>
                 <div class="col-12">
-                    <label class="form-label">Описание неисправности</label>
-                    <textarea class="form-control" asp-for="Defect" rows="3" placeholder="Что именно произошло с устройством"></textarea>
+                    <label class="form-label">@Localizer["DefectLabel"]</label>
+                    <textarea class="form-control" asp-for="Defect" rows="3" placeholder="@Localizer["DefectPlaceholder"]"></textarea>
                     <span asp-validation-for="Defect" class="text-danger"></span>
                 </div>
                 <div class="col-12 text-end">
-                    <a class="btn btn-outline-secondary" asp-action="Index">Отмена</a>
-                    <button type="submit" class="btn btn-primary">Создать заказ</button>
+                    <a class="btn btn-outline-secondary" asp-action="Index">@Localizer["Cancel"]</a>
+                    <button type="submit" class="btn btn-primary">@Localizer["CreateOrder"]</button>
                 </div>
             </form>
         </div>

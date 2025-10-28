@@ -304,6 +304,11 @@ namespace Scm.Infrastructure.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<string>("ClientEmail")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
                     b.Property<string>("ClientName")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -313,11 +318,6 @@ namespace Scm.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
-
-                    b.Property<string>("ClientEmail")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
 
                     b.Property<Guid?>("ContactId")
                         .HasColumnType("uuid");
@@ -536,6 +536,136 @@ namespace Scm.Infrastructure.Migrations
                     b.ToTable("ReportExecutionLogs", (string)null);
                 });
 
+            modelBuilder.Entity("Scm.Domain.Entities.Ticket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClientEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("ClientName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ExternalThreadId")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientEmail");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UpdatedAtUtc");
+
+                    b.ToTable("Tickets", (string)null);
+                });
+
+            modelBuilder.Entity("Scm.Domain.Entities.TicketAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<long>("Length")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("TicketMessageId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketMessageId");
+
+                    b.ToTable("TicketAttachments", (string)null);
+                });
+
+            modelBuilder.Entity("Scm.Domain.Entities.TicketMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BodyHtml")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BodyText")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatedByUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("ExternalReferences")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("FromClient")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SenderName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("SentAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique();
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("TicketMessages", (string)null);
+                });
+
             modelBuilder.Entity("Scm.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -726,6 +856,28 @@ namespace Scm.Infrastructure.Migrations
                     b.Navigation("Report");
                 });
 
+            modelBuilder.Entity("Scm.Domain.Entities.TicketAttachment", b =>
+                {
+                    b.HasOne("Scm.Domain.Entities.TicketMessage", "TicketMessage")
+                        .WithMany("Attachments")
+                        .HasForeignKey("TicketMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TicketMessage");
+                });
+
+            modelBuilder.Entity("Scm.Domain.Entities.TicketMessage", b =>
+                {
+                    b.HasOne("Scm.Domain.Entities.Ticket", "Ticket")
+                        .WithMany("Messages")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
+                });
+
             modelBuilder.Entity("Scm.Domain.Entities.Account", b =>
                 {
                     b.Navigation("Contacts");
@@ -748,6 +900,16 @@ namespace Scm.Infrastructure.Migrations
             modelBuilder.Entity("Scm.Domain.Entities.ReportDefinition", b =>
                 {
                     b.Navigation("ExecutionLogs");
+                });
+
+            modelBuilder.Entity("Scm.Domain.Entities.Ticket", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Scm.Domain.Entities.TicketMessage", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 #pragma warning restore 612, 618
         }
