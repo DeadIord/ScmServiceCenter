@@ -99,8 +99,7 @@ public sealed class TicketsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reply(
-        [FromForm]
-        [Bind(Prefix = TicketReplyInputModel.FormFieldPrefix)] TicketReplyInputModel in_model,
+        [FromForm] TicketReplyInputModel in_model,
         CancellationToken in_cancellationToken)
     {
         if (!ModelState.IsValid)
