@@ -4,14 +4,24 @@
     var lines = Model.QuoteLines;
     decimal approvedTotal = lines.Where(l => l.Status == QuoteLineStatus.Approved).Sum(l => l.Price * l.Qty);
     decimal proposedTotal = lines.Where(l => l.Status == QuoteLineStatus.Proposed).Sum(l => l.Price * l.Qty);
+    decimal totalAmount = lines.Sum(l => l.Price * l.Qty);
     int laborCount = lines.Count(l => l.Kind == QuoteLineKind.Labor);
     int partCount = lines.Count(l => l.Kind == QuoteLineKind.Part);
+    
     string KindTitle(QuoteLineKind in_kind) => in_kind switch
     {
         QuoteLineKind.Labor => "Работа",
         QuoteLineKind.Part => "Запчасть",
         _ => in_kind.ToString()
     };
+    
+    string KindIcon(QuoteLineKind in_kind) => in_kind switch
+    {
+        QuoteLineKind.Labor => "bi-tools",
+        QuoteLineKind.Part => "bi-box-seam",
+        _ => "bi-circle"
+    };
+    
     string StatusTitle(QuoteLineStatus in_status) => in_status switch
     {
         QuoteLineStatus.Draft => "Черновик",
@@ -20,6 +30,7 @@
         QuoteLineStatus.Rejected => "Отклонено",
         _ => in_status.ToString()
     };
+    
     string StatusBadge(QuoteLineStatus in_status) => in_status switch
     {
         QuoteLineStatus.Draft => "secondary",
@@ -29,95 +40,207 @@
         _ => "secondary"
     };
 }
-<div class="card shadow-sm rounded-3 mb-4">
-    <div class="card-body">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-            <div>
-                <h5 class="fw-semibold mb-1">Смета заказа</h5>
-                <p class="section-subtitle mb-0">Фиксация работ, запчастей и статуса согласования</p>
-            </div>
-            <div class="quote-summary">
-                <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">Работы</div>
-                    <div class="fs-5 fw-semibold">@laborCount</div>
-                </div>
-                <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">Запчасти</div>
-                    <div class="fs-5 fw-semibold">@partCount</div>
-                </div>
-                <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">На согласовании</div>
-                    <div class="fs-5 fw-semibold">@proposedTotal.ToString("N2") ₽</div>
-                </div>
-                <div class="quote-summary-item">
-                    <div class="small text-uppercase text-muted">Согласовано</div>
-                    <div class="fs-5 fw-semibold" id="quote-total">@approvedTotal.ToString("N2") ₽</div>
-                </div>
-            </div>
+
+<link rel="stylesheet" href="~/css/orders/orders_quote_table.css" asp-append-version="true" />
+
+<!-- Статистика сметы -->
+<div class="quote-stats-grid mb-4">
+    <div class="quote-stat-card">
+        <div class="quote-stat-icon bg-primary-subtle">
+            <i class="bi bi-tools text-primary"></i>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle table-sticky mb-0">
-                <thead>
-                    <tr>
-                        <th>Наименование</th>
-                        <th class="text-center">Тип</th>
-                        <th class="text-end">Кол-во</th>
-                        <th class="text-end">Цена</th>
-                        <th class="text-end">Сумма</th>
-                        <th class="text-end">Статус</th>
-                    </tr>
-                </thead>
-                <tbody id="quote-lines">
-                    @if (!lines.Any())
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-5 table-empty">Записей нет</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        foreach (var line in lines.OrderBy(l => l.Kind).ThenBy(l => l.Title))
-                        {
-                            var badge = StatusBadge(line.Status);
-                            <tr>
-                                <td class="fw-semibold">@line.Title</td>
-                                <td class="text-center">
-                                    <span class="badge badge-light-alt">@KindTitle(line.Kind)</span>
-                                </td>
-                                <td class="text-end">@line.Qty.ToString("N2")</td>
-                                <td class="text-end">@line.Price.ToString("N2")</td>
-                                <td class="text-end">@(line.Price * line.Qty).ToString("N2")</td>
-                                <td class="text-end"><span class="badge text-bg-@badge">@StatusTitle(line.Status)</span></td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
+        <div class="quote-stat-content">
+            <div class="quote-stat-value">@laborCount</div>
+            <div class="quote-stat-label">Работы</div>
         </div>
-        <form id="add-line-form" class="row g-3 border-top pt-3 mt-3">
-            <input type="hidden" name="OrderId" value="@Model.Id" />
-            <div class="col-md-4">
-                <label class="form-label">Наименование</label>
-                <input class="form-control" name="Title" placeholder="Например, диагностика" required />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Тип</label>
-                <select class="form-select" name="Kind">
-                    <option value="Labor">Работа</option>
-                    <option value="Part">Запчасть</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Кол-во</label>
-                <input class="form-control" type="number" step="0.01" name="Qty" value="1" min="0.01" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Цена</label>
-                <input class="form-control" type="number" step="0.01" name="Price" value="0" min="0" />
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-circle me-2"></i>Добавить</button>
-            </div>
-        </form>
+    </div>
+    
+    <div class="quote-stat-card">
+        <div class="quote-stat-icon bg-info-subtle">
+            <i class="bi bi-box-seam text-info"></i>
+        </div>
+        <div class="quote-stat-content">
+            <div class="quote-stat-value">@partCount</div>
+            <div class="quote-stat-label">Запчасти</div>
+        </div>
+    </div>
+    
+    <div class="quote-stat-card">
+        <div class="quote-stat-icon bg-warning-subtle">
+            <i class="bi bi-clock-history text-warning"></i>
+        </div>
+        <div class="quote-stat-content">
+            <div class="quote-stat-value">@proposedTotal.ToString("N0") ₽</div>
+            <div class="quote-stat-label">На согласовании</div>
+        </div>
+    </div>
+    
+    <div class="quote-stat-card">
+        <div class="quote-stat-icon bg-success-subtle">
+            <i class="bi bi-check-circle text-success"></i>
+        </div>
+        <div class="quote-stat-content">
+            <div class="quote-stat-value">@approvedTotal.ToString("N0") ₽</div>
+            <div class="quote-stat-label">Согласовано</div>
+        </div>
     </div>
 </div>
+
+<!-- Таблица позиций -->
+<div class="quote-table-wrapper">
+    <table class="quote-table">
+        <thead>
+            <tr>
+                <th style="width: 40px;">
+                    <input type="checkbox" class="form-check-input" id="selectAllQuoteLines">
+                </th>
+                <th>НАИМЕНОВАНИЕ</th>
+                <th style="width: 120px;">ТИП</th>
+                <th class="text-end" style="width: 100px;">КОЛ-ВО</th>
+                <th class="text-end" style="width: 120px;">ЦЕНА, ₽</th>
+                <th class="text-end" style="width: 120px;">СУММА, ₽</th>
+                <th style="width: 140px;">СТАТУС</th>
+                <th style="width: 80px;"></th>
+            </tr>
+        </thead>
+        <tbody id="quote-lines">
+            @if (!lines.Any())
+            {
+                <tr>
+                    <td colspan="8" class="quote-empty-state">
+                        <i class="bi bi-inbox display-4 d-block mb-3 text-muted"></i>
+                        <p class="mb-0">Позиции не добавлены</p>
+                        <small class="text-muted">Заполните форму ниже для добавления</small>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var line in lines.OrderBy(l => l.Kind).ThenBy(l => l.Title))
+                {
+                    var badge = StatusBadge(line.Status);
+                    var kindIcon = KindIcon(line.Kind);
+                    <tr class="quote-line-row">
+                        <td>
+                            <input type="checkbox" class="form-check-input">
+                        </td>
+                        <td>
+                            <div class="quote-item-name">@line.Title</div>
+                        </td>
+                        <td>
+                            <span class="quote-type-badge quote-type-@line.Kind.ToString().ToLower()">
+                                <i class="@kindIcon me-1"></i>
+                                @KindTitle(line.Kind)
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="quote-quantity">@line.Qty.ToString("N1")</span>
+                        </td>
+                        <td class="text-end">
+                            <span class="quote-price">@line.Price.ToString("N2")</span>
+                        </td>
+                        <td class="text-end">
+                            <span class="quote-total fw-semibold">@((line.Price * line.Qty).ToString("N2"))</span>
+                        </td>
+                        <td>
+                            <span class="status-badge-small status-@badge">
+                                @StatusTitle(line.Status)
+                            </span>
+                        </td>
+                        <td>
+                            <div class="quote-actions">
+                                @if (line.Status == QuoteLineStatus.Proposed)
+                                {
+                                    @* <button class="btn-quote-action" type="button" title="Просмотр">
+                                        <i class="bi bi-eye"></i>
+                                    </button> *@
+                                    <button class="btn-quote-action text-warning" type="button" 
+                                            onclick="cancelQuoteLine('@line.Id')" title="Отозвать">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Итоги -->
+@if (lines.Any())
+{
+    <div class="quote-summary-panel">
+        <div class="quote-summary-row">
+            <span>Промежуточный итог:</span>
+            <span class="fw-semibold">@totalAmount.ToString("N2") ₽</span>
+        </div>
+        <div class="quote-summary-row">
+            <span>Скидка:</span>
+            <span class="text-success">0.00 ₽</span>
+        </div>
+        <div class="quote-summary-row">
+            <span>Налог (НДС):</span>
+            <span>0.00 ₽</span>
+        </div>
+        <div class="quote-summary-row quote-summary-total">
+            <span>Итого к оплате:</span>
+            <span class="fw-bold fs-5">@totalAmount.ToString("N2") ₽</span>
+        </div>
+    </div>
+}
+
+<!-- Форма добавления позиции -->
+<div class="quote-add-form">
+    <div class="quote-add-form-header">
+        <h6 class="mb-0">
+            <i class="bi bi-plus-circle me-2"></i>Добавить позицию
+        </h6>
+    </div>
+    <form id="add-line-form" class="quote-form-grid">
+        <input type="hidden" name="OrderId" value="@Model.Id" />
+        
+        <div class="form-group">
+            <label class="form-label">Наименование</label>
+            <input class="form-control" name="Title" 
+                   placeholder="Например, замена экрана" required />
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Тип</label>
+            <select class="form-select" name="Kind">
+                <option value="Labor">
+                    <i class="bi bi-tools"></i> Работа
+                </option>
+                <option value="Part">
+                    <i class="bi bi-box-seam"></i> Запчасть
+                </option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Количество</label>
+            <input class="form-control" type="number" step="0.01" 
+                   name="Qty" value="1" min="0.01" required />
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Цена (₽)</label>
+            <input class="form-control" type="number" step="0.01" 
+                   name="Price" value="0" min="0" required />
+        </div>
+        
+        <div class="form-group d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-plus-circle me-2"></i>Добавить
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/orders/orders_quote_table.js"></script>

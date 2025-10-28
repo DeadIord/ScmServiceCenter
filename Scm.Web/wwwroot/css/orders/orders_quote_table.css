@@ -1,0 +1,301 @@
+/* ==================== СТАТИСТИКА ==================== */
+.quote-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.quote-stat-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+}
+
+.quote-stat-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.quote-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.quote-stat-content {
+    flex: 1;
+}
+
+.quote-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.quote-stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* ==================== ТАБЛИЦА ==================== */
+.quote-table-wrapper {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.quote-table {
+    width: 100%;
+    margin: 0;
+}
+
+.quote-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.quote-table th {
+    padding: 1rem 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+}
+
+.quote-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+
+.quote-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.quote-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.quote-table td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border: none;
+}
+
+.quote-item-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.quote-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.quote-type-labor {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.quote-type-part {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.quote-quantity {
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+.quote-price {
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.quote-total {
+    font-size: 1rem;
+    color: #1e293b;
+}
+
+.status-badge-small {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.status-secondary { background: #f1f5f9; color: #64748b; }
+.status-warning { background: #fef3c7; color: #92400e; }
+.status-success { background: #d1fae5; color: #065f46; }
+.status-danger { background: #fee2e2; color: #991b1b; }
+
+.quote-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: flex-end;
+}
+
+.btn-quote-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-quote-action:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.btn-quote-action.text-danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+.quote-empty-state {
+    text-align: center;
+    padding: 4rem 2rem !important;
+    color: #94a3b8;
+}
+
+/* ==================== ИТОГИ ==================== */
+.quote-summary-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.quote-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.quote-summary-row:not(:last-child) {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.quote-summary-total {
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid #cbd5e1 !important;
+    color: #1e293b;
+    font-size: 1.125rem;
+}
+
+/* ==================== ФОРМА ДОБАВЛЕНИЯ ==================== */
+.quote-add-form {
+    background: white;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.quote-add-form-header {
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.quote-add-form-header h6 {
+    color: #475569;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.quote-form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 0.5rem;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1200px) {
+    .quote-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .quote-stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .quote-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quote-table {
+        font-size: 0.875rem;
+    }
+
+    .quote-table th,
+    .quote-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}

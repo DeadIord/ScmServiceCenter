@@ -5,8 +5,6 @@
 }
 
 .hero-image-container {
-    animation: hero-fade-in 1s 0.5s linear forwards;
-    opacity: 0;
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -28,9 +26,6 @@
     z-index: 1;
 }
 
-@keyframes hero-fade-in {
-    100% { opacity: 1; }
-}
 
 .window-background {
     position: absolute;

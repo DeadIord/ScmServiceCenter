@@ -1,0 +1,79 @@
+@model (Scm.Domain.Entities.Order Order, int CurrentStatusIndex)
+@using Scm.Domain.Entities
+
+<div class="order-progress">
+    <!-- Принят -->
+    <div class="progress-step @(Model.CurrentStatusIndex >= 0 ? "completed" : "") @(Model.CurrentStatusIndex == 0 ? "active" : "")">
+        <div class="progress-icon"><i class="bi bi-inbox"></i></div>
+        <div class="progress-info">
+            <div class="progress-title">Принят</div>
+            <div class="progress-date">
+                @Model.Order.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+            </div>
+        </div>
+    </div>
+    
+    <!-- Диагностика -->
+    <div class="progress-step @(Model.CurrentStatusIndex >= 1 ? "completed" : "") @(Model.CurrentStatusIndex == 1 ? "active" : "")">
+        <div class="progress-icon"><i class="bi bi-search"></i></div>
+        <div class="progress-info">
+            <div class="progress-title">Диагностика</div>
+            <div class="progress-date">
+                @if (Model.CurrentStatusIndex > 1) { <span class="text-success"><i class="bi bi-check-circle me-1"></i>Завершено</span> }
+                else if (Model.CurrentStatusIndex == 1) { <span class="text-primary">В процессе...</span> }
+                else { <span>Ожидание</span> }
+            </div>
+        </div>
+    </div>
+    
+    <!-- Согласование -->
+    <div class="progress-step @(Model.CurrentStatusIndex >= 2 ? "completed" : "") @(Model.CurrentStatusIndex == 2 ? "active" : "")">
+        <div class="progress-icon"><i class="bi bi-clock"></i></div>
+        <div class="progress-info">
+            <div class="progress-title">Согласование</div>
+            <div class="progress-date">
+                @if (Model.CurrentStatusIndex > 2) { <span class="text-success"><i class="bi bi-check-circle me-1"></i>Завершено</span> }
+                else if (Model.CurrentStatusIndex == 2) { <span class="text-warning">Ожидает согласования...</span> }
+                else { <span>Ожидание</span> }
+            </div>
+        </div>
+    </div>
+    
+    <!-- В ремонте -->
+    <div class="progress-step @(Model.CurrentStatusIndex >= 3 ? "completed" : "") @(Model.CurrentStatusIndex == 3 ? "active" : "")">
+        <div class="progress-icon"><i class="bi bi-tools"></i></div>
+        <div class="progress-info">
+            <div class="progress-title">В ремонте</div>
+            <div class="progress-date">
+                @if (Model.CurrentStatusIndex > 3) { <span class="text-success"><i class="bi bi-check-circle me-1"></i>Завершено</span> }
+                else if (Model.CurrentStatusIndex == 3) { <span class="text-primary">Идёт работа...</span> }
+                else { <span>Ожидание</span> }
+            </div>
+        </div>
+    </div>
+    
+    <!-- Готов -->
+    <div class="progress-step @(Model.CurrentStatusIndex >= 4 ? "completed" : "") @(Model.CurrentStatusIndex == 4 ? "active" : "")">
+        <div class="progress-icon"><i class="bi bi-check-circle"></i></div>
+        <div class="progress-info">
+            <div class="progress-title">Готов</div>
+            <div class="progress-date">
+                @if (Model.CurrentStatusIndex > 4) { <span class="text-success"><i class="bi bi-check-circle me-1"></i>Завершено</span> }
+                else if (Model.CurrentStatusIndex == 4) { <span class="text-success">Можно забрать</span> }
+                else { <span>Ожидание</span> }
+            </div>
+        </div>
+    </div>
+    
+    <!-- Закрыт -->
+    <div class="progress-step @(Model.CurrentStatusIndex >= 5 ? "completed" : "") @(Model.CurrentStatusIndex == 5 ? "active" : "")">
+        <div class="progress-icon"><i class="bi bi-lock"></i></div>
+        <div class="progress-info">
+            <div class="progress-title">Закрыт</div>
+            <div class="progress-date">
+                @if (Model.CurrentStatusIndex >= 5) { <span class="text-success"><i class="bi bi-check-circle me-1"></i>Завершено</span> }
+                else { <span>Ожидание</span> }
+            </div>
+        </div>
+    </div>
+</div>

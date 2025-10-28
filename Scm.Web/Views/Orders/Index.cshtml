@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Заказы";
     OrderStatus[] statuses = Enum.GetValues<OrderStatus>();
+    
     string StatusBadge(OrderStatus in_status) => in_status switch
     {
         OrderStatus.Received => "secondary",
@@ -13,16 +14,18 @@
         OrderStatus.Closed => "dark",
         _ => "secondary"
     };
+    
     string StatusTitle(OrderStatus in_status) => in_status switch
     {
         OrderStatus.Received => "Принят",
         OrderStatus.Diagnosing => "Диагностика",
-        OrderStatus.WaitingApproval => "Ожидает согласования",
+        OrderStatus.WaitingApproval => "Cогласование",
         OrderStatus.InRepair => "В ремонте",
         OrderStatus.Ready => "Готов",
         OrderStatus.Closed => "Закрыт",
         _ => in_status.ToString()
     };
+    
     string PriorityBadge(OrderPriority in_priority) => in_priority switch
     {
         OrderPriority.Low => "secondary",
@@ -31,6 +34,7 @@
         OrderPriority.Critical => "danger",
         _ => "secondary"
     };
+    
     string PriorityTitle(OrderPriority in_priority) => in_priority switch
     {
         OrderPriority.Low => "Низкий",
@@ -39,101 +43,348 @@
         OrderPriority.Critical => "Критичный",
         _ => in_priority.ToString()
     };
-    string SlaClass(DateTime? in_date) => in_date is null ? "text-muted" : in_date.Value < DateTime.UtcNow ? "text-danger fw-semibold" : "text-success";
+    
+    string SlaClass(DateTime? in_date) => in_date is null ? "text-muted" : 
+        in_date.Value < DateTime.UtcNow ? "text-danger fw-semibold" : "text-success";
+    
+    
+    // Функция для получения инициалов
+    string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+    }
+    
+    // Цвета для аватаров
+    string[] avatarColors = { "primary", "success", "info", "warning", "danger", "secondary" };
+    string GetAvatarColor(int index) => avatarColors[index % avatarColors.Length];
 }
-<div class="card p-4 mb-4">
-    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
-        <div>
-            <h1 class="section-title mb-1">Очередь заказов</h1>
-            <p class="section-subtitle mb-0">Актуальные ремонты, статусы согласования и связь с клиентами</p>
-        </div>
-        <div class="d-flex flex-column flex-sm-row gap-2">
-            <a class="btn btn-outline-light text-dark" asp-action="Kanban"><i class="bi bi-columns-gap me-2"></i>Доска Kanban</a>
-            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-circle me-2"></i>Создать заказ</a>
-        </div>
-    </div>
-</div>
-<div class="card p-4 mb-4">
-    <form method="get" class="row g-3 align-items-end">
-        <div class="col-lg-4">
-            <label class="form-label">Поиск</label>
-            <div class="input-group">
-                <input type="text" class="form-control" name="q" value="@Model.Query" placeholder="Номер, клиент, email, устройство" />
-                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+
+<link rel="stylesheet" href="~/css/orders/orders_index.css" asp-append-version="true" />
+
+<div class="main-body">
+
+    <div class="orders-modern-container">
+        <!-- Статистика сверху -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-subtle">
+                    <i class="bi bi-clock-history text-warning"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Orders.Count(o => o.Status == OrderStatus.Received)</div>
+                    <div class="stat-label">Принято</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-subtle">
+                    <i class="bi bi-gear text-primary"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Orders.Count(o => o.Status == OrderStatus.InRepair || o.Status == OrderStatus.Diagnosing)</div>
+                    <div class="stat-label">В работе</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon bg-success-subtle">
+                    <i class="bi bi-check-circle text-success"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Orders.Count(o => o.Status == OrderStatus.Ready)</div>
+                    <div class="stat-label">Готово</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon bg-danger-subtle">
+                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@Model.Orders.Count(o => o.SLAUntil.HasValue && o.SLAUntil.Value < DateTime.UtcNow)</div>
+                    <div class="stat-label">Просрочено</div>
+                </div>
             </div>
         </div>
-        <div class="col-lg-3">
-            <label class="form-label">Статус</label>
-            <select class="form-select" name="status" onchange="this.form.submit()">
-                <option value="">Все</option>
-                @foreach (var status in statuses)
-                {
-                    <option value="@status" selected="@(Model.Status == status ? "selected" : null)">@StatusTitle(status)</option>
-                }
-            </select>
-        </div>
-        <div class="col-lg-5">
-            <label class="form-label">Быстрые фильтры</label>
-            <div class="d-flex flex-wrap gap-2">
-                @foreach (var status in statuses)
-                {
-                    bool selected = Model.Status == status;
-                    <a class="badge rounded-pill text-decoration-none px-3 py-2 badge-status text-bg-@StatusBadge(status) @(selected ? "shadow" : string.Empty)" href="@Url.Action("Index", new { status = selected ? (OrderStatus?)null : status, q = Model.Query })">@StatusTitle(status)</a>
-                }
+
+        <!-- Header с кнопками -->
+        <div class="orders-header mb-4">
+            <div>
+                <h1 class="orders-title mb-1">Очередь заказов</h1>
+                <p class="orders-subtitle mb-0">Актуальные ремонты, статусы согласования и связь с клиентами</p>
+            </div>
+            <div class="orders-actions">
+                <a class="btn btn-primary" asp-action="Create">
+                    <i class="bi bi-plus-circle me-2"></i>Создать заказ
+                </a>
             </div>
         </div>
-    </form>
-</div>
-<div class="card p-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle table-sticky mb-0">
-            <thead>
-                <tr>
-                    <th>Номер</th>
-                    <th>Клиент</th>
-                    <th>Email</th>
-                    <th>Телефон</th>
-                    <th>Устройство</th>
-                    <th>Статус</th>
-                    <th>Приоритет</th>
-                    <th>SLA</th>
-                    <th>Создан</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Orders.Any())
-                {
-                    <tr>
-                        <td colspan="10" class="text-center py-5 table-empty">Заказы не найдены</td>
-                    </tr>
-                }
-                else
-                {
-                    foreach (var order in Model.Orders)
-                    {
+
+        <!-- Фильтры -->
+        <div class="filters-card">
+            <form method="get" class="filters-form">
+                <div class="search-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="form-control search-input" name="q" 
+                        value="@Model.Query" placeholder="Поиск по номеру, клиенту, email или устройству" />
+                </div>
+                
+                <div class="quick-filters">
+                    <label class="filter-label">Быстрые фильтры:</label>
+                    <div class="filter-badges">
+                        <a class="filter-badge @(Model.Status == null ? "active" : "")" 
+                        href="@Url.Action("Index", new { status = (OrderStatus?)null, q = Model.Query })">
+                            Все
+                        </a>
+                        @foreach (var status in statuses)
+                        {
+                            bool selected = Model.Status == status;
+                            <a class="filter-badge filter-badge-@StatusBadge(status) @(selected ? "active" : "")" 
+                            href="@Url.Action("Index", new { status = selected ? (OrderStatus?)null : status, q = Model.Query })">
+                                @StatusTitle(status)
+                            </a>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Таблица -->
+        <div class="orders-table-card">
+            <div class="table-responsive">
+                <table class="orders-table">
+                    <thead>
                         <tr>
-                            <td class="fw-semibold">@order.Number</td>
-                            <td>@order.ClientName</td>
-                            <td>
-                                @if (!string.IsNullOrWhiteSpace(order.ClientEmail))
-                                {
-                                    <a href="mailto:@order.ClientEmail" class="text-decoration-none">@order.ClientEmail</a>
-                                }
-                            </td>
-                            <td><a href="tel:@order.ClientPhone" class="text-decoration-none">@order.ClientPhone</a></td>
-                            <td>@order.Device</td>
-                            <td><span class="badge text-bg-@StatusBadge(order.Status) badge-status">@StatusTitle(order.Status)</span></td>
-                            <td><span class="badge text-bg-@PriorityBadge(order.Priority) badge-status">@PriorityTitle(order.Priority)</span></td>
-                            <td class="@SlaClass(order.SLAUntil)">@order.SLAUntil?.ToString("dd.MM.yyyy") ?? "—"</td>
-                            <td>@order.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
-                            <td class="text-end">
-                                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@order.Id"><i class="bi bi-arrow-right"></i></a>
-                            </td>
+                            <th style="width: 40px;">
+                                <input type="checkbox" class="form-check-input" id="selectAll">
+                            </th>
+                            <th>ЗАКАЗ</th>
+                            <th>КЛИЕНТ</th>
+                            <th>УСТРОЙСТВО</th>
+                            <th>СТАТУС</th>
+                            <th>ПРИОРИТЕТ</th>
+                            <th>ДАТА СОЗДАНИЯ</th>
+                            <th>SLA</th>
+                            <th>ДЕЙСТВИЕ</th>
                         </tr>
-                    }
+                    </thead>
+                    <tbody>
+                        @if (!Model.Orders.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="empty-state">
+                                    <i class="bi bi-inbox display-4 d-block mb-3 text-muted"></i>
+                                    <p class="mb-0">Заказы не найдены</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @for (int i = 0; i < Model.Orders.Count(); i++)
+                            {
+                                var order = Model.Orders.ElementAt(i);
+                                <tr class="order-row">
+                                    <td>
+                                        <input type="checkbox" class="form-check-input">
+                                    </td>
+                                    <td>
+                                        <span class="order-number">#@order.Number</span>
+                                    </td>
+                                    <td>
+                                        <div class="customer-cell">
+                                            <div class="customer-avatar bg-@GetAvatarColor(i)">
+                                                @GetInitials(order.ClientName)
+                                            </div>
+                                            <div class="customer-info">
+                                                <div class="customer-name">@order.ClientName</div>
+                                                @if (!string.IsNullOrWhiteSpace(order.ClientEmail))
+                                                {
+                                                    <div class="customer-email">@order.ClientEmail</div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="customer-email">@order.ClientPhone</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="device-name">@order.Device</div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-@StatusBadge(order.Status)">
+                                            @StatusTitle(order.Status)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="priority-badge priority-@PriorityBadge(order.Priority).Split(' ')[0]">
+                                            @PriorityTitle(order.Priority)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="order-date">@order.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy, HH:mm")</div>
+                                    </td>
+                                    <td>
+                                        <div class="sla-cell @SlaClass(order.SLAUntil)">
+                                            @if (order.SLAUntil.HasValue)
+                                            {
+                                                if (order.SLAUntil.Value < DateTime.UtcNow)
+                                                {
+                                                    @* <i class="bi bi-exclamation-circle me-1"></i> *@
+                                                }
+                                                @order.SLAUntil.Value.ToString("dd.MM.yyyy")
+                                            }
+                                            else
+                                            {
+                                                <span>—</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <div class="dropdown">
+                                                <button class="btn-action" type="button" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li><a class="dropdown-item" asp-action="Details" asp-route-id="@order.Id">
+                                                        <i class="bi bi-eye me-2"></i>Просмотр
+                                                    </a></li>
+
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">
+                                                        <i class="bi bi-trash me-2"></i>Удалить
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <!-- Мобильный вид (карточки) -->
+        <div class="mobile-orders-grid">
+            @if (!Model.Orders.Any())
+            {
+                <div class="empty-state" style="text-align: center; padding: 4rem 1rem;">
+                    <i class="bi bi-inbox display-4 d-block mb-3 text-muted"></i>
+                    <p class="mb-0">Заказы не найдены</p>
+                </div>
+            }
+            else
+            {
+                @for (int i = 0; i < Model.Orders.Count(); i++)
+                {
+                    var order = Model.Orders.ElementAt(i);
+                    var statusClass = order.Status switch
+                    {
+                        OrderStatus.Received => "status-received",
+                        OrderStatus.Diagnosing => "status-diagnosing",
+                        OrderStatus.WaitingApproval => "status-waiting",
+                        OrderStatus.InRepair => "status-repair",
+                        OrderStatus.Ready => "status-ready",
+                        OrderStatus.Closed => "status-closed",
+                        _ => "status-received"
+                    };
+                    
+                    <div class="mobile-order-card @statusClass">
+                        <!-- Заголовок -->
+                        <div class="mobile-order-header">
+                            <span class="mobile-order-number">#@order.Number</span>
+                            <span class="status-badge status-@StatusBadge(order.Status)">
+                                @StatusTitle(order.Status)
+                            </span>
+                        </div>
+                        
+                        <!-- Тело карточки -->
+                        <div class="mobile-order-body">
+                            <!-- Клиент -->
+                            <div class="mobile-info-row">
+                                <div class="mobile-info-icon">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div class="mobile-info-content">
+                                    <div class="mobile-info-label">Клиент</div>
+                                    <div class="mobile-info-value">@order.ClientName</div>
+                                    @if (!string.IsNullOrWhiteSpace(order.ClientEmail))
+                                    {
+                                        <div class="mobile-info-value small">@order.ClientEmail</div>
+                                    }
+                                    <div class="mobile-info-value small">@order.ClientPhone</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Устройство -->
+                            <div class="mobile-info-row">
+                                <div class="mobile-info-icon">
+                                    <i class="bi bi-gear"></i>
+                                </div>
+                                <div class="mobile-info-content">
+                                    <div class="mobile-info-label">Устройство</div>
+                                    <div class="mobile-info-value">@order.Device</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Приоритет и SLA -->
+                            <div class="mobile-info-row">
+                                <div class="mobile-info-icon">
+                                    <i class="bi bi-flag"></i>
+                                </div>
+                                <div class="mobile-info-content">
+                                    <div class="mobile-info-label">Приоритет и SLA</div>
+                                    <div class="mobile-badges">
+                                        <span class="priority-badge priority-@PriorityBadge(order.Priority).Split(' ')[0]">
+                                            @PriorityTitle(order.Priority)
+                                        </span>
+                                        @if (order.SLAUntil.HasValue)
+                                        {
+                                            <span class="badge @(order.SLAUntil.Value < DateTime.UtcNow ? "bg-danger" : "bg-success")">
+                                                SLA: @order.SLAUntil.Value.ToString("dd.MM.yyyy")
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Футер -->
+                        <div class="mobile-order-footer">
+                            <div class="mobile-order-date">
+                                <i class="bi bi-clock me-1"></i>
+                                @order.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                            <div class="mobile-order-actions">
+                                <a href="@Url.Action("Details", new { id = order.Id })" class="mobile-btn mobile-btn-primary">
+                                    <i class="bi bi-eye"></i>
+                                    Открыть
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 }
-            </tbody>
-        </table>
+            }
+        </div>
     </div>
 </div>
+
+<script>
+    // Чекбокс "Выбрать все"
+    document.getElementById('selectAll')?.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.order-row input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Подсветка выбранных строк
+    document.querySelectorAll('.order-row input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            this.closest('tr').classList.toggle('table-active', this.checked);
+        });
+    });
+</script>

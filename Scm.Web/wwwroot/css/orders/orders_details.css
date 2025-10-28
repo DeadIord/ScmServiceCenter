@@ -1,0 +1,528 @@
+.main-body {
+    display: flex;
+    justify-content: center;
+}
+/* ==================== КОНТЕЙНЕР ==================== */
+.order-details-modern {
+    background: #f8fafc;
+    min-height: 100vh;
+    max-width: 1296px;
+}
+
+/* ==================== HEADER ==================== */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow:0 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+.order-header-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.order-header-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* ==================== КАРТОЧКИ ==================== */
+.card-modern {
+    background: white;
+    border-radius: 12px;
+    box-shadow:0 1px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.card-header-modern {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title-modern {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.card-body-modern {
+    padding: 1.5rem;
+}
+
+.btn-link-modern {
+    font-size: 0.875rem;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.btn-link-modern:hover {
+    color: #5568d3;
+}
+
+/* ==================== ПРОГРЕСС ЗАКАЗА ==================== */
+.order-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+}
+
+.progress-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    position: relative;
+    padding: 1rem 0;
+}
+
+.progress-step::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 50px;
+    bottom: -10px;
+    width: 2px;
+    background: #e2e8f0;
+}
+
+.progress-step:last-child::before {
+    display: none;
+}
+
+.progress-step.completed::before {
+    background: #10b981;
+}
+
+.progress-step.active::before {
+    background: linear-gradient(to bottom, #10b981 0%, #e2e8f0 100%);
+}
+
+.progress-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s;
+}
+
+.progress-step.completed .progress-icon {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.progress-step.active .progress-icon {
+    background: white;
+    border-color: #3b82f6;
+    color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.05);
+    }
+}
+
+.progress-info {
+    flex: 1;
+}
+
+.progress-title {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.progress-step.completed .progress-title {
+    color: #1e293b;
+}
+
+.progress-step.active .progress-title {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.progress-date {
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+.progress-step.completed .progress-date {
+    color: #10b981;
+}
+
+.progress-step.active .progress-date {
+    color: #3b82f6;
+    font-weight: 500;
+}
+
+/* ==================== SUMMARY ==================== */
+.order-summary {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.summary-total {
+    border-top: 2px solid #e2e8f0;
+    margin-top: 0.75rem;
+    padding-top: 1rem;
+    font-size: 1.125rem;
+    color: #1e293b;
+}
+
+/* ==================== КЛИЕНТ ==================== */
+.customer-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.customer-avatar-large {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.customer-details {
+    flex: 1;
+}
+
+.customer-name-large {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.25rem;
+}
+
+.customer-id {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.customer-stats {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.stat-item i {
+    font-size: 1.25rem;
+}
+
+/* ==================== КОНТАКТЫ ==================== */
+.contact-info-section {
+    margin-top: 1rem;
+}
+
+.contact-info-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 1rem;
+}
+
+.contact-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+}
+
+.contact-item i {
+    width: 32px;
+    height: 32px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.contact-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 0.125rem;
+}
+
+.contact-value {
+    font-size: 0.875rem;
+    color: #475569;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.contact-value:hover {
+    color: #667eea;
+}
+
+/* ==================== УСТРОЙСТВО ==================== */
+.device-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.device-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.device-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.device-serial {
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.info-text {
+    font-size: 0.875rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ==================== СООБЩЕНИЯ ==================== */
+.messages-container {
+    min-height: 15em;
+    max-height: 37.7em;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.message-wrapper {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.message-wrapper.message-start {
+    justify-content: flex-start;
+}
+
+.message-wrapper.message-end {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 0.875rem 1rem;
+    border-radius: 12px;
+}
+
+.message-bubble-client {
+    background: white;
+    border: 1px solid #e2e8f0;
+}
+
+.message-bubble-staff {
+    background: #667eea;
+    color: white;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.message-author {
+    font-weight: 600;
+}
+
+.message-bubble-staff .message-author,
+.message-bubble-staff .message-time {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.message-time {
+    color: #94a3b8;
+}
+
+.message-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.message-input-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.message-input {
+    flex: 1;
+    resize: none;
+    border-radius: 8px;
+}
+
+.client-access-info {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+/* ==================== СТАТУСЫ И ПРИОРИТЕТЫ ==================== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.status-secondary { background: #f1f5f9; color: #64748b; }
+.status-secondary .status-dot { background: #64748b; }
+
+.status-info { background: #dbeafe; color: #1e40af; }
+.status-info .status-dot { background: #3b82f6; }
+
+.status-warning { background: #fef3c7; color: #92400e; }
+.status-warning .status-dot { background: #f59e0b; }
+
+.status-primary { background: #e0e7ff; color: #3730a3; }
+.status-primary .status-dot { background: #6366f1; }
+
+.status-success { background: #d1fae5; color: #065f46; }
+.status-success .status-dot { background: #10b981; }
+
+.status-dark { background: #e2e8f0; color: #334155; }
+.status-dark .status-dot { background: #475569; }
+
+.priority-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.priority-secondary { background: #f1f5f9; color: #64748b; }
+.priority-light { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+.priority-warning { background: #fef3c7; color: #92400e; }
+.priority-danger { background: #fee2e2; color: #991b1b; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 992px) {
+    .order-details-modern {
+        padding: 1rem;
+    }
+
+    .message-bubble {
+        max-width: 85%;
+    }
+}

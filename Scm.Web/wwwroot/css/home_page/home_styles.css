@@ -1,0 +1,320 @@
+
+/* \n для текста  */
+.multiline-text {
+    white-space: pre-line;
+}
+
+/* Hero секция  */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: relative;
+    overflow: hidden;
+    padding-top: 200px; 
+    padding-bottom: 20px;
+    margin-top: -120px; 
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+    will-change: transform;
+    box-shadow: 0 10px 25px #764ba270;
+}
+
+.pos-up{
+    transform: translateY(-45px);
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 110px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,112C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    background-size: cover;
+    opacity: 0.35;
+}
+
+
+/* ==================== АНИМАЦИИ ==================== */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.feature-card {
+    background: white;
+    position: relative;
+    z-index: 20;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+}
+
+.shadow-box{
+    box-shadow:0 1px 10px rgba(0, 0, 0, 0.2);
+}
+ /* Table Orders Section  */
+.cont-flidss {
+    background-color: #f8fafc;
+}
+
+.ihw{
+    height: 24px;
+    width: 24px;
+    transform: translateY(-5px);
+}
+
+.w-max-adv{
+    width: 415px;
+}
+
+ /* CTA секция   */
+.cta-section {
+    background: linear-gradient(150deg, #4569e8, #4338cb);
+    color: white;
+    padding: 80px 0;
+    position: relative;
+    padding-bottom: 100px; 
+    padding-top: 50px;
+    margin-bottom: -60px; 
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    box-shadow: 0 -10px 25px #4b71a270;
+}
+
+/* ==================== Таблица ==================== */
+.home-orders-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.home-orders-table {
+    width: 100%;
+    margin: 0;
+}
+
+.home-orders-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.home-orders-table th {
+    padding: 1.25rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+    white-space: nowrap;
+}
+
+.home-orders-table td:nth-child(2) {
+    max-width: 300px;
+    width: 300px;
+}
+
+.home-orders-table td:nth-child(4) {
+    max-width: 177px;
+    width: 177px;
+}
+
+.home-orders-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.home-orders-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.home-orders-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.home-orders-table td {
+    padding: 1.25rem 1.5rem;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Order Number */
+.home-order-number {
+    font-weight: 700;
+    color: #e11d48;
+    font-size: 1rem;
+}
+
+/* Customer Cell */
+.home-customer-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+.home-customer-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.home-customer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.home-customer-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Device */
+.home-device-name {
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-secondary { background: #f1f5f9; color: #64748b; }
+.status-info { background: #dbeafe; color: #1e40af; }
+.status-warning { background: #fef3c7; color: #92400e; }
+.status-primary { background: #e0e7ff; color: #3730a3; }
+.status-success { background: #d1fae5; color: #065f46; }
+.status-dark { background: #e2e8f0; color: #334155; }
+
+/* Priority Badge */
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.priority-secondary { background: #f1f5f9; color: #64748b; }
+.priority-light { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+.priority-warning { background: #fef3c7; color: #92400e; }
+.priority-danger { background: #fee2e2; color: #991b1b; }
+
+/* Date */
+.home-order-date {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* View Button */
+.home-btn-view {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 1.25rem;
+}
+
+.home-btn-view:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(4px);
+}
+
+/* Empty State */
+.home-empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .home-orders-table th:nth-child(5),
+    .home-orders-table td:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 992px) {
+    .home-orders-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .home-orders-table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-orders-table th,
+    .home-orders-table td {
+        padding: 1rem;
+    }
+    
+    .home-customer-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 0.8125rem;
+    }
+    
+    .home-orders-table th:nth-child(6),
+    .home-orders-table td:nth-child(6) {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .home-orders-table th:nth-child(3),
+    .home-orders-table td:nth-child(3) {
+        display: none;
+    }
+}
