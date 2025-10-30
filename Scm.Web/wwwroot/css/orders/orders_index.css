@@ -6,7 +6,6 @@
 
 .orders-modern-container {
     background: #f8fafc;
-    min-height: 100vh;
     max-width: 1296px;
 }
 
@@ -368,6 +367,52 @@
     border-color: #cbd5e1;
 }
 
+/* ==================== PAGINATION ==================== */
+.table-pagination,
+.mobile-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 1rem;
+}
+
+.page-btn {
+    min-width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #475569;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.5rem;
+}
+
+.page-btn:hover {
+    background: #f1f5f9;
+}
+
+.page-btn.active {
+    background: #667eea;
+    color: white;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-count {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.875rem;
+    padding-bottom: 1rem;
+}
+
 /* ==================== EMPTY STATE ==================== */
 .empty-state {
     text-align: center;
@@ -413,7 +458,6 @@
 
 .mobile-order-number {
     font-weight: 700;
-    color: #e11d48;
     font-size: 1.125rem;
 }
 

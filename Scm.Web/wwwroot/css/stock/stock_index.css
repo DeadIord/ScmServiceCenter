@@ -239,7 +239,7 @@
     transition: background 0.3s;
 }
 .stock-toggle.active {
-    background: #dc3545;
+    background: #667eea;
 }
 .stock-toggle::after {
     content: '';
@@ -332,34 +332,31 @@
 
 .pagination-custom {
     display: flex;
-    gap: 4px;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    gap: 0.25rem;
+    padding: 1rem;
 }
 .page-btn {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    background: white;
-    color: #495057;
-    font-size: 14px;
+    min-width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #475569;
     font-weight: 500;
-    cursor: pointer;
+    border-radius: 6px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 0.5rem;
 }
 .page-btn:hover {
-    background: #f8f9fa;
-    border-color: #d0d0d0;
+   background: #f1f5f9;
 }
 .page-btn.active {
-    background: #dc3545;
-    color: white;
-    border-color: #dc3545;
+    background: #667eea;
+    color: white
 }
 
 .page-btn:disabled {
