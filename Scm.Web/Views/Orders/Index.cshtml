@@ -158,9 +158,7 @@
                 <table class="orders-table">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">
-                                <input type="checkbox" class="form-check-input" id="selectAll">
-                            </th>
+                            <th>№</th>
                             <th>ЗАКАЗ</th>
                             <th>КЛИЕНТ</th>
                             <th>УСТРОЙСТВО</th>
@@ -188,10 +186,10 @@
                                 var order = Model.Orders.ElementAt(i);
                                 <tr class="order-row">
                                     <td>
-                                        <input type="checkbox" class="form-check-input">
+                                        <span>@i</span>
                                     </td>
                                     <td>
-                                        <span class="order-number">#@order.Number</span>
+                                        <span class="order-number">@order.Number</span>
                                     </td>
                                     <td>
                                         <div class="customer-cell">
@@ -374,17 +372,6 @@
     </div>
 </div>
 
-<script>
-    // Чекбокс "Выбрать все"
-    document.getElementById('selectAll')?.addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.order-row input[type="checkbox"]');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    });
-
-    // Подсветка выбранных строк
-    document.querySelectorAll('.order-row input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            this.closest('tr').classList.toggle('table-active', this.checked);
-        });
-    });
-</script>
+@section Scripts {
+    <script src="~/js/orders/orders_index.js" asp-append-version="true"></script>
+}
