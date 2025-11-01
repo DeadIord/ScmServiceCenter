@@ -13,6 +13,8 @@ using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Web.Controllers;
 using Scm.Web.Models.Tickets;
+using Scm.Web.Services;
+using Scm.Domain.Entities;
 using Xunit;
 
 namespace Scm.Web.Tests;
@@ -28,7 +30,8 @@ public sealed class TicketsControllerTests
             .Returns(Task.CompletedTask);
 
         var loggerMock = new Mock<ILogger<TicketsController>>();
-        var controller = new TicketsController(ticketServiceMock.Object, loggerMock.Object);
+        var pollerMock = new Mock<ITicketInboxPoller>();
+        var controller = new TicketsController(ticketServiceMock.Object, pollerMock.Object, loggerMock.Object);
 
         var httpContext = new DefaultHttpContext();
         var userClaims = new List<Claim>
@@ -73,6 +76,62 @@ public sealed class TicketsControllerTests
                 It.Is<Guid>(in_ticketId => in_ticketId == ticketId),
                 It.Is<TicketReplyDto>(in_reply => in_reply.BodyHtml == replyBody && in_reply.Attachments.Count == 1),
                 It.Is<string>(in_userId => in_userId == "agent-1"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+    [Fact]
+    public async Task Compose_WithValidFormData_CreatesTicket()
+    {
+        var ticketServiceMock = new Mock<ITicketService>();
+        ticketServiceMock
+            .Setup(service => service.CreateTicketAsync(It.IsAny<TicketComposeDto>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TicketMessage());
+
+        var loggerMock = new Mock<ILogger<TicketsController>>();
+        var pollerMock = new Mock<ITicketInboxPoller>();
+        var controller = new TicketsController(ticketServiceMock.Object, pollerMock.Object, loggerMock.Object);
+
+        var httpContext = new DefaultHttpContext();
+        var userClaims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, "agent-1"),
+            new Claim(ClaimTypes.Name, "Agent One")
+        };
+        httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(userClaims, "Test"));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = httpContext
+        };
+
+        var attachmentContent = new MemoryStream(Encoding.UTF8.GetBytes("file-content"));
+        var attachment = new FormFile(attachmentContent, 0, attachmentContent.Length, "data", "note.txt")
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "text/plain"
+        };
+
+        var composeModel = new TicketComposeInputModel
+        {
+            Email = "client@example.com",
+            ClientName = "Client",
+            Subject = "Order 123",
+            Body = "Message body",
+            Attachments = new List<IFormFile> { attachment }
+        };
+
+        var result = await controller.Compose(composeModel, CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var successProperty = okResult.Value?.GetType().GetProperty("success");
+        Assert.NotNull(successProperty);
+        var successValue = successProperty?.GetValue(okResult.Value) as bool?;
+        Assert.True(successValue);
+
+        ticketServiceMock.Verify(
+            service => service.CreateTicketAsync(
+                It.Is<TicketComposeDto>(dto => dto.ClientEmail == composeModel.Email && dto.Subject == composeModel.Subject),
+                "agent-1",
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

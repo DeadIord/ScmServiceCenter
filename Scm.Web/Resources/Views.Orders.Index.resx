@@ -120,4 +120,57 @@
   <data name="PaginationNext" xml:space="preserve">
     <value>Следующая страница</value>
   </data>
+  <data name="ComposeModalTitle" xml:space="preserve">
+    <value>Написать письмо</value>
+  </data>
+  <data name="ComposeModalDescription" xml:space="preserve">
+    <value>Сообщение будет отправлено через систему тикетов.</value>
+  </data>
+  <data name="ComposeEmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="ComposeClientNameLabel" xml:space="preserve">
+    <value>Имя клиента</value>
+  </data>
+  <data name="ComposeSubjectLabel" xml:space="preserve">
+    <value>Тема</value>
+  </data>
+  <data name="ComposeBodyLabel" xml:space="preserve">
+    <value>Сообщение</value>
+  </data>
+  <data name="ComposeAttachmentsLabel" xml:space="preserve">
+    <value>Вложения</value>
+  </data>
+  <data name="ComposeAttachmentsHint" xml:space="preserve">
+    <value>Можно выбрать несколько файлов.</value>
+  </data>
+  <data name="ComposeCancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="ComposeSubmit" xml:space="preserve">
+    <value>Отправить</value>
+  </data>
+  <data name="ComposeClose" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="ComposeOpenTooltip" xml:space="preserve">
+    <value>Написать письмо на {0}</value>
+  </data>
+  <data name="ComposeSuccess" xml:space="preserve">
+    <value>Сообщение отправлено клиенту</value>
+  </data>
+  <data name="ComposeError" xml:space="preserve">
+    <value>Не удалось отправить сообщение</value>
+  </data>
+  <data name="ComposeValidationError" xml:space="preserve">
+    <value>Проверьте корректность заполнения формы</value>
+  </data>
+  <data name="ComposeSubjectTemplate" xml:space="preserve">
+    <value>Заказ {orderNumber}</value>
+  </data>
+  <data name="ComposeBodyTemplate" xml:space="preserve">
+    <value>Здравствуйте{clientName}!
+
+Пишем по заказу {orderNumber} ({device}).</value>
+  </data>
 </root>

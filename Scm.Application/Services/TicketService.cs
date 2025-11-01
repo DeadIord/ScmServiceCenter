@@ -252,6 +252,146 @@ public sealed class TicketService : ITicketService
         return agentMessage;
     }
 
+    public async Task<TicketMessage> CreateTicketAsync(TicketComposeDto in_message, string in_userId, CancellationToken in_cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(in_userId))
+        {
+            throw new InvalidOperationException("Не удалось определить пользователя");
+        }
+
+        var normalizedEmail = NormalizeEmail(in_message.ClientEmail);
+        if (string.IsNullOrWhiteSpace(normalizedEmail))
+        {
+            throw new InvalidOperationException("Не указан email клиента");
+        }
+
+        var sanitizedHtml = SanitizeHtml(in_message.BodyHtml);
+        if (string.IsNullOrWhiteSpace(sanitizedHtml))
+        {
+            throw new InvalidOperationException("Текст сообщения не может быть пустым");
+        }
+
+        var subject = NormalizeSubject(in_message.Subject);
+        var bodyText = BuildPlainText(sanitizedHtml);
+        var senderName = string.IsNullOrWhiteSpace(in_message.SenderName)
+            ? null
+            : NormalizeWhitespace(in_message.SenderName);
+        var clientName = string.IsNullOrWhiteSpace(in_message.ClientName)
+            ? null
+            : NormalizeWhitespace(in_message.ClientName);
+
+        var sentAtUtc = DateTime.UtcNow;
+        var messageId = GenerateAgentMessageId();
+
+        var ticket = new Ticket
+        {
+            Subject = subject,
+            ClientEmail = normalizedEmail,
+            ClientName = clientName,
+            Status = TicketStatus.Pending,
+            CreatedAtUtc = sentAtUtc,
+            UpdatedAtUtc = sentAtUtc,
+            ExternalThreadId = messageId
+        };
+
+        var ticketMessage = new TicketMessage
+        {
+            Ticket = ticket,
+            TicketId = ticket.Id,
+            FromClient = false,
+            Subject = subject,
+            BodyHtml = sanitizedHtml,
+            BodyText = bodyText,
+            SenderName = senderName,
+            SentAtUtc = sentAtUtc,
+            CreatedByUserId = in_userId,
+            ExternalId = messageId
+        };
+
+        foreach (var attachment in in_message.Attachments)
+        {
+            if (attachment.Content.Length != 0)
+            {
+                var ticketAttachment = new TicketAttachment
+                {
+                    FileName = string.IsNullOrWhiteSpace(attachment.FileName) ? "attachment" : attachment.FileName,
+                    ContentType = string.IsNullOrWhiteSpace(attachment.ContentType) ? "application/octet-stream" : attachment.ContentType,
+                    Content = attachment.Content,
+                    Length = attachment.Content.LongLength
+                };
+
+                ticketMessage.Attachments.Add(ticketAttachment);
+            }
+        }
+
+        ticket.Messages.Add(ticketMessage);
+        m_dbContext.Tickets.Add(ticket);
+
+        var startedTransaction = false;
+        IDbContextTransaction? transaction = null;
+
+        try
+        {
+            if (m_dbContext.Database.CurrentTransaction is null)
+            {
+                transaction = await m_dbContext.Database.BeginTransactionAsync(in_cancellationToken);
+                startedTransaction = true;
+            }
+
+            await m_dbContext.SaveChangesAsync(in_cancellationToken);
+
+            var mailRequest = new MailSendRequest
+            {
+                To = ticket.ClientEmail,
+                Subject = subject,
+                Body = sanitizedHtml,
+                IsHtml = true,
+                MessageId = ticketMessage.ExternalId,
+                Attachments = ticketMessage.Attachments
+                    .Select(a => new MailSendAttachment
+                    {
+                        FileName = a.FileName,
+                        ContentType = a.ContentType,
+                        Content = a.Content
+                    })
+                    .ToList()
+            };
+
+            var actualMessageId = await m_mailService.SendAsync(mailRequest, in_cancellationToken);
+            if (!string.IsNullOrWhiteSpace(actualMessageId) &&
+                !string.Equals(actualMessageId, ticketMessage.ExternalId, StringComparison.OrdinalIgnoreCase))
+            {
+                ticketMessage.ExternalId = actualMessageId;
+                ticket.ExternalThreadId = actualMessageId;
+
+                await m_dbContext.SaveChangesAsync(in_cancellationToken);
+            }
+
+            if (startedTransaction && transaction is not null)
+            {
+                await transaction.CommitAsync(in_cancellationToken);
+            }
+        }
+        catch
+        {
+            if (startedTransaction && transaction is not null)
+            {
+                await transaction.RollbackAsync(in_cancellationToken);
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (startedTransaction && transaction is not null)
+            {
+                await transaction.DisposeAsync();
+            }
+        }
+
+        return ticketMessage;
+    }
+
     public async Task<TicketMessage?> IngestEmailAsync(InboundTicketMessageDto in_message, CancellationToken in_cancellationToken = default)
     {
         var messageId = NormalizeMessageId(in_message.MessageId);
