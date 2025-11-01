@@ -108,4 +108,16 @@
   <data name="Priority_Critical" xml:space="preserve">
     <value>Critical</value>
   </data>
+  <data name="PaginationSummary" xml:space="preserve">
+    <value>Showing {0}–{1} of {2}</value>
+  </data>
+  <data name="PaginationLabel" xml:space="preserve">
+    <value>Order queue pagination</value>
+  </data>
+  <data name="PaginationPrevious" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="PaginationNext" xml:space="preserve">
+    <value>Next page</value>
+  </data>
 </root>

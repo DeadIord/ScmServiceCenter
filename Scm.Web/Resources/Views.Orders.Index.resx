@@ -108,4 +108,16 @@
   <data name="Priority_Critical" xml:space="preserve">
     <value>Критичный</value>
   </data>
+  <data name="PaginationSummary" xml:space="preserve">
+    <value>Показаны {0}–{1} из {2}</value>
+  </data>
+  <data name="PaginationLabel" xml:space="preserve">
+    <value>Навигация по страницам очереди</value>
+  </data>
+  <data name="PaginationPrevious" xml:space="preserve">
+    <value>Предыдущая страница</value>
+  </data>
+  <data name="PaginationNext" xml:space="preserve">
+    <value>Следующая страница</value>
+  </data>
 </root>
