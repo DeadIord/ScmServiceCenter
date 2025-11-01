@@ -54,6 +54,19 @@
         return ret;
     }
     string SlaClass(DateTime? in_date) => in_date is null ? "text-muted" : in_date.Value < DateTime.UtcNow ? "text-danger fw-semibold" : "text-success";
+    string BuildPageUrl(int in_page) => Url.Action("Index", new { page = in_page, status = Model.Status, q = Model.Query }) ?? string.Empty;
+    int maxVisiblePages = 5;
+    int startPage = 1;
+    int endPage = Model.TotalPages;
+    if (Model.TotalPages > 0)
+    {
+        startPage = Math.Max(1, Model.PageNumber - 2);
+        endPage = Math.Min(Model.TotalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages)
+        {
+            startPage = Math.Max(1, endPage - maxVisiblePages + 1);
+        }
+    }
 }
 <div class="card p-4 mb-4">
     <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
@@ -98,9 +111,9 @@
         </div>
     </form>
 </div>
-<div class="card p-0">
+<div class="card card-table">
     <div class="table-responsive">
-        <table class="table table-hover align-middle table-sticky mb-0">
+        <table class="table table-hover align-middle table-sticky mb-0 orders-queue-table">
             <thead>
                 <tr>
                     <th>@Localizer["NumberColumn"]</th>
@@ -132,7 +145,7 @@
                             <td>
                                 @if (!string.IsNullOrWhiteSpace(order.ClientEmail))
                                 {
-                                    <a href="mailto:@order.ClientEmail" class="text-decoration-none">@order.ClientEmail</a>
+                                    <a asp-controller="Tickets" asp-action="Index" asp-route-q="@order.ClientEmail" class="text-decoration-none">@order.ClientEmail</a>
                                 }
                             </td>
                             <td><a href="tel:@order.ClientPhone" class="text-decoration-none">@order.ClientPhone</a></td>
@@ -150,4 +163,36 @@
             </tbody>
         </table>
     </div>
+    @if (Model.TotalCount > 0)
+    {
+        <div class="card-footer py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <span class="text-muted small">@string.Format(Localizer["PaginationSummary"].Value, Model.StartRecord, Model.EndRecord, Model.TotalCount)</span>
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="@Localizer["PaginationLabel"]">
+                        <ul class="pagination pagination-rounded justify-content-center mb-0">
+                            <li class="page-item @(Model.HasPrevious ? string.Empty : "disabled")">
+                                <a class="page-link" href="@(Model.HasPrevious ? BuildPageUrl(Model.PageNumber - 1) : "#")" aria-label="@Localizer["PaginationPrevious"]" @(Model.HasPrevious ? string.Empty : "aria-disabled=\"true\"")>
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            @for (int pageNumber = startPage; pageNumber <= endPage; pageNumber++)
+                            {
+                                bool isActive = pageNumber == Model.PageNumber;
+                                <li class="page-item @(isActive ? "active" : string.Empty)">
+                                    <a class="page-link" href="@(isActive ? "#" : BuildPageUrl(pageNumber))" @(isActive ? "aria-current=\"page\"" : string.Empty)>@pageNumber</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.HasNext ? string.Empty : "disabled")">
+                                <a class="page-link" href="@(Model.HasNext ? BuildPageUrl(Model.PageNumber + 1) : "#")" aria-label="@Localizer["PaginationNext"]" @(Model.HasNext ? string.Empty : "aria-disabled=\"true\"")>
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
+        </div>
+    }
 </div>

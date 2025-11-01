@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Scm.Application.DTOs;
 using Scm.Domain.Entities;
@@ -36,23 +38,78 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
 
     public async Task<List<Order>> GetQueueAsync(string? q, OrderStatus? status, CancellationToken cancellationToken = default)
     {
-        var query = _dbContext.Orders.AsNoTracking();
-
-        if (!string.IsNullOrWhiteSpace(q))
-        {
-            var term = q.Trim();
-            query = query.Where(o => o.Number.Contains(term) || o.ClientName.Contains(term) || o.ClientPhone.Contains(term) || o.ClientEmail.Contains(term) || o.Device.Contains(term));
-        }
-
-        if (status.HasValue)
-        {
-            query = query.Where(o => o.Status == status.Value);
-        }
+        var query = BuildQueueQuery(q, status);
 
         return await query
             .OrderBy(o => o.Status)
             .ThenBy(o => o.CreatedAtUtc)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<PagedResult<Order>> GetQueuePageAsync(
+        string? in_q,
+        OrderStatus? in_status,
+        int in_pageNumber,
+        int in_pageSize,
+        CancellationToken in_cancellationToken = default)
+    {
+        int pageNumber = Math.Max(1, in_pageNumber);
+        int pageSize = Math.Clamp(in_pageSize, 1, 100);
+
+        var query = BuildQueueQuery(in_q, in_status);
+
+        var totalCount = await query.CountAsync(in_cancellationToken);
+
+        if (totalCount == 0)
+        {
+            return new PagedResult<Order>
+            {
+                Items = Array.Empty<Order>(),
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = 0
+            };
+        }
+
+        int skip = (pageNumber - 1) * pageSize;
+
+        var items = await query
+            .OrderBy(o => o.Status)
+            .ThenBy(o => o.CreatedAtUtc)
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync(in_cancellationToken);
+
+        return new PagedResult<Order>
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+    }
+
+    private IQueryable<Order> BuildQueueQuery(string? in_q, OrderStatus? in_status)
+    {
+        var query = _dbContext.Orders.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(in_q))
+        {
+            var term = in_q.Trim();
+            query = query.Where(o =>
+                o.Number.Contains(term) ||
+                o.ClientName.Contains(term) ||
+                o.ClientPhone.Contains(term) ||
+                o.ClientEmail.Contains(term) ||
+                o.Device.Contains(term));
+        }
+
+        if (in_status.HasValue)
+        {
+            query = query.Where(o => o.Status == in_status.Value);
+        }
+
+        return query;
     }
 
     public async Task<Order?> GetAsync(Guid id, CancellationToken cancellationToken = default)
