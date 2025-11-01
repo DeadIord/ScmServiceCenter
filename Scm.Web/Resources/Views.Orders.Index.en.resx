@@ -108,4 +108,69 @@
   <data name="Priority_Critical" xml:space="preserve">
     <value>Critical</value>
   </data>
+  <data name="PaginationSummary" xml:space="preserve">
+    <value>Showing {0}–{1} of {2}</value>
+  </data>
+  <data name="PaginationLabel" xml:space="preserve">
+    <value>Order queue pagination</value>
+  </data>
+  <data name="PaginationPrevious" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="PaginationNext" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="ComposeModalTitle" xml:space="preserve">
+    <value>Compose message</value>
+  </data>
+  <data name="ComposeModalDescription" xml:space="preserve">
+    <value>The message will be sent via the ticket system.</value>
+  </data>
+  <data name="ComposeEmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="ComposeClientNameLabel" xml:space="preserve">
+    <value>Client name</value>
+  </data>
+  <data name="ComposeSubjectLabel" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="ComposeBodyLabel" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="ComposeAttachmentsLabel" xml:space="preserve">
+    <value>Attachments</value>
+  </data>
+  <data name="ComposeAttachmentsHint" xml:space="preserve">
+    <value>You can attach multiple files.</value>
+  </data>
+  <data name="ComposeCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ComposeSubmit" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="ComposeClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ComposeOpenTooltip" xml:space="preserve">
+    <value>Write a message to {0}</value>
+  </data>
+  <data name="ComposeSuccess" xml:space="preserve">
+    <value>Message sent to the client</value>
+  </data>
+  <data name="ComposeError" xml:space="preserve">
+    <value>Failed to send the message</value>
+  </data>
+  <data name="ComposeValidationError" xml:space="preserve">
+    <value>Please check the form fields</value>
+  </data>
+  <data name="ComposeSubjectTemplate" xml:space="preserve">
+    <value>Order {orderNumber}</value>
+  </data>
+  <data name="ComposeBodyTemplate" xml:space="preserve">
+    <value>Hello{clientName},
+
+We are contacting you about order {orderNumber} ({device}).</value>
+  </data>
 </root>

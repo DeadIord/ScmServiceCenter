@@ -20,6 +20,11 @@ public interface ITicketService
         string in_userId,
         CancellationToken in_cancellationToken = default);
 
+    Task<TicketMessage> CreateTicketAsync(
+        TicketComposeDto in_message,
+        string in_userId,
+        CancellationToken in_cancellationToken = default);
+
     Task<TicketMessage?> IngestEmailAsync(
         InboundTicketMessageDto in_message,
         CancellationToken in_cancellationToken = default);

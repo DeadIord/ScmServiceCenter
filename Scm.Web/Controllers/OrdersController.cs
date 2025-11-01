@@ -45,14 +45,15 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(string? q, OrderStatus? status)
+    public async Task<IActionResult> Index(string? q, OrderStatus? status, int page = 1)
     {
-        var orders = await m_orderService.GetQueueAsync(q, status);
+        const int pageSize = 20;
+        var pagedOrders = await m_orderService.GetQueuePageAsync(q, status, page, pageSize);
         var model = new OrdersIndexViewModel
         {
             Query = q,
             Status = status,
-            Orders = orders.Select(o => new OrderListItemViewModel
+            Orders = pagedOrders.Items.Select(o => new OrderListItemViewModel
             {
                 Id = o.Id,
                 Number = o.Number,
@@ -64,7 +65,13 @@ public class OrdersController : Controller
                 Priority = o.Priority,
                 SLAUntil = o.SLAUntil,
                 CreatedAtUtc = o.CreatedAtUtc
-            }).ToList()
+            }).ToList(),
+            PageNumber = pagedOrders.PageNumber,
+            TotalPages = pagedOrders.TotalPages,
+            PageSize = pagedOrders.PageSize,
+            TotalCount = pagedOrders.TotalCount,
+            StartRecord = pagedOrders.StartRecord,
+            EndRecord = pagedOrders.EndRecord
         };
 
         return View(model);

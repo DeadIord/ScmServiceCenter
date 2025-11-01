@@ -1,6 +1,8 @@
 @model Scm.Web.Models.Orders.OrdersIndexViewModel
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Scm.Domain.Entities
+@using System.Text.Encodings.Web
+@using System.Text.Json
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Title"].Value;
@@ -54,6 +56,34 @@
         return ret;
     }
     string SlaClass(DateTime? in_date) => in_date is null ? "text-muted" : in_date.Value < DateTime.UtcNow ? "text-danger fw-semibold" : "text-success";
+    string BuildPageUrl(int in_page) => Url.Action("Index", new { page = in_page, status = Model.Status, q = Model.Query }) ?? string.Empty;
+    int maxVisiblePages = 5;
+    int startPage = 1;
+    int endPage = Model.TotalPages;
+    if (Model.TotalPages > 0)
+    {
+        startPage = Math.Max(1, Model.PageNumber - 2);
+        endPage = Math.Min(Model.TotalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages)
+        {
+            startPage = Math.Max(1, endPage - maxVisiblePages + 1);
+        }
+    }
+
+    var composeTemplates = new
+    {
+        SubjectTemplate = Localizer["ComposeSubjectTemplate"].Value,
+        BodyTemplate = Localizer["ComposeBodyTemplate"].Value,
+        Success = Localizer["ComposeSuccess"].Value,
+        Error = Localizer["ComposeError"].Value,
+        Validation = Localizer["ComposeValidationError"].Value
+    };
+    string composeResourcesJson = JsonSerializer.Serialize(
+        composeTemplates,
+        new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        });
 }
 <div class="card p-4 mb-4">
     <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
@@ -98,9 +128,9 @@
         </div>
     </form>
 </div>
-<div class="card p-0">
+<div class="card card-table">
     <div class="table-responsive">
-        <table class="table table-hover align-middle table-sticky mb-0">
+        <table class="table table-hover align-middle table-sticky mb-0 orders-queue-table">
             <thead>
                 <tr>
                     <th>@Localizer["NumberColumn"]</th>
@@ -132,7 +162,17 @@
                             <td>
                                 @if (!string.IsNullOrWhiteSpace(order.ClientEmail))
                                 {
-                                    <a href="mailto:@order.ClientEmail" class="text-decoration-none">@order.ClientEmail</a>
+                                    <button type="button"
+                                            class="btn btn-link p-0 text-decoration-none order-email-link"
+                                            data-email="@order.ClientEmail"
+                                            data-client-name="@order.ClientName"
+                                            data-order-number="@order.Number"
+                                            data-device="@order.Device"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#ticketComposeModal"
+                                            title="@Localizer["ComposeOpenTooltip", order.ClientEmail]">
+                                        @order.ClientEmail
+                                    </button>
                                 }
                             </td>
                             <td><a href="tel:@order.ClientPhone" class="text-decoration-none">@order.ClientPhone</a></td>
@@ -150,4 +190,245 @@
             </tbody>
         </table>
     </div>
+    @if (Model.TotalCount > 0)
+    {
+        <div class="card-footer py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <span class="text-muted small">@string.Format(Localizer["PaginationSummary"].Value, Model.StartRecord, Model.EndRecord, Model.TotalCount)</span>
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="@Localizer["PaginationLabel"]">
+                        <ul class="pagination pagination-rounded justify-content-center mb-0">
+                            <li class="page-item @(Model.HasPrevious ? string.Empty : "disabled")">
+                                <a class="page-link" href="@(Model.HasPrevious ? BuildPageUrl(Model.PageNumber - 1) : "#")" aria-label="@Localizer["PaginationPrevious"]" @(Model.HasPrevious ? string.Empty : "aria-disabled=\"true\"")>
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            @for (int pageNumber = startPage; pageNumber <= endPage; pageNumber++)
+                            {
+                                bool isActive = pageNumber == Model.PageNumber;
+                                <li class="page-item @(isActive ? "active" : string.Empty)">
+                                    <a class="page-link" href="@(isActive ? "#" : BuildPageUrl(pageNumber))" @(isActive ? "aria-current=\"page\"" : string.Empty)>@pageNumber</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.HasNext ? string.Empty : "disabled")">
+                                <a class="page-link" href="@(Model.HasNext ? BuildPageUrl(Model.PageNumber + 1) : "#")" aria-label="@Localizer["PaginationNext"]" @(Model.HasNext ? string.Empty : "aria-disabled=\"true\"")>
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
+        </div>
+    }
 </div>
+
+<div class="modal fade" id="ticketComposeModal" tabindex="-1" aria-labelledby="ticketComposeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="ticketComposeModalLabel">@Localizer["ComposeModalTitle"]</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@Localizer["ComposeClose"]"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">@Localizer["ComposeModalDescription"]</p>
+                <div class="alert d-none" data-compose-feedback></div>
+                <form id="ticket-compose-form" asp-controller="Tickets" asp-action="Compose" method="post" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="compose-email" class="form-label">@Localizer["ComposeEmailLabel"]</label>
+                        <input type="email" class="form-control" id="compose-email" name="Email" required readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-client-name" class="form-label">@Localizer["ComposeClientNameLabel"]</label>
+                        <input type="text" class="form-control" id="compose-client-name" name="ClientName" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-subject" class="form-label">@Localizer["ComposeSubjectLabel"]</label>
+                        <input type="text" class="form-control" id="compose-subject" name="Subject" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-body" class="form-label">@Localizer["ComposeBodyLabel"]</label>
+                        <textarea class="form-control" id="compose-body" name="Body" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-attachments" class="form-label">@Localizer["ComposeAttachmentsLabel"]</label>
+                        <input class="form-control" id="compose-attachments" name="Attachments" type="file" multiple />
+                        <div class="form-text">@Localizer["ComposeAttachmentsHint"]</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@Localizer["ComposeCancel"]</button>
+                <button type="submit" class="btn btn-primary" form="ticket-compose-form">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                    <span>@Localizer["ComposeSubmit"]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const composeModal = document.getElementById('ticketComposeModal');
+            if (!composeModal || typeof bootstrap === 'undefined') {
+                return;
+            }
+
+            const resources = @Html.Raw(composeResourcesJson);
+            const form = document.getElementById('ticket-compose-form');
+            const feedback = composeModal.querySelector('[data-compose-feedback]');
+            const submitButton = composeModal.querySelector('button[type="submit"]');
+            const spinner = submitButton.querySelector('.spinner-border');
+            const emailInput = document.getElementById('compose-email');
+            const clientNameInput = document.getElementById('compose-client-name');
+            const subjectInput = document.getElementById('compose-subject');
+            const bodyInput = document.getElementById('compose-body');
+
+            const fillTemplate = (template, replacements) => {
+                let ret = template ?? '';
+                Object.keys(replacements).forEach(key => {
+                    const value = replacements[key] ?? '';
+                    const pattern = new RegExp(`\\{${key}\\}`, 'g');
+                    ret = ret.replace(pattern, value);
+                });
+                return ret;
+            };
+
+            composeModal.addEventListener('show.bs.modal', event => {
+                const trigger = event.relatedTarget;
+                if (!trigger) {
+                    return;
+                }
+
+                const email = trigger.getAttribute('data-email') ?? '';
+                const orderNumber = trigger.getAttribute('data-order-number') ?? '';
+                const device = trigger.getAttribute('data-device') ?? '';
+                const clientName = trigger.getAttribute('data-client-name') ?? '';
+
+                emailInput.value = email;
+                clientNameInput.value = clientName;
+                subjectInput.value = fillTemplate(resources.SubjectTemplate, { orderNumber, device, clientName });
+                const bodyName = clientName ? ` ${clientName}` : '';
+                bodyInput.value = fillTemplate(resources.BodyTemplate, {
+                    orderNumber,
+                    device,
+                    clientName: bodyName,
+                    clientNameOnly: clientName
+                });
+
+                if (feedback) {
+                    feedback.classList.add('d-none');
+                    feedback.classList.remove('alert-success', 'alert-danger');
+                    feedback.textContent = '';
+                }
+
+                if (form) {
+                    form.classList.remove('was-validated');
+                }
+
+                spinner?.classList.add('d-none');
+                submitButton.disabled = false;
+            });
+
+            composeModal.addEventListener('hidden.bs.modal', () => {
+                if (form) {
+                    form.reset();
+                    form.classList.remove('was-validated');
+                }
+
+                if (feedback) {
+                    feedback.classList.add('d-none');
+                    feedback.classList.remove('alert-success', 'alert-danger');
+                    feedback.textContent = '';
+                }
+
+                spinner?.classList.add('d-none');
+                submitButton.disabled = false;
+            });
+
+            if (!form) {
+                return;
+            }
+
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    if (feedback) {
+                        feedback.classList.remove('alert-success');
+                        feedback.classList.add('alert', 'alert-danger');
+                        feedback.textContent = resources.Validation || resources.Error;
+                        feedback.classList.remove('d-none');
+                    }
+
+                    return;
+                }
+
+                const formData = new FormData(form);
+                submitButton.disabled = true;
+                spinner?.classList.remove('d-none');
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    let payload = null;
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.indexOf('application/json') !== -1) {
+                        payload = await response.json();
+                    }
+
+                    if (response.ok && payload?.success) {
+                        if (feedback) {
+                            feedback.classList.remove('alert-danger');
+                            feedback.classList.add('alert', 'alert-success');
+                            feedback.textContent = resources.Success;
+                            feedback.classList.remove('d-none');
+                        }
+
+                        spinner?.classList.add('d-none');
+
+                        setTimeout(() => {
+                            const modalInstance = bootstrap.Modal.getInstance(composeModal);
+                            modalInstance?.hide();
+                        }, 1500);
+                    }
+                    else {
+                        const message = payload?.message || resources.Error;
+                        if (feedback) {
+                            feedback.classList.remove('alert-success');
+                            feedback.classList.add('alert', 'alert-danger');
+                            feedback.textContent = message;
+                            feedback.classList.remove('d-none');
+                        }
+
+                        submitButton.disabled = false;
+                        spinner?.classList.add('d-none');
+                    }
+                }
+                catch (error) {
+                    if (feedback) {
+                        feedback.classList.remove('alert-success');
+                        feedback.classList.add('alert', 'alert-danger');
+                        feedback.textContent = resources.Error;
+                        feedback.classList.remove('d-none');
+                    }
+
+                    submitButton.disabled = false;
+                    spinner?.classList.add('d-none');
+                }
+            });
+        })();
+    </script>
+}
