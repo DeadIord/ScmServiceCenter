@@ -375,6 +375,84 @@
             <div class="pagination-count"></div>
         </div>
     </div>
+    @if (Model.TotalCount > 0)
+    {
+        <div class="card-footer py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <span class="text-muted small">@string.Format(Localizer["PaginationSummary"].Value, Model.StartRecord, Model.EndRecord, Model.TotalCount)</span>
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="@Localizer["PaginationLabel"]">
+                        <ul class="pagination pagination-rounded justify-content-center mb-0">
+                            <li class="page-item @(Model.HasPrevious ? string.Empty : "disabled")">
+                                <a class="page-link" href="@(Model.HasPrevious ? BuildPageUrl(Model.PageNumber - 1) : "#")" aria-label="@Localizer["PaginationPrevious"]" @(Model.HasPrevious ? string.Empty : "aria-disabled=\"true\"")>
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            @for (int pageNumber = startPage; pageNumber <= endPage; pageNumber++)
+                            {
+                                bool isActive = pageNumber == Model.PageNumber;
+                                <li class="page-item @(isActive ? "active" : string.Empty)">
+                                    <a class="page-link" href="@(isActive ? "#" : BuildPageUrl(pageNumber))" @(isActive ? "aria-current=\"page\"" : string.Empty)>@pageNumber</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.HasNext ? string.Empty : "disabled")">
+                                <a class="page-link" href="@(Model.HasNext ? BuildPageUrl(Model.PageNumber + 1) : "#")" aria-label="@Localizer["PaginationNext"]" @(Model.HasNext ? string.Empty : "aria-disabled=\"true\"")>
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="ticketComposeModal" tabindex="-1" aria-labelledby="ticketComposeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="ticketComposeModalLabel">@Localizer["ComposeModalTitle"]</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@Localizer["ComposeClose"]"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">@Localizer["ComposeModalDescription"]</p>
+                <div class="alert d-none" data-compose-feedback></div>
+                <form id="ticket-compose-form" asp-controller="Tickets" asp-action="Compose" method="post" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="compose-email" class="form-label">@Localizer["ComposeEmailLabel"]</label>
+                        <input type="email" class="form-control" id="compose-email" name="Email" required readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-client-name" class="form-label">@Localizer["ComposeClientNameLabel"]</label>
+                        <input type="text" class="form-control" id="compose-client-name" name="ClientName" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-subject" class="form-label">@Localizer["ComposeSubjectLabel"]</label>
+                        <input type="text" class="form-control" id="compose-subject" name="Subject" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-body" class="form-label">@Localizer["ComposeBodyLabel"]</label>
+                        <textarea class="form-control" id="compose-body" name="Body" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="compose-attachments" class="form-label">@Localizer["ComposeAttachmentsLabel"]</label>
+                        <input class="form-control" id="compose-attachments" name="Attachments" type="file" multiple />
+                        <div class="form-text">@Localizer["ComposeAttachmentsHint"]</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@Localizer["ComposeCancel"]</button>
+                <button type="submit" class="btn btn-primary" form="ticket-compose-form">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                    <span>@Localizer["ComposeSubmit"]</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

@@ -9,6 +9,13 @@ public interface IOrderService
 
     Task<List<Order>> GetQueueAsync(string? q, OrderStatus? status, CancellationToken cancellationToken = default);
 
+    Task<PagedResult<Order>> GetQueuePageAsync(
+        string? in_q,
+        OrderStatus? in_status,
+        int in_pageNumber,
+        int in_pageSize,
+        CancellationToken in_cancellationToken = default);
+
     Task<Order?> GetAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task ChangeStatusAsync(Guid id, OrderStatus to, CancellationToken cancellationToken = default);

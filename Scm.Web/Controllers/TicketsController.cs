@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -175,6 +176,77 @@ public sealed class TicketsController : Controller
         }
 
         return RedirectToAction(nameof(Index), new { id = in_model.TicketId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Compose(
+        [FromForm] TicketComposeInputModel in_model,
+        CancellationToken in_cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(value => value.Errors)
+                .Select(error => error.ErrorMessage)
+                .Where(message => !string.IsNullOrWhiteSpace(message))
+                .ToList();
+
+            var ret = errors.Any()
+                ? string.Join("\n", errors)
+                : "Форма заполнена с ошибками";
+
+            return BadRequest(new { success = false, message = ret });
+        }
+
+        var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized(new { success = false });
+        }
+
+        var attachments = new List<TicketAttachmentInputDto>();
+        foreach (var file in in_model.Attachments)
+        {
+            if (file.Length > 0)
+            {
+                await using var memory = new MemoryStream();
+                await file.CopyToAsync(memory, in_cancellationToken);
+                attachments.Add(new TicketAttachmentInputDto
+                {
+                    FileName = file.FileName,
+                    ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+                    Content = memory.ToArray()
+                });
+            }
+        }
+
+        var composeDto = new TicketComposeDto
+        {
+            ClientEmail = in_model.Email,
+            ClientName = in_model.ClientName,
+            Subject = in_model.Subject,
+            BodyHtml = in_model.Body,
+            SenderName = User?.Identity?.Name,
+            Attachments = attachments
+        };
+
+        try
+        {
+            await m_ticketService.CreateTicketAsync(composeDto, userId, in_cancellationToken);
+        }
+        catch (InvalidOperationException ex)
+        {
+            m_logger.LogWarning(ex, "Не удалось создать тикет вручную для {Email}", in_model.Email);
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            m_logger.LogError(ex, "Ошибка при отправке сообщения клиенту {Email}", in_model.Email);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { success = false, message = "Не удалось отправить сообщение" });
+        }
+
+        return Ok(new { success = true });
     }
 
     [HttpPost]
