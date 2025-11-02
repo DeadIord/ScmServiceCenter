@@ -76,10 +76,6 @@ body:has(.hero-section) {
     transition: transform 0.3s ease, color 0.3s ease;
 }
 
-.navbar-brand:hover {
-    transform: translateY(-2px);
-}
-
 .brand-icon {
     width: 40px;
     height: 40px;
@@ -89,6 +85,11 @@ body:has(.hero-section) {
     font-size: 1.25rem;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     transition: all 0.3s ease;
+}
+
+.logo{
+    width: 25px;
+    height: 30px;
 }
 
 .navbar-dark .nav-link {
@@ -200,6 +201,12 @@ footer h5::after {
     height: 3px;
     background: var(--primary-gradient);
     border-radius: 2px;
+}
+
+.logo-footer{
+    width: 20px;
+    height: 24px;
+    transform: translateY(-5px) translateX(6px) scale(1.5);
 }
 
 .footer-links a {

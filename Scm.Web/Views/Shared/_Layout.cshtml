@@ -48,7 +48,8 @@
                     <!-- Brand -->
                     <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
                         <span class="brand-icon d-inline-flex align-items-center justify-content-center">
-                            <i class="bi bi-tools"></i>
+                            @* <i class="bi bi-tools"></i> *@
+                            <img class="logo" src="/svg/logo/logo.svg" alt="logo">
                         </span>
                         <span class="visible-brand-name text-muted">@Localizer["BrandName"]</span>
                     </a>
@@ -182,7 +183,7 @@
                     <!-- Brand Column -->
                     <div class="col-lg-4 col-md-6">
                         <h5>
-                            <i class="bi bi-tools me-2"></i>@Localizer["BrandName"]
+                            <img class="logo-footer me-4" src="/svg/logo/logo.svg" alt="logo">@Localizer["BrandName"]
                         </h5>
                         <p class="mb-4">
                             Открытая CRM-система для сервисных центров и ремонтных мастерских. 
