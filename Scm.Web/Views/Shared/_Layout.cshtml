@@ -87,10 +87,18 @@
                             
                             @if (canAccessReports)
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Reports" asp-action="Dashboard">
-                                        <i class="bi bi-graph-up me-1"></i>@Localizer["ReportsNav"]
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-flag me-1"></i>@Localizer["ReportsNav"]
                                     </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Dashboard">
+                                            <i class="bi bi-graph-up me-2"></i>@Localizer["DashboardNav"]
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="ReportDefinitions" asp-action="Index">
+                                            <i class="bi bi-clipboard-plus me-2"></i>@Localizer["ReportBuilderNav"]
+                                        </a></li>
+                                    </ul>
                                 </li>
                             }
                             
@@ -113,6 +121,9 @@
                                         </a></li>
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Tasks" asp-action="Index">
                                             <i class="bi bi-check2-square me-2"></i>@Localizer["TasksNav"]
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Tickets" asp-action="Index">
+                                            <i class="bi bi-headset me-2"></i>@Localizer["TicketsNav"]
                                         </a></li>
                                     </ul>
                                 </li>
