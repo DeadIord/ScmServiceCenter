@@ -64,6 +64,7 @@ public sealed class ContactsController : Controller
         };
 
         await PopulateAccountsAsync(dto.AccountId);
+        ViewBag.AccountId = accountId; // Pass accountId to view for UI handling
         return View(dto);
     }
 
@@ -74,6 +75,7 @@ public sealed class ContactsController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateAccountsAsync(dto.AccountId);
+            ViewBag.AccountId = dto.AccountId; // Pass accountId to view for UI handling
             return View(dto);
         }
 
@@ -102,6 +104,7 @@ public sealed class ContactsController : Controller
 
         await PopulateAccountsAsync(dto.AccountId);
         ViewBag.ContactId = id;
+        ViewBag.AccountId = contact.AccountId; // Pass accountId to view for UI handling
         return View(dto);
     }
 
@@ -113,6 +116,7 @@ public sealed class ContactsController : Controller
         {
             await PopulateAccountsAsync(dto.AccountId);
             ViewBag.ContactId = id;
+            ViewBag.AccountId = dto.AccountId; // Pass accountId to view for UI handling
             return View(dto);
         }
 

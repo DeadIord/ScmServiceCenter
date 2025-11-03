@@ -1,59 +1,363 @@
 @model Scm.Web.Models.Crm.AccountIndexViewModel
+@using Scm.Domain.Entities
 @{
     ViewData["Title"] = "Контрагенты";
+
+    string TypeBadge(AccountType type) => type switch
+    {
+        AccountType.Company => "company",
+        AccountType.Person => "person",
+        _ => "company"
+    };
+
+    string TypeTitle(AccountType type) => type switch
+    {
+        AccountType.Company => "Компания",
+        AccountType.Person => "Физлицо",
+        _ => type.ToString()
+    };
+
+    string TypeIcon(AccountType type) => type switch
+    {
+        AccountType.Company => "bi-building",
+        AccountType.Person => "bi-person",
+        _ => "bi-building"
+    };
+
+    // Функция для получения инициалов (без учета ИП, ООО, АО и т.д.)
+    string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+
+        // Убираем организационно-правовые формы
+        var cleanName = name
+            .Replace("ООО", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("ИП", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("АО", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("ПАО", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("ЗАО", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("ОАО", "", StringComparison.OrdinalIgnoreCase)
+            .Trim()
+            .Trim('"', '«', '»');
+
+        if (string.IsNullOrWhiteSpace(cleanName)) return name.Substring(0, Math.Min(2, name.Length)).ToUpper();
+
+        var parts = cleanName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+    }
+
+    // Цвета для аватаров
+    string[] avatarColors = { "primary", "success", "info", "warning", "danger", "secondary", "purple" };
+    string GetAvatarColor(int index) => avatarColors[index % avatarColors.Length];
+
+    // Подсчет статистики
+    int totalAccounts = Model.Accounts.Count();
+    int companiesCount = Model.Accounts.Count(a => a.Type == AccountType.Company);
+    int personsCount = Model.Accounts.Count(a => a.Type == AccountType.Person);
+    int withInnCount = Model.Accounts.Count(a => !string.IsNullOrWhiteSpace(a.Inn));
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="section-title mb-0">Контрагенты</h1>
-    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-2"></i>Добавить</a>
-</div>
-<div class="card shadow-sm rounded-3 p-4 mb-4">
-    <form class="row g-3" method="get">
-        <div class="col-md-6">
-            <label class="form-label">Поиск</label>
-            <input class="form-control" type="search" name="q" value="@Model.Query" placeholder="Название или ИНН" />
+
+<link rel="stylesheet" href="~/css/accounts/accounts_index.css" asp-append-version="true" />
+
+<div class="main-body">
+    <div class="accounts-container">
+        <!-- Статистика сверху -->
+        <div class="stats-grid mb-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-subtle">
+                    <i class="bi bi-briefcase text-primary"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@totalAccounts</div>
+                    <div class="stat-label">Всего контрагентов</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon bg-info-subtle">
+                    <i class="bi bi-building text-info"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@companiesCount</div>
+                    <div class="stat-label">Компании</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon bg-success-subtle">
+                    <i class="bi bi-person text-success"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@personsCount</div>
+                    <div class="stat-label">Физлица</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-subtle">
+                    <i class="bi bi-file-text text-warning"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@withInnCount</div>
+                    <div class="stat-label">С ИНН</div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6 align-self-end text-end">
-            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search me-2"></i>Найти</button>
+
+        <!-- Header с кнопками -->
+        <div class="accounts-header mb-4">
+            <div>
+                <h1 class="accounts-title mb-1">Контрагенты</h1>
+                <p class="accounts-subtitle mb-0">Управление базой клиентов и партнеров</p>
+            </div>
+            <div class="accounts-actions">
+                <a class="btn btn-primary" asp-action="Create">
+                    <i class="bi bi-plus-circle me-2"></i>Добавить контрагента
+                </a>
+            </div>
         </div>
-    </form>
-</div>
-<div class="card shadow-sm rounded-3">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle table-sticky mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Название</th>
-                    <th>Тип</th>
-                    <th>ИНН</th>
-                    <th>Теги</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Accounts.Any())
-                {
-                    <tr>
-                        <td colspan="5" class="text-center py-5 table-empty">Записей нет</td>
-                    </tr>
-                }
-                else
-                {
-                    @foreach (var account in Model.Accounts)
-                    {
+
+        <!-- Фильтры -->
+        <div class="filters-card">
+            <form method="get" class="filters-form">
+                <div class="search-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="form-control search-input" name="q"
+                        value="@Model.Query" placeholder="Поиск по названию или ИНН" />
+                </div>
+
+                <div class="quick-filters">
+                    <label class="filter-label">Быстрые фильтры:</label>
+                    <div class="filter-badges">
+                        <a class="filter-badge active" href="#" onclick="resetFilters(); return false;">
+                            Все
+                        </a>
+                        <a class="filter-badge" href="#" onclick="filterByType('company'); return false;">
+                            <i class="bi bi-building me-1"></i>Компании
+                        </a>
+                        <a class="filter-badge" href="#" onclick="filterByType('person'); return false;">
+                            <i class="bi bi-person me-1"></i>Физлица
+                        </a>
+                        <a class="filter-badge" href="#" onclick="filterByInn(); return false;">
+                            <i class="bi bi-file-text me-1"></i>С ИНН
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Таблица -->
+        <div class="accounts-table-card">
+            <div class="table-responsive">
+                <table class="accounts-table">
+                    <thead>
                         <tr>
-                            <td>
-                                <a class="text-decoration-none" asp-action="Details" asp-route-id="@account.Id">@account.Name</a>
-                            </td>
-                            <td>@(account.Type == Scm.Domain.Entities.AccountType.Company ? "Компания" : "Физлицо")</td>
-                            <td>@account.Inn</td>
-                            <td>@account.Tags</td>
-                            <td class="text-end">
-                                <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@account.Id"><i class="bi bi-pencil"></i></a>
-                            </td>
+                            <th class="text-center" style="width: 50px;">№</th>
+                            <th>КОНТРАГЕНТ</th>
+                            <th>ТИП</th>
+                            <th>ИНН</th>
+                            <th>АДРЕС</th>
+                            <th>ТЕГИ</th>
+                            <th class="text-center" style="width: 100px;">ДЕЙСТВИЕ</th>
                         </tr>
-                    }
+                    </thead>
+                    <tbody>
+                        @if (!Model.Accounts.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="bi bi-inbox display-4 d-block mb-3 text-muted"></i>
+                                    <p class="mb-0">Контрагенты не найдены</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @for (int i = 0; i < Model.Accounts.Count(); i++)
+                            {
+                                var account = Model.Accounts.ElementAt(i);
+                                <tr data-type="@TypeBadge(account.Type)" data-has-inn="@(!string.IsNullOrWhiteSpace(account.Inn))">
+                                    <td class="text-center">
+                                        <span class="row-number">@(i + 1)</span>
+                                    </td>
+                                    <td>
+                                        <div class="account-cell">
+                                            <div class="account-avatar bg-@GetAvatarColor(i)">
+                                                @GetInitials(account.Name)
+                                            </div>
+                                            <div class="account-info">
+                                                <a class="account-name" asp-action="Details" asp-route-id="@account.Id">
+                                                    @account.Name
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="type-badge type-@TypeBadge(account.Type)">
+                                            <i class="@TypeIcon(account.Type)"></i>
+                                            @TypeTitle(account.Type)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="@(string.IsNullOrWhiteSpace(account.Inn) ? "text-muted" : "")">
+                                            @(string.IsNullOrWhiteSpace(account.Inn) ? "—" : account.Inn)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            @(string.IsNullOrWhiteSpace(account.Address) ? "—" : account.Address)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(account.Tags))
+                                        {
+                                            <div class="tags-cell">
+                                                @foreach (var tag in account.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                                {
+                                                    <span class="tag-badge">@tag.Trim()</span>
+                                                }
+                                                @if (account.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Length > 3)
+                                                {
+                                                    <span class="tag-badge">+@(account.Tags.Split(',').Length - 3)</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <div class="dropdown" data-row-index="@i">
+                                                <button class="btn-action" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li><a class="dropdown-item" asp-action="Details" asp-route-id="@account.Id">
+                                                        <i class="bi bi-eye me-2"></i>Просмотр
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@account.Id">
+                                                        <i class="bi bi-pencil me-2"></i>Редактировать
+                                                    </a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">
+                                                        <i class="bi bi-trash me-2"></i>Удалить
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-pagination"></div>
+            <div class="pagination-count"></div>
+        </div>
+
+        <!-- Мобильный вид (карточки) -->
+        <div class="mobile-accounts-grid">
+            @if (!Model.Accounts.Any())
+            {
+                <div class="empty-state" style="text-align: center; padding: 4rem 1rem;">
+                    <i class="bi bi-inbox display-4 d-block mb-3 text-muted"></i>
+                    <p class="mb-0">Контрагенты не найдены</p>
+                </div>
+            }
+            else
+            {
+                @for (int i = 0; i < Model.Accounts.Count(); i++)
+                {
+                    var account = Model.Accounts.ElementAt(i);
+                    <div class="mobile-account-card type-@TypeBadge(account.Type)"
+                         data-type="@TypeBadge(account.Type)"
+                         data-has-inn="@(!string.IsNullOrWhiteSpace(account.Inn))">
+                        <!-- Заголовок -->
+                        <div class="mobile-account-header">
+                            <h3 class="mobile-account-name">@account.Name</h3>
+                            <span class="type-badge type-@TypeBadge(account.Type)">
+                                <i class="@TypeIcon(account.Type)"></i>
+                                @TypeTitle(account.Type)
+                            </span>
+                        </div>
+
+                        <!-- Тело карточки -->
+                        <div class="mobile-account-body">
+                            <!-- ИНН -->
+                            @if (!string.IsNullOrWhiteSpace(account.Inn))
+                            {
+                                <div class="mobile-info-row">
+                                    <div class="mobile-info-icon">
+                                        <i class="bi bi-file-text"></i>
+                                    </div>
+                                    <div class="mobile-info-content">
+                                        <div class="mobile-info-label">ИНН</div>
+                                        <div class="mobile-info-value">@account.Inn</div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Адрес -->
+                            @if (!string.IsNullOrWhiteSpace(account.Address))
+                            {
+                                <div class="mobile-info-row">
+                                    <div class="mobile-info-icon">
+                                        <i class="bi bi-geo-alt"></i>
+                                    </div>
+                                    <div class="mobile-info-content">
+                                        <div class="mobile-info-label">Адрес</div>
+                                        <div class="mobile-info-value">@account.Address</div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Теги -->
+                            @if (!string.IsNullOrWhiteSpace(account.Tags))
+                            {
+                                <div class="mobile-info-row">
+                                    <div class="mobile-info-icon">
+                                        <i class="bi bi-tags"></i>
+                                    </div>
+                                    <div class="mobile-info-content">
+                                        <div class="mobile-info-label">Теги</div>
+                                        <div class="tags-cell">
+                                            @foreach (var tag in account.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Take(3))
+                                            {
+                                                <span class="tag-badge">@tag.Trim()</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Футер -->
+                        <div class="mobile-account-footer">
+                            <div class="mobile-account-actions">
+                                <a href="@Url.Action("Details", new { id = account.Id })" class="mobile-btn mobile-btn-primary">
+                                    <i class="bi bi-eye"></i>
+                                    Открыть
+                                </a>
+                                <a href="@Url.Action("Edit", new { id = account.Id })" class="mobile-btn mobile-btn-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                    Изменить
+                                </a>
+                            </div>
+                        </div>
+                        <span class="row-number" style="display: none;">@(i + 1)</span>
+                    </div>
                 }
-            </tbody>
-        </table>
+            }
+            <div class="mobile-pagination"></div>
+            <div class="pagination-count"></div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/accounts/accounts_index.js" asp-append-version="true"></script>
+}

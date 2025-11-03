@@ -1,27 +1,212 @@
 @model Scm.Web.Models.Crm.ContactDetailsViewModel
 @{
     ViewData["Title"] = Model.Contact.FullName;
+    var initials = string.IsNullOrWhiteSpace(Model.Contact.FullName) ? "?" : 
+                  Model.Contact.FullName.Split(' ').Length >= 2 
+                  ? $"{Model.Contact.FullName.Split(' ')[0][0]}{Model.Contact.FullName.Split(' ')[1][0]}" 
+                  : Model.Contact.FullName.Substring(0, 1).ToUpper();
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="section-title mb-0">@Model.Contact.FullName</h1>
-        @if (Model.Contact.Account is not null)
-        {
-            <div class="text-muted">Контрагент: <a class="text-decoration-none" asp-controller="Accounts" asp-action="Details" asp-route-id="@Model.Contact.AccountId">@Model.Contact.Account.Name</a></div>
-        }
+
+<link rel="stylesheet" href="~/css/contacts/contacts_details.css" asp-append-version="true" />
+
+<div class="main-body">
+    <div class="details-container">
+        
+        <!-- Заголовок -->
+        <div class="details-header">
+            <div class="header-left">
+                <a asp-action="Index" class="back-button" title="К списку контактов">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div class="contact-header-info">
+                    <div class="contact-avatar-large">@initials</div>
+                    <div class="header-text">
+                        <h1 class="details-title">@Model.Contact.FullName</h1>
+                        @if (!string.IsNullOrWhiteSpace(Model.Contact.Position))
+                        {
+                            <div class="position-badge">
+                                <i class="bi bi-briefcase"></i>
+                                @Model.Contact.Position
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <a asp-action="Edit" asp-route-id="@Model.Contact.Id" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i>
+                    Редактировать
+                </a>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="details-grid">
+            
+            <!-- Левая колонка - Информация -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <div class="info-card-icon">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h2 class="info-card-title">Информация о контакте</h2>
+                </div>
+                
+                <div class="info-card-body">
+                    <!-- Контактные данные -->
+                    <div class="info-section">
+                        <h3 class="info-section-title">
+                            <i class="bi bi-telephone"></i>
+                            Контактные данные
+                        </h3>
+                        
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="bi bi-telephone-fill"></i>
+                                Телефон
+                            </div>
+                            <div class="info-value">
+                                @if (!string.IsNullOrWhiteSpace(Model.Contact.Phone))
+                                {
+                                    <a href="tel:@Model.Contact.Phone" class="contact-link phone-link">
+                                        <i class="bi bi-phone"></i>
+                                        @Model.Contact.Phone
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="info-value-empty">Не указан</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="bi bi-envelope-fill"></i>
+                                Email
+                            </div>
+                            <div class="info-value">
+                                @if (!string.IsNullOrWhiteSpace(Model.Contact.Email))
+                                {
+                                    <a href="mailto:@Model.Contact.Email" class="contact-link email-link">
+                                        <i class="bi bi-envelope"></i>
+                                        @Model.Contact.Email
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="info-value-empty">Не указан</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Должность -->
+                    @if (!string.IsNullOrWhiteSpace(Model.Contact.Position))
+                    {
+                        <div class="info-section">
+                            <h3 class="info-section-title">
+                                <i class="bi bi-briefcase"></i>
+                                Должность
+                            </h3>
+                            <div class="info-row">
+                                <div class="info-value">
+                                    <div class="position-display">
+                                        <i class="bi bi-person-workspace"></i>
+                                        @Model.Contact.Position
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Контрагент -->
+                    @if (Model.Contact.Account is not null)
+                    {
+                        <div class="info-section">
+                            <h3 class="info-section-title">
+                                <i class="bi bi-building"></i>
+                                Контрагент
+                            </h3>
+                            <div class="info-row">
+                                <div class="info-value">
+                                    <a asp-controller="Accounts" 
+                                       asp-action="Details" 
+                                       asp-route-id="@Model.Contact.AccountId" 
+                                       class="account-link">
+                                        <div class="account-badge">
+                                            <i class="bi bi-building-fill"></i>
+                                            <span>@Model.Contact.Account.Name</span>
+                                            <i class="bi bi-arrow-right"></i>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Правая колонка - Быстрые действия -->
+            <div class="actions-column">
+                
+                <!-- Быстрые действия -->
+                <div class="quick-actions-card">
+                    <div class="quick-actions-header">
+                        <div class="quick-actions-icon">
+                            <i class="bi bi-lightning-charge"></i>
+                        </div>
+                        <h2 class="quick-actions-title">Быстрые действия</h2>
+                    </div>
+                    <div class="quick-actions-body">
+                        @if (!string.IsNullOrWhiteSpace(Model.Contact.Phone))
+                        {
+                            <a href="tel:@Model.Contact.Phone" class="action-button call">
+                                <div class="action-icon">
+                                    <i class="bi bi-telephone-fill"></i>
+                                </div>
+                                <div class="action-content">
+                                    <div class="action-title">Позвонить</div>
+                                    <div class="action-subtitle">@Model.Contact.Phone</div>
+                                </div>
+                                <i class="bi bi-chevron-right action-arrow"></i>
+                            </a>
+                        }
+                        
+                        @if (!string.IsNullOrWhiteSpace(Model.Contact.Email))
+                        {
+                            <a href="mailto:@Model.Contact.Email" class="action-button email">
+                                <div class="action-icon">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </div>
+                                <div class="action-content">
+                                    <div class="action-title">Написать письмо</div>
+                                    <div class="action-subtitle">@Model.Contact.Email</div>
+                                </div>
+                                <i class="bi bi-chevron-right action-arrow"></i>
+                            </a>
+                        }
+                        
+                        @if (Model.Contact.Account is not null)
+                        {
+                            <a asp-controller="Accounts" 
+                               asp-action="Details" 
+                               asp-route-id="@Model.Contact.AccountId" 
+                               class="action-button account">
+                                <div class="action-icon">
+                                    <i class="bi bi-building-fill"></i>
+                                </div>
+                                <div class="action-content">
+                                    <div class="action-title">Перейти к контрагенту</div>
+                                    <div class="action-subtitle">@Model.Contact.Account.Name</div>
+                                </div>
+                                <i class="bi bi-chevron-right action-arrow"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left me-2"></i>К списку</a>
-        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Contact.Id"><i class="bi bi-pencil me-2"></i>Редактировать</a>
-    </div>
-</div>
-<div class="card shadow-sm rounded-3 p-4">
-    <dl class="row mb-0">
-        <dt class="col-4">Должность</dt>
-        <dd class="col-8">@Model.Contact.Position</dd>
-        <dt class="col-4">Телефон</dt>
-        <dd class="col-8"><a class="text-decoration-none" href="tel:@Model.Contact.Phone">@Model.Contact.Phone</a></dd>
-        <dt class="col-4">Email</dt>
-        <dd class="col-8"><a class="text-decoration-none" href="mailto:@Model.Contact.Email">@Model.Contact.Email</a></dd>
-    </dl>
 </div>

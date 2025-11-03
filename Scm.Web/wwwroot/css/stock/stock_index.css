@@ -135,12 +135,12 @@
     margin-bottom: 20px;
 }
 .data-table {
+    width: 100%;
     margin: 0;
-    border-collapse: separate;
-    border-spacing: 0;
 }
 .data-table thead {
     background: #f8f9fa;
+    width: 100%;
     border-bottom: 2px solid #e9ecef;
 }
 .data-table thead th {

@@ -1,0 +1,613 @@
+/* ==================== КОНТЕЙНЕР ==================== */
+.main-body {
+    display: flex;
+    justify-content: center;
+}
+
+.accounts-container {
+    min-width: 1296px;
+    max-width: 1296px;
+}
+
+/* ==================== Header Section ==================== */
+.accounts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.accounts-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.accounts-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.accounts-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* ==================== Stats Cards ==================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow:0 1px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ==================== Filters Card ==================== */
+.filters-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow:0 1px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1.5rem;
+}
+
+.filters-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    font-size: 1.1rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.quick-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.filter-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 2px solid #e5e7eb;
+    background: white;
+    color: var(--text-secondary);
+}
+
+.filter-badge:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.filter-badge.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+/* ==================== Table Card ==================== */
+.accounts-table-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow:0 1px 10px rgba(0, 0, 0, 0.2);
+    overflow: visible;
+}
+
+.accounts-table {
+    width: 100%;
+    margin: 0;
+}
+
+.accounts-table thead {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.accounts-table th {
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    border: none;
+}
+
+.accounts-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.15s ease;
+}
+
+.accounts-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.accounts-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.accounts-table td {
+    padding: 1.25rem 1.5rem;
+    vertical-align: middle;
+    border: none;
+}
+
+/* ==================== Account Cell Styles ==================== */
+.account-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+.account-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.account-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.account-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+    text-decoration: none;
+    display: block;
+    transition: color 0.2s ease;
+}
+
+.account-name:hover {
+    color: #3b82f6;
+}
+
+.account-inn {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* ==================== Type Badge ==================== */
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.type-company {
+    background: #eff6ff;
+    color: #1e40af;
+}
+
+.type-person {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+/* ==================== Tags ==================== */
+.tags-cell {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.tag-badge {
+    padding: 0.25rem 0.625rem;
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* ==================== Action Buttons ==================== */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.action-buttons .dropdown {
+    position: static;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: var(--text-primary);
+}
+
+.action-buttons .dropdown-menu {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+}
+
+/* ==================== Empty State ==================== */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* ==================== Mobile Cards ==================== */
+.mobile-accounts-grid {
+    display: none;
+    gap: 1rem;
+}
+
+.mobile-account-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow:0 1px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.mobile-account-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.mobile-account-card.type-company {
+    border-left-color: #3b82f6;
+}
+
+.mobile-account-card.type-person {
+    border-left-color: #10b981;
+}
+
+.mobile-account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.mobile-account-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.mobile-account-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mobile-info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.mobile-info-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.mobile-info-content {
+    flex: 1;
+}
+
+.mobile-info-label {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-bottom: 0.125rem;
+}
+
+.mobile-info-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.mobile-account-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.mobile-account-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mobile-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+.mobile-btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.mobile-btn-primary:hover {
+    background: #2563eb;
+    color: white;
+}
+
+.mobile-btn-secondary {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+
+.mobile-btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 768px) {
+    .accounts-modern-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .accounts-title {
+        font-size: 1.5rem;
+    }
+
+    .accounts-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .accounts-actions {
+        width: 100%;
+    }
+
+    .accounts-actions .btn {
+        flex: 1;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .filters-card {
+        padding: 1rem;
+    }
+
+    .quick-filters {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .accounts-table-card {
+        display: none;
+    }
+
+    .mobile-accounts-grid {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-accounts-grid {
+        display: none !important;
+    }
+}
+
+/* ==================== Pagination ==================== */
+.table-pagination,
+.mobile-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.page-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: var(--text-primary);
+}
+
+.page-btn.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+.page-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.pagination-count {
+    text-align: center;
+    padding: 0 1rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.row-number {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* ==================== Avatar Colors ==================== */
+.bg-purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* ==================== Color Variables ==================== */
+:root {
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+    --user-circle-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}

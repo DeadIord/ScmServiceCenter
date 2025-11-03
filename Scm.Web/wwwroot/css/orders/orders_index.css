@@ -203,7 +203,7 @@
 }
 
 .orders-table thead {
-    background: #ffffff;
+    background: #f8f9fa;
     height: 60px;
     border-bottom: 1px solid #e2e8f0;
 }
@@ -347,6 +347,10 @@
     justify-content: center;
 }
 
+.action-buttons .dropdown {
+    position: static;
+}
+
 .btn-action {
     width: 32px;
     height: 32px;
@@ -365,6 +369,11 @@
     background: #f1f5f9;
     color: #475569;
     border-color: #cbd5e1;
+}
+
+.action-buttons .dropdown-menu {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
 }
 
 /* ==================== PAGINATION ==================== */
