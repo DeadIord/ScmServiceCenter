@@ -1,0 +1,696 @@
+/* ===== Deals Index Modern Styles ===== */
+
+:root {
+    --primary-color: #667eea;
+    --primary-hover: #5568d3;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --info-color: #06b6d4;
+    --background-light: #f8fafc;
+    --border-color: #e5e7eb;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+    --card-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Body */
+.main-body {
+    display: flex;
+    justify-content: center;
+}
+
+/* Container */
+.deals-container {
+    width: 100%;
+    max-width: 1296px;
+}
+
+/* Header */
+.deals-header {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.header-text h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.header-text p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border: 1px solid var(--primary-color);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-secondary {
+    background: var(--background-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-outline-secondary:hover {
+    background: white;
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Statistics Cards */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.stats-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.stats-info {
+    flex: 1;
+}
+
+.stats-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.stats-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+}
+
+.stats-change {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.stats-change.positive {
+    color: var(--success-color);
+    background: #d1fae5;
+}
+
+.stats-change.negative {
+    color: var(--danger-color);
+    background: #fee2e2;
+}
+
+.stats-change.neutral {
+    color: var(--info-color);
+    background: #e0f2fe;
+}
+
+.stats-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Filter Card */
+.filter-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.filter-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-title i {
+    color: var(--primary-color);
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-select,
+.form-control {
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.form-select:focus,
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Deals Table Card */
+.deals-table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.deals-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.deals-table thead th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    background: var(--background-light);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.deals-table tbody td {
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--background-light);
+}
+
+.deals-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.deals-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.deals-table tbody tr:hover {
+    background: var(--background-light);
+}
+
+/* Deal Name Column */
+.deal-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.deal-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.deal-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.deal-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deal-company {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Stage Badge */
+.stage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.stage-badge.lead {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.stage-badge.qualified {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.stage-badge.proposal {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.stage-badge.negotiation {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.stage-badge.won {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.stage-badge.lost {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.stage-badge i {
+    font-size: 0.75rem;
+}
+
+/* Amount Display */
+.amount-display {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+
+.amount-large {
+    color: var(--success-color);
+}
+
+/* Probability Display */
+.probability-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.probability-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--background-light);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.probability-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-color), var(--info-color));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.probability-text {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* Date Display */
+.date-display {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.date-display.urgent {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+/* Contact Badge */
+.contact-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.contact-badge:hover {
+    background: white;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.contact-badge i {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.contact-badge:hover i {
+    color: var(--primary-color);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-icon:hover {
+    background: white;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.5rem;
+    border-radius: 16px;
+    background: var(--background-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--text-tertiary);
+}
+
+.empty-state-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+/* Pipeline View (Alternative Layout) */
+.pipeline-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.pipeline-column {
+    background: var(--background-light);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.pipeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+}
+
+.pipeline-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pipeline-count {
+    background: white;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+}
+
+.pipeline-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.pipeline-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 1320px) {
+    .deals-container {
+        max-width: 100%;
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pipeline-view {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .deals-container {
+        padding: 1rem;
+    }
+
+    .deals-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .deals-table thead th,
+    .deals-table tbody td {
+        padding: 0.75rem 1rem;
+    }
+
+    .deal-name-cell {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .deals-table {
+        min-width: 900px;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .header-text h1 {
+        font-size: 1.5rem;
+    }
+
+    .stats-value {
+        font-size: 1.5rem;
+    }
+
+    .stats-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+}
