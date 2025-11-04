@@ -132,6 +132,35 @@ public class ReportDefinitionsController : Controller
             model.Parameters.Add(new ReportParameterInputModel { Name = "", Type = "string" });
         }
 
+        var queryDefinition = _reportBuilderService.DeserializeQueryDefinition(model.QueryDefinitionJson);
+        if (!string.IsNullOrWhiteSpace(model.QueryDefinitionJson) && queryDefinition is null && !string.Equals(model.QueryDefinitionJson.Trim(), "{}", StringComparison.Ordinal))
+        {
+            ModelState.AddModelError(nameof(model.QueryDefinitionJson), "Не удалось разобрать структуру конструктора.");
+        }
+
+        if (queryDefinition is not null && queryDefinition.Tables.Any())
+        {
+            model.QueryDefinitionJson = _reportBuilderService.SerializeQueryDefinition(queryDefinition);
+            model.QueryBuilder = MapToQueryBuilderViewModel(queryDefinition);
+            var generatedSql = _reportBuilderService.GenerateSqlFromDefinition(queryDefinition);
+            model.GeneratedSqlPreview = generatedSql;
+            model.SqlText = generatedSql;
+            model.HasLegacyQuery = false;
+        }
+        else
+        {
+            model.QueryDefinitionJson = "{}";
+            model.QueryBuilder ??= new ReportQueryBuilderViewModel();
+            if (string.IsNullOrWhiteSpace(model.SqlText) && report is not null)
+            {
+                model.SqlText = report.SqlText;
+            }
+            model.GeneratedSqlPreview = model.SqlText;
+            model.HasLegacyQuery = report is not null;
+        }
+
+        ModelState.Remove(nameof(model.SqlText));
+
         if (!ModelState.IsValid)
         {
             await PopulateRoles(model);
@@ -173,6 +202,7 @@ public class ReportDefinitionsController : Controller
                 Title = model.Title,
                 Description = model.Description,
                 SqlText = model.SqlText,
+                QueryDefinitionJson = model.QueryDefinitionJson,
                 ParametersJson = serializedParameters,
                 Visibility = model.Visibility,
                 AllowedRolesJson = serializedRoles,
@@ -188,6 +218,7 @@ public class ReportDefinitionsController : Controller
             report.Title = model.Title;
             report.Description = model.Description;
             report.SqlText = model.SqlText;
+            report.QueryDefinitionJson = model.QueryDefinitionJson;
             report.ParametersJson = serializedParameters;
             report.Visibility = model.Visibility;
             report.AllowedRolesJson = serializedRoles;
@@ -198,6 +229,32 @@ public class ReportDefinitionsController : Controller
         await _dbContext.SaveChangesAsync();
         TempData["Success"] = "Отчёт успешно сохранён.";
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet("metadata")]
+    public async Task<IActionResult> Metadata(CancellationToken cancellationToken)
+    {
+        var metadata = await _reportBuilderService.GetDatabaseMetadataAsync(cancellationToken);
+        return Json(metadata);
+    }
+
+    [HttpPost("generate-sql")]
+    [ValidateAntiForgeryToken]
+    public IActionResult GenerateSql([FromBody] ReportQueryBuilderViewModel builder)
+    {
+        if (builder is null)
+        {
+            return BadRequest(new { error = "Структура запроса не задана." });
+        }
+
+        var definition = MapToQueryDefinition(builder);
+        if (!definition.Tables.Any())
+        {
+            return BadRequest(new { error = "Не выбраны таблицы." });
+        }
+
+        var sql = _reportBuilderService.GenerateSqlFromDefinition(definition);
+        return Ok(new { sql });
     }
 
     [HttpGet]
@@ -405,8 +462,28 @@ public class ReportDefinitionsController : Controller
             Description = report?.Description,
             SqlText = report?.SqlText ?? string.Empty,
             Visibility = report?.Visibility ?? ReportVisibility.Private,
-            IsActive = report?.IsActive ?? true
+            IsActive = report?.IsActive ?? true,
+            QueryDefinitionJson = report?.QueryDefinitionJson ?? "{}",
+            GeneratedSqlPreview = report is null ? string.Empty : _reportBuilderService.ResolveSqlText(report)
         };
+
+        var definition = report is not null ? _reportBuilderService.DeserializeQueryDefinition(report.QueryDefinitionJson) : null;
+        if (definition is not null && definition.Tables.Any())
+        {
+            model.QueryBuilder = MapToQueryBuilderViewModel(definition);
+            model.QueryDefinitionJson = _reportBuilderService.SerializeQueryDefinition(definition);
+            model.SqlText = model.GeneratedSqlPreview;
+        }
+        else
+        {
+            model.QueryBuilder = new ReportQueryBuilderViewModel();
+            if (report is not null)
+            {
+                model.GeneratedSqlPreview = report.SqlText;
+            }
+        }
+
+        model.HasLegacyQuery = report is not null && (definition is null || !definition.Tables.Any());
 
         if (report is not null)
         {
@@ -449,6 +526,118 @@ public class ReportDefinitionsController : Controller
                 Selected = model.AllowedRoles.Contains(roleName)
             };
         });
+    }
+
+    private static ReportQueryBuilderViewModel MapToQueryBuilderViewModel(ReportQueryDefinition definition)
+    {
+        var model = new ReportQueryBuilderViewModel
+        {
+            Tables = definition.Tables.Select(table => new ReportQueryTableInputModel
+            {
+                Schema = table.Schema,
+                Name = table.Name,
+                Alias = string.IsNullOrWhiteSpace(table.Alias) ? null : table.Alias,
+                JoinType = table.JoinType,
+                JoinCondition = table.JoinCondition
+            }).ToList(),
+            Columns = definition.Columns.Select(column => new ReportQueryColumnInputModel
+            {
+                TableAlias = column.TableAlias,
+                ColumnName = column.ColumnName,
+                Alias = column.Alias,
+                Aggregate = column.Aggregate,
+                GroupBy = column.GroupBy,
+                SortDirection = column.SortDirection,
+                SortOrder = column.SortOrder
+            }).ToList(),
+            Filters = definition.Filters.Select(filter => new ReportQueryFilterInputModel
+            {
+                Connector = filter.Connector,
+                TableAlias = filter.TableAlias,
+                ColumnName = filter.ColumnName,
+                Operator = filter.Operator,
+                Value = filter.Value,
+                ParameterName = filter.ParameterName
+            }).ToList(),
+            Sorts = definition.Sorts.Select(sort => new ReportQuerySortInputModel
+            {
+                TableAlias = sort.TableAlias,
+                ColumnName = sort.ColumnName,
+                Direction = sort.Direction,
+                Order = sort.Order
+            }).ToList()
+        };
+
+        return model;
+    }
+
+    private static ReportQueryDefinition MapToQueryDefinition(ReportQueryBuilderViewModel builder)
+    {
+        var definition = new ReportQueryDefinition();
+
+        if (builder.Tables is not null)
+        {
+            foreach (var table in builder.Tables.Where(t => !string.IsNullOrWhiteSpace(t.Name)))
+            {
+                definition.Tables.Add(new ReportQueryTableDefinition
+                {
+                    Schema = string.IsNullOrWhiteSpace(table.Schema) ? "public" : table.Schema,
+                    Name = table.Name,
+                    Alias = table.Alias ?? string.Empty,
+                    JoinType = string.IsNullOrWhiteSpace(table.JoinType) ? "Inner" : table.JoinType,
+                    JoinCondition = table.JoinCondition
+                });
+            }
+        }
+
+        if (builder.Columns is not null)
+        {
+            foreach (var column in builder.Columns.Where(c => !string.IsNullOrWhiteSpace(c.ColumnName)))
+            {
+                definition.Columns.Add(new ReportQueryColumnDefinition
+                {
+                    TableAlias = column.TableAlias,
+                    ColumnName = column.ColumnName,
+                    Alias = column.Alias,
+                    Aggregate = column.Aggregate,
+                    GroupBy = column.GroupBy,
+                    SortDirection = column.SortDirection,
+                    SortOrder = column.SortOrder
+                });
+            }
+        }
+
+        if (builder.Filters is not null)
+        {
+            foreach (var filter in builder.Filters.Where(f => !string.IsNullOrWhiteSpace(f.ColumnName)))
+            {
+                definition.Filters.Add(new ReportQueryFilterDefinition
+                {
+                    Connector = string.IsNullOrWhiteSpace(filter.Connector) ? "AND" : filter.Connector,
+                    TableAlias = filter.TableAlias,
+                    ColumnName = filter.ColumnName,
+                    Operator = string.IsNullOrWhiteSpace(filter.Operator) ? "=" : filter.Operator,
+                    Value = filter.Value,
+                    ParameterName = filter.ParameterName
+                });
+            }
+        }
+
+        if (builder.Sorts is not null)
+        {
+            foreach (var sort in builder.Sorts.Where(s => !string.IsNullOrWhiteSpace(s.ColumnName)))
+            {
+                definition.Sorts.Add(new ReportQuerySortDefinition
+                {
+                    TableAlias = sort.TableAlias,
+                    ColumnName = sort.ColumnName,
+                    Direction = string.IsNullOrWhiteSpace(sort.Direction) ? "ASC" : sort.Direction,
+                    Order = sort.Order
+                });
+            }
+        }
+
+        return definition;
     }
 
     private static string NormalizeParameterName(string name)

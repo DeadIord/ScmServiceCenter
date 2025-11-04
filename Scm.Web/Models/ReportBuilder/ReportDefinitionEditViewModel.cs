@@ -17,9 +17,16 @@ public class ReportDefinitionEditViewModel
     [Display(Name = "Описание")]
     public string? Description { get; set; }
 
-    [Required]
     [Display(Name = "SQL-запрос")]
     public string SqlText { get; set; } = string.Empty;
+
+    public string QueryDefinitionJson { get; set; } = "{}";
+
+    public ReportQueryBuilderViewModel QueryBuilder { get; set; } = new();
+
+    public string GeneratedSqlPreview { get; set; } = string.Empty;
+
+    public bool HasLegacyQuery { get; set; }
 
     [Display(Name = "Параметры")]
     public List<ReportParameterInputModel> Parameters { get; set; } = new();

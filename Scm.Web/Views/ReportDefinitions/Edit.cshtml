@@ -30,10 +30,178 @@
                 <textarea asp-for="Description" class="form-control" rows="2"></textarea>
             </div>
             <div class="col-md-12">
-                <label asp-for="SqlText" class="form-label"></label>
-                <textarea asp-for="SqlText" class="form-control font-monospace" rows="8" spellcheck="false"></textarea>
-                <small class="form-text text-muted">Допускаются только SELECT-запросы. В запросе обязательно используйте параметризацию вида @@имя.</small>
-                <span asp-validation-for="SqlText" class="text-danger"></span>
+                <div class="card border-primary shadow-sm" id="report-builder-root"
+                     data-metadata-url="@Url.Action("Metadata")"
+                     data-generate-sql-url="@Url.Action("GenerateSql")">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="h5 mb-0">Конструктор SQL-запроса</h2>
+                                <small class="text-white-50">Соберите таблицы, поля и условия</small>
+                            </div>
+                            <span class="badge bg-light text-dark" data-role="builder-badge">Конструктор</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" asp-for="QueryDefinitionJson" id="query-definition-json" />
+                        <input type="hidden" asp-for="SqlText" id="sql-text-value" />
+                        <span asp-validation-for="QueryDefinitionJson" class="text-danger"></span>
+                        <span asp-validation-for="SqlText" class="text-danger"></span>
+
+                        <div class="alert alert-warning mt-3" role="alert" data-role="legacy-notice" @(Model.HasLegacyQuery ? string.Empty : "hidden")>
+                            Для отчёта пока используется ранее сохранённый SQL. Соберите новую структуру, чтобы перейти на визуальный конструктор.
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <strong>Шаг 1. Источники данных</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Таблица</label>
+                                        <select class="form-select" data-role="table-selector"></select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Псевдоним</label>
+                                        <input type="text" class="form-control" data-role="table-alias" placeholder="например, o" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Тип соединения</label>
+                                        <select class="form-select" data-role="table-join-type">
+                                            <option value="Inner">INNER JOIN</option>
+                                            <option value="Left">LEFT JOIN</option>
+                                            <option value="Right">RIGHT JOIN</option>
+                                            <option value="Full">FULL JOIN</option>
+                                            <option value="Cross">CROSS JOIN</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-grid">
+                                        <button type="button" class="btn btn-primary" data-action="add-table"><i class="bi bi-plus"></i> Добавить</button>
+                                    </div>
+                                </div>
+                                <div class="form-text mt-2">Для первой таблицы соединение и условие не требуются.</div>
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-sm table-hover align-middle" data-role="selected-tables">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 5%">#</th>
+                                                <th style="width: 25%">Таблица</th>
+                                                <th style="width: 15%">Псевдоним</th>
+                                                <th style="width: 15%">Тип</th>
+                                                <th>Условие соединения</th>
+                                                <th style="width: 8%" class="text-end">&nbsp;</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="text-center text-muted" data-role="empty">
+                                                <td colspan="6">Таблицы не выбраны</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <strong>Шаг 2. Колонки, агрегаты и группировки</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h3 class="h6 mb-0">Выбранные поля</h3>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-action="add-column"><i class="bi bi-plus"></i> Добавить колонку</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle" data-role="selected-columns">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 18%">Таблица</th>
+                                                <th style="width: 20%">Колонка</th>
+                                                <th style="width: 14%">Агрегат</th>
+                                                <th style="width: 18%">Псевдоним</th>
+                                                <th style="width: 10%" class="text-center">Группировка</th>
+                                                <th style="width: 10%">Сортировка</th>
+                                                <th style="width: 7%" class="text-end">&nbsp;</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="text-center text-muted" data-role="empty">
+                                                <td colspan="7">Колонки не выбраны</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <strong>Шаг 3. Фильтры</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h3 class="h6 mb-0">Условия отбора</h3>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-action="add-filter"><i class="bi bi-plus"></i> Добавить фильтр</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle" data-role="selected-filters">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 10%">Связь</th>
+                                                <th style="width: 18%">Таблица</th>
+                                                <th style="width: 18%">Колонка</th>
+                                                <th style="width: 14%">Оператор</th>
+                                                <th>Значение / параметр</th>
+                                                <th style="width: 7%" class="text-end">&nbsp;</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="text-center text-muted" data-role="empty">
+                                                <td colspan="6">Фильтры не заданы</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <strong>Шаг 4. Сортировки</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h3 class="h6 mb-0">Порядок строк</h3>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-action="add-sort"><i class="bi bi-plus"></i> Добавить сортировку</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle" data-role="selected-sorts">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 30%">Таблица / псевдоним</th>
+                                                <th style="width: 30%">Колонка или выражение</th>
+                                                <th style="width: 15%">Направление</th>
+                                                <th style="width: 15%">Порядок</th>
+                                                <th style="width: 7%" class="text-end">&nbsp;</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="text-center text-muted" data-role="empty">
+                                                <td colspan="5">Сортировка не задана</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <h3 class="h6 mb-2">Сгенерированный SQL</h3>
+                        <pre class="bg-dark text-white rounded p-3 mb-0 font-monospace" data-role="sql-preview">@Model.GeneratedSqlPreview</pre>
+                        <small class="text-muted">Запрос формируется автоматически и доступен только для просмотра.</small>
+                    </div>
+                </div>
             </div>
             <div class="col-md-6">
                 <label asp-for="AllowedRoles" class="form-label"></label>
@@ -111,6 +279,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/reportBuilder.js"></script>
     <script>
         if (typeof initReportParametersEditor === 'function') {
             initReportParametersEditor();

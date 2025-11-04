@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Application.Validators;
+using Scm.Web.Authorization;
 using Scm.Web.Models.Stock;
 using Scm.Infrastructure.Persistence;
 
 namespace Scm.Web.Controllers;
 
-[Authorize]
+[Authorize(Policy = PolicyNames.StockAccess)]
 public class StockController : Controller
 {
     private readonly ScmDbContext _dbContext;

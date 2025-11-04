@@ -10,6 +10,8 @@ public class ReportDefinition
 
     public string SqlText { get; set; } = string.Empty;
 
+    public string QueryDefinitionJson { get; set; } = "{}";
+
     public string ParametersJson { get; set; } = "[]";
 
     public ReportVisibility Visibility { get; set; } = ReportVisibility.Private;

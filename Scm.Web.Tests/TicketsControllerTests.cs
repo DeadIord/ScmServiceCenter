@@ -27,7 +27,7 @@ public sealed class TicketsControllerTests
         var ticketServiceMock = new Mock<ITicketService>();
         ticketServiceMock
             .Setup(service => service.AddAgentReplyAsync(It.IsAny<Guid>(), It.IsAny<TicketReplyDto>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(new TicketMessage());
 
         var loggerMock = new Mock<ILogger<TicketsController>>();
         var pollerMock = new Mock<ITicketInboxPoller>();
