@@ -40,25 +40,36 @@ function updateKanbanColumnCounts(board) {
 
 window.initKanbanBoard = function () {
     const board = document.getElementById('kanban-board');
-    if (!board || typeof Sortable === 'undefined') {
+    if (!board) {
         return;
     }
 
-    const groupName = 'orders-board';
+    const revertMove = (moveContext) => {
+        if (!moveContext) {
+            return;
+        }
 
-    const revertMove = (evt) => {
-        const { from, item, oldIndex } = evt;
+        const { from, item, oldIndex, originalNextSibling } = moveContext;
         if (!from || !item) {
             return;
         }
 
-        const reference = from.children[oldIndex] ?? null;
-        from.insertBefore(item, reference);
+        const reference = originalNextSibling || (typeof oldIndex === 'number' ? from.children[oldIndex] ?? null : null);
+        if (reference) {
+            from.insertBefore(item, reference);
+        } else {
+            from.appendChild(item);
+        }
+
         updateKanbanColumnCounts(board);
     };
 
-    const handleStatusChange = (evt) => {
-        const { item, from, to } = evt;
+    const handleStatusChange = (moveContext) => {
+        if (!moveContext) {
+            return;
+        }
+
+        const { item, from, to } = moveContext;
         if (!item || !from || !to) {
             return;
         }
@@ -89,11 +100,13 @@ window.initKanbanBoard = function () {
             if (typeof showToast === 'function') {
                 showToast(message, 'bg-danger');
             }
-            revertMove(evt);
+            revertMove(moveContext);
         });
     };
 
     updateKanbanColumnCounts(board);
+
+    const groupName = 'orders-board';
 
     const preventPlaceholderDrop = (evt) => {
         if (!evt || !evt.related || !evt.related.classList) {
@@ -103,24 +116,147 @@ window.initKanbanBoard = function () {
         return !evt.related.classList.contains('kanban-empty');
     };
 
-    board.querySelectorAll('.kanban-column').forEach(column => {
-        Sortable.create(column, {
-            group: groupName,
-            animation: 220,
-            ghostClass: 'kanban-ghost',
-            dragClass: 'kanban-dragging',
-            filter: '.kanban-empty',
-            onMove: preventPlaceholderDrop,
-            onStart: () => {
-                board.classList.add('kanban-board-dragging');
-            },
-            onEnd: evt => {
-                board.classList.remove('kanban-board-dragging');
-                handleStatusChange(evt);
+    if (typeof Sortable !== 'undefined') {
+        board.querySelectorAll('.kanban-column').forEach(column => {
+            Sortable.create(column, {
+                group: groupName,
+                animation: 220,
+                ghostClass: 'kanban-ghost',
+                dragClass: 'kanban-dragging',
+                filter: '.kanban-empty',
+                onMove: preventPlaceholderDrop,
+                onStart: evt => {
+                    board.classList.add('kanban-board-dragging');
+                    evt.item.classList.add('kanban-dragging');
+                    evt.item.__originalNextSibling = evt.item.nextElementSibling;
+                },
+                onEnd: evt => {
+                    board.classList.remove('kanban-board-dragging');
+                    evt.item.classList.remove('kanban-dragging');
+                    handleStatusChange({
+                        item: evt.item,
+                        from: evt.from,
+                        to: evt.to,
+                        oldIndex: evt.oldIndex,
+                        originalNextSibling: evt.item.__originalNextSibling || null
+                    });
+                    delete evt.item.__originalNextSibling;
+                }
+            });
+        });
+
+        return;
+    }
+
+    const dragState = {
+        item: null,
+        fromColumn: null,
+        oldIndex: null,
+        originalNextSibling: null,
+        didDrop: false
+    };
+
+    const setDraggable = (item) => {
+        item.setAttribute('draggable', 'true');
+        item.addEventListener('dragstart', event => {
+            dragState.item = item;
+            dragState.fromColumn = item.closest('.kanban-column');
+            const siblings = dragState.fromColumn ? Array.from(dragState.fromColumn.querySelectorAll('.kanban-item')) : [];
+            dragState.oldIndex = siblings.indexOf(item);
+            dragState.originalNextSibling = item.nextElementSibling;
+            dragState.didDrop = false;
+
+            board.classList.add('kanban-board-dragging');
+            item.classList.add('kanban-dragging');
+
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', item.dataset.id || '');
             }
+        });
+
+        item.addEventListener('dragend', () => {
+            board.classList.remove('kanban-board-dragging');
+            item.classList.remove('kanban-dragging');
+
+            if (!dragState.didDrop) {
+                revertMove({
+                    item: dragState.item,
+                    from: dragState.fromColumn,
+                    oldIndex: dragState.oldIndex,
+                    originalNextSibling: dragState.originalNextSibling
+                });
+            }
+
+            dragState.item = null;
+            dragState.fromColumn = null;
+            dragState.oldIndex = null;
+            dragState.originalNextSibling = null;
+            dragState.didDrop = false;
+        });
+    };
+
+    const getDragAfterElement = (column, positionY) => {
+        const siblings = Array.from(column.querySelectorAll('.kanban-item:not(.kanban-dragging)'));
+
+        return siblings.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = positionY - box.top - box.height / 2;
+
+            if (offset < 0 && offset > closest.offset) {
+                return { offset, element: child };
+            }
+
+            return closest;
+        }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+    };
+
+    board.querySelectorAll('.kanban-item').forEach(setDraggable);
+
+    board.querySelectorAll('.kanban-column').forEach(column => {
+        column.addEventListener('dragover', event => {
+            if (!dragState.item) {
+                return;
+            }
+
+            event.preventDefault();
+            if (event.dataTransfer) {
+                event.dataTransfer.dropEffect = 'move';
+            }
+            const afterElement = getDragAfterElement(column, event.clientY);
+
+            if (!afterElement) {
+                column.appendChild(dragState.item);
+                return;
+            }
+
+            if (afterElement !== dragState.item) {
+                column.insertBefore(dragState.item, afterElement);
+            }
+        });
+
+        column.addEventListener('drop', event => {
+            if (!dragState.item) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const moveContext = {
+                item: dragState.item,
+                from: dragState.fromColumn,
+                to: column,
+                oldIndex: dragState.oldIndex,
+                originalNextSibling: dragState.originalNextSibling
+            };
+
+            dragState.didDrop = true;
+
+            handleStatusChange(moveContext);
         });
     });
 };
+
 
 window.initReportParametersEditor = function () {
     const tableBody = document.querySelector('#parameters-table tbody');

@@ -260,12 +260,18 @@
 }
 
 .kanban-board {
-  display: flex;
-  gap: 1.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.75rem;
-  align-items: flex-start;
-  scroll-snap-type: x proximity;
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 0 1.5rem 0.75rem;
+    align-items: flex-start;
+    scroll-snap-type: x proximity;
+}
+
+@media (min-width: 1200px) {
+    .kanban-board {
+        justify-content: center;
+    }
 }
 
 .kanban-board::-webkit-scrollbar {
