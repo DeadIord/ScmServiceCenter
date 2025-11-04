@@ -2,23 +2,259 @@
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Title"].Value;
+    @* var deals = new[] {
+        new { Id = 1, Title = "Поставка оборудования ООО \"Техпром\"", Company = "ООО \"Техпром\"", Stage = "negotiation", Amount = 850000m, Probability = 75, CloseDate = DateTime.Now.AddDays(10), Contact = "Иван Петров" },
+        new { Id = 2, Title = "Сервисное обслуживание", Company = "АО \"МетроСтрой\"", Stage = "proposal", Amount = 320000m, Probability = 60, CloseDate = DateTime.Now.AddDays(15), Contact = "Мария Сидорова" },
+        new { Id = 3, Title = "Комплексное решение для склада", Company = "ТД \"Логистика Плюс\"", Stage = "qualified", Amount = 1250000m, Probability = 40, CloseDate = DateTime.Now.AddDays(20), Contact = "Алексей Смирнов" },
+        new { Id = 4, Title = "Расширение производства", Company = "ЗАО \"ПромМаш\"", Stage = "lead", Amount = 2100000m, Probability = 25, CloseDate = DateTime.Now.AddDays(30), Contact = "Елена Кузнецова" },
+        new { Id = 5, Title = "Модернизация цеха", Company = "ООО \"СталеПрокат\"", Stage = "won", Amount = 680000m, Probability = 100, CloseDate = DateTime.Now.AddDays(-5), Contact = "Дмитрий Волков" },
+        new { Id = 6, Title = "Запчасти для производственной линии", Company = "ИП Николаев", Stage = "negotiation", Amount = 150000m, Probability = 80, CloseDate = DateTime.Now.AddDays(7), Contact = "Николай Николаев" },
+    }; *@
+
+    var deals = Array.Empty<dynamic>();
+    var totalDeals = deals.Length;
+    var totalAmount = 0m;
+    var wonDeals = 0;
+    var avgDealSize = 0m;
+    var winRate = totalDeals > 0 ? ((decimal)wonDeals / totalDeals) * 100 : 0m;
 }
-
-<div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-lg-between gap-3 mb-4">
-    <div>
-        <h1 class="h3 fw-semibold mb-2">@Localizer["Heading"]</h1>
-        <p class="text-muted mb-0">@Localizer["Description"]</p>
-    </div>
-    <div class="d-flex gap-2">
-        <button type="button" class="btn btn-primary" disabled>@Localizer["PrimaryAction"]</button>
-        <button type="button" class="btn btn-outline-secondary" disabled>@Localizer["SecondaryAction"]</button>
-    </div>
-</div>
-
-<div class="card border-0 shadow-sm">
-    <div class="card-body text-center py-5">
-        <i class="bi bi-diagram-3 display-5 text-muted mb-3"></i>
-        <h2 class="h5 fw-semibold mb-2">@Localizer["EmptyTitle"]</h2>
-        <p class="text-muted mb-0">@Localizer["EmptyDescription"]</p>
+<link rel="stylesheet" href="~/css/deals/deals_index.css" asp-append-version="true" />
+<div class="main-body">
+    <div class="deals-container">
+        @* <!-- Header --> *@
+        <div class="deals-header">
+            <div class="header-title-section">
+                <div class="header-icon">
+                    <i class="bi bi-diagram-3"></i>
+                </div>
+                <div class="header-text">
+                    <h1>@Localizer["Heading"]</h1>
+                    <p>@Localizer["Description"]</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    @Localizer["PrimaryAction"]
+                </button>
+                <button type="button" class="btn btn-outline-secondary">
+                    <i class="bi bi-funnel"></i>
+                    @Localizer["SecondaryAction"]
+                </button>
+            </div>
+        </div>
+        @* <!-- Statistics Cards --> *@
+        <div class="stats-row">
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">Всего сделок</p>
+                        <div class="stats-value">@totalDeals</div>
+                        <span class="stats-change neutral">В воронке</span>
+                    </div>
+                    <div class="stats-icon" style="background: #e0f2fe;">
+                        <i class="bi bi-briefcase" style="color: #06b6d4;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">Общая сумма</p>
+                        <div class="stats-value">@totalAmount.ToString("N0") ₽</div>
+                        <span class="stats-change positive">Потенциальный доход</span>
+                    </div>
+                    <div class="stats-icon" style="background: #d1fae5;">
+                        <i class="bi bi-cash-stack" style="color: #10b981;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">Средний чек</p>
+                        <div class="stats-value">@avgDealSize.ToString("N0") ₽</div>
+                        <span class="stats-change neutral">На сделку</span>
+                    </div>
+                    <div class="stats-icon" style="background: #fef3c7;">
+                        <i class="bi bi-graph-up-arrow" style="color: #f59e0b;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">Win Rate</p>
+                        <div class="stats-value">@winRate%</div>
+                        <span class="stats-change positive">Закрытых сделок</span>
+                    </div>
+                    <div class="stats-icon" style="background: #ede9fe;">
+                        <i class="bi bi-trophy" style="color: #8b5cf6;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* <!-- Filter Card --> *@
+        <div class="filter-card">
+            <h2 class="filter-title">
+                <i class="bi bi-funnel"></i>
+                Фильтры и поиск
+            </h2>
+            <form class="filter-form" method="get">
+                <div class="filter-group">
+                    <label class="filter-label">Поиск</label>
+                    <input class="form-control" type="search" name="q" placeholder="Название сделки или компания" />
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Этап</label>
+                    <select class="form-select" name="stage">
+                        <option value="">Все этапы</option>
+                        <option value="lead">Лид</option>
+                        <option value="qualified">Квалификация</option>
+                        <option value="proposal">Предложение</option>
+                        <option value="negotiation">Переговоры</option>
+                        <option value="won">Закрыто успешно</option>
+                        <option value="lost">Закрыто неудачно</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Период</label>
+                    <select class="form-select" name="period">
+                        <option value="">Все периоды</option>
+                        <option value="week">Эта неделя</option>
+                        <option value="month">Этот месяц</option>
+                        <option value="quarter">Этот квартал</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                        Найти
+                    </button>
+                </div>
+            </form>
+        </div>
+        @* <!-- Table Card --> *@
+        <div class="deals-table-card">
+            @if (!deals.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-diagram-3"></i>
+                    </div>
+                    <h3 class="empty-state-title">@Localizer["EmptyTitle"]</h3>
+                    <p class="empty-state-text">@Localizer["EmptyDescription"]</p>
+                    <button type="button" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        @Localizer["PrimaryAction"]
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="table-wrapper">
+                    <table class="deals-table">
+                        <thead>
+                            <tr>
+                                <th>Сделка</th>
+                                <th>Этап</th>
+                                <th>Сумма</th>
+                                <th>Вероятность</th>
+                                <th>Закрытие</th>
+                                <th>Контакт</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var deal in deals)
+                            {
+                                string company = (string)deal.Company;
+                                var words = company.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                var initials = string.Join("", words.Take(2).Select(w => w[0])).ToUpper();
+                                DateTime closeDate = (DateTime)deal.CloseDate;
+                                string stage = (string)deal.Stage;
+                                var isUrgent = closeDate < DateTime.Now.AddDays(7) && stage != "won" && stage != "lost";
+                                <tr>
+                                    <td>
+                                        <div class="deal-name-cell">
+                                            <div class="deal-icon">@initials</div>
+                                            <div class="deal-info">
+                                                <div class="deal-title">@deal.Title</div>
+                                                <div class="deal-company">@company</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="stage-badge @stage">
+                                            @if (stage == "lead")
+                                            {
+                                                <i class="bi bi-person-plus"></i>
+                                                <text>Лид</text>
+                                            }
+                                            else if (stage == "qualified")
+                                            {
+                                                <i class="bi bi-patch-check"></i>
+                                                <text>Квалификация</text>
+                                            }
+                                            else if (stage == "proposal")
+                                            {
+                                                <i class="bi bi-file-earmark-text"></i>
+                                                <text>Предложение</text>
+                                            }
+                                            else if (stage == "negotiation")
+                                            {
+                                                <i class="bi bi-chat-dots"></i>
+                                                <text>Переговоры</text>
+                                            }
+                                            else if (stage == "won")
+                                            {
+                                                <i class="bi bi-check-circle"></i>
+                                                <text>Закрыто</text>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-x-circle"></i>
+                                                <text>Отклонено</text>
+                                            }
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="amount-display @((decimal)deal.Amount > 1000000 ? "amount-large" : "")">
+                                            @deal.Amount.ToString("N0") ₽
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="probability-display">
+                                            <div class="probability-bar">
+                                                <div class="probability-fill" style="width: @deal.Probability%"></div>
+                                            </div>
+                                            <span class="probability-text">@deal.Probability%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="date-display @(isUrgent ? "urgent" : "")">
+                                            @closeDate.ToString("dd.MM.yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span>@deal.Contact</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a class="btn-icon" href="#" title="Просмотр">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a class="btn-icon" href="#" title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
     </div>
 </div>

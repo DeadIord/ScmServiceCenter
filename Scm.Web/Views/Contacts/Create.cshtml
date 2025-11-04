@@ -1,22 +1,157 @@
 @model Scm.Application.DTOs.ContactInputDto
+@using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Новый контакт";
+    var accounts = ViewBag.Accounts as List<SelectListItem> ?? new();
 }
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-6">
-        <div class="card shadow-sm rounded-3 p-4">
-            <h1 class="section-title mb-3">Создание контакта</h1>
-            <form asp-action="Create" method="post" class="d-grid gap-3">
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <partial name="_Form" />
-                <div class="text-end">
-                    <a class="btn btn-outline-secondary" asp-action="Index">Отмена</a>
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
+
+<link rel="stylesheet" href="~/css/contacts/contacts_create.css" asp-append-version="true" />
+
+<div class="main-body">
+    <div class="create-container">
+        <!-- Header -->
+        <div class="create-header">
+            <a class="back-button" asp-action="Index" title="Вернуться к списку">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="create-title-section">
+                <h1 class="create-title">Новый контакт</h1>
+                <p class="create-subtitle">Заполните информацию о новом контакте</p>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card">
+            <div class="info-icon">
+                <i class="bi bi-info-lg"></i>
+            </div>
+            <div class="info-content">
+                <div class="info-title">Обязательные поля</div>
+                <div class="info-text">Для создания контакта необходимо заполнить все обязательные поля, отмеченные звездочкой (*). Контакт должен быть привязан к контрагенту.</div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="create-form-card">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="All" class="validation-summary-errors"></div>
+                <input type="hidden" asp-for="AccountId" />
+
+                <!-- Основная информация -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <h2 class="section-title">Основная информация</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">
+                                Контрагент<span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-building input-icon"></i>
+                                <select class="form-control" asp-for="AccountId" asp-items="accounts" disabled="@(ViewBag.AccountId != null)"></select>
+                            </div>
+                            @if (ViewBag.AccountId != null)
+                            {
+                                <input type="hidden" asp-for="AccountId" />
+                            }
+                            <span class="text-danger" asp-validation-for="AccountId"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                Выберите контрагента, к которому будет привязан контакт
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Полное имя<span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-person input-icon"></i>
+                                <input class="form-control" asp-for="FullName" placeholder="Иванов Иван Иванович" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="FullName"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                Введите полное имя контакта
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Должность
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-briefcase input-icon"></i>
+                                <input class="form-control" asp-for="Position" placeholder="Генеральный директор" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Position"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Контактная информация -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <h2 class="section-title">Контактная информация</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Телефон<span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-telephone input-icon"></i>
+                                <input class="form-control" asp-for="Phone" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="71234567890" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Phone"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                Введите номер телефона в формате 7XXXXXXXXXX (11 цифр)
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Email<span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-envelope input-icon"></i>
+                                <input class="form-control" asp-for="Email" placeholder="example@domain.com" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Email"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                Введите действующий адрес электронной почты
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <a class="btn btn-secondary" asp-action="Index">
+                        <i class="bi bi-x-circle"></i>
+                        Отмена
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        Создать контакт
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

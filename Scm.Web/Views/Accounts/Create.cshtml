@@ -1,22 +1,201 @@
 @model Scm.Application.DTOs.AccountInputDto
+@using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Новый контрагент";
+    var accountTypes = ViewBag.AccountTypes as List<SelectListItem> ?? new();
 }
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-6">
-        <div class="card shadow-sm rounded-3 p-4">
-            <h1 class="section-title mb-3">Создание контрагента</h1>
-            <form asp-action="Create" method="post" class="d-grid gap-3">
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <partial name="_Form" />
-                <div class="text-end">
-                    <a class="btn btn-outline-secondary" asp-action="Index">Отмена</a>
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
+
+<link rel="stylesheet" href="~/css/accounts/accounts_create.css" asp-append-version="true" />
+
+<div class="main-body">
+    <div class="create-container">
+        <!-- Header -->
+        <div class="create-header">
+            <a class="back-button" asp-action="Index" title="Вернуться к списку">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="create-title-section">
+                <h1 class="create-title">Новый контрагент</h1>
+                <p class="create-subtitle">Заполните информацию о клиенте или партнере</p>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card">
+            <div class="info-icon">
+                <i class="bi bi-info-lg"></i>
+            </div>
+            <div class="info-content">
+                <div class="info-title">Обязательные поля</div>
+                <div class="info-text">Для создания контрагента необходимо заполнить название и выбрать тип. Остальные поля можно заполнить позже.</div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="create-form-card">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="All" class="validation-summary-errors"></div>
+
+                <!-- Основная информация -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <h2 class="section-title">Основная информация</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">
+                                Название<span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-building input-icon"></i>
+                                <input class="form-control" asp-for="Name" placeholder="ООО Ромашка" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Name"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                Введите полное наименование организации или ФИО физического лица
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Тип контрагента<span class="required">*</span>
+                            </label>
+                            <div class="type-selector">
+                                <div class="type-option">
+                                    <input type="radio" asp-for="Type" value="0" id="type-company" checked />
+                                    <label for="type-company" class="type-label">
+                                        <div class="type-icon-box company">
+                                            <i class="bi bi-building"></i>
+                                        </div>
+                                        <div class="type-label-text">
+                                            <div class="type-label-title">Компания</div>
+                                            <div class="type-label-desc">Юридическое лицо или ИП</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="type-option">
+                                    <input type="radio" asp-for="Type" value="1" id="type-person" />
+                                    <label for="type-person" class="type-label">
+                                        <div class="type-icon-box person">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <div class="type-label-text">
+                                            <div class="type-label-title">Физическое лицо</div>
+                                            <div class="type-label-desc">Частный клиент</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Реквизиты -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <h2 class="section-title">Реквизиты</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">ИНН</label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-hash input-icon"></i>
+                                <input class="form-control" asp-for="Inn" inputmode="numeric" pattern="[0-9]{10}([0-9]{2})?" maxlength="12" placeholder="10 или 12 цифр" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Inn"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                10 цифр для ЮЛ/ИП, 12 цифр для физ. лиц
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Теги</label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-tags input-icon"></i>
+                                <input class="form-control" asp-for="Tags" placeholder="VIP, Постоянный, Оптовик" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="Tags"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                Через запятую для группировки клиентов
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Контактная информация -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <h2 class="section-title">Контактная информация</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Адрес</label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-geo-alt input-icon" style="top: 1.5rem;"></i>
+                                <textarea class="form-control" asp-for="Address" rows="3" placeholder="Введите полный адрес"></textarea>
+                            </div>
+                            <span class="text-danger" asp-validation-for="Address"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Дополнительно -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <h2 class="section-title">Ответственный менеджер</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">ID менеджера</label>
+                            <div class="input-with-icon">
+                                <i class="bi bi-person input-icon"></i>
+                                <input class="form-control" asp-for="ManagerUserId" placeholder="Оставьте пустым для автоназначения" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="ManagerUserId"></span>
+                            <div class="form-help">
+                                <i class="bi bi-lightbulb"></i>
+                                Тест*
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <a class="btn btn-secondary" asp-action="Index">
+                        <i class="bi bi-x-circle"></i>
+                        Отмена
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        Создать контрагента
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+

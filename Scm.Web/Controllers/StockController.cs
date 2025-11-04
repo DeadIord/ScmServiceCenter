@@ -4,13 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Application.Validators;
-using Scm.Infrastructure.Persistence;
-using Scm.Web.Authorization;
 using Scm.Web.Models.Stock;
+using Scm.Infrastructure.Persistence;
 
 namespace Scm.Web.Controllers;
 
-[Authorize(Policy = PolicyNames.StockAccess)]
+[Authorize]
 public class StockController : Controller
 {
     private readonly ScmDbContext _dbContext;
@@ -88,4 +87,36 @@ public class StockController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+    [HttpPost]
+    public async Task<IActionResult> ToggleActive([FromBody] ToggleActiveRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Sku))
+                return BadRequest(new { success = false });
+
+            var part = await _dbContext.Parts
+                .FirstOrDefaultAsync(p => p.Sku == request.Sku);
+
+            if (part == null)
+                return NotFound(new { success = false });
+
+            part.IsActive = request.IsActive;
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { success = true, isActive = request.IsActive });
+        }
+        catch
+        {
+            return StatusCode(500, new { success = false });
+        }
+    }
+
+    // Класс уже был в вашем коде
+    public class ToggleActiveRequest
+    {
+        public string Sku { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
 }
+

@@ -5,19 +5,6 @@
 @inject SignInManager<Scm.Infrastructure.Identity.ApplicationUser> SignInManager
 @inject UserManager<Scm.Infrastructure.Identity.ApplicationUser> UserManager
 @inject IViewLocalizer Localizer
-<!DOCTYPE html>
-<html lang="@CultureInfo.CurrentUICulture.Name">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - @Localizer["SiteTitle"]</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
 @{
     bool isAuthenticated = SignInManager.IsSignedIn(User);
     bool canAccessOrders = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Technician"));
@@ -26,106 +13,265 @@
     bool canAccessCrm = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Technician") || User.IsInRole("Support"));
     bool canManageUsers = isAuthenticated && User.IsInRole("Admin");
 }
-<body class="app-body d-flex flex-column min-vh-100"
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.Name">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - @Localizer["SiteTitle"]</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/layout/layout.css" asp-append-version="true" />
+    
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="d-flex flex-column min-vh-100"
       data-toast-status-updated="@Localizer["Toast_StatusUpdated"]"
       data-toast-status-error="@Localizer["Toast_StatusUpdateFailed"]"
-      data-table-empty="@Localizer["Table_Empty"]"
-      data-param-type-string="@Localizer["ParamType_String"]"
-      data-param-type-int="@Localizer["ParamType_Int"]"
-      data-param-type-decimal="@Localizer["ParamType_Decimal"]"
-      data-param-type-date="@Localizer["ParamType_Date"]"
-      data-param-type-bool="@Localizer["ParamType_Bool"]">
-    <header class="app-header shadow-sm">
-        <nav class="navbar navbar-expand-lg navbar-dark py-3">
-            <div class="container-xxl">
-                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Orders" asp-action="Index">
-                    <span class="brand-icon d-inline-flex align-items-center justify-content-center">
-                        <i class="bi bi-tools"></i>
-                    </span>
-                    <span class="fw-semibold">@Localizer["BrandName"]</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="@Localizer["ToggleNavigation"]">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      data-table-empty="@Localizer["Table_Empty"]">
 
-                        @if (canAccessOrders)
-                        {
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Index">@Localizer["OrdersNav"]</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Kanban">@Localizer["KanbanNav"]</a></li>
-                        }
-                        @if (canAccessStock)
-                        {
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Stock" asp-action="Index">@Localizer["StockNav"]</a></li>
-                        }
-                        @if (canAccessReports)
-                        {
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Reports" asp-action="Dashboard">@Localizer["ReportsNav"]</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="ReportDefinitions" asp-action="Index">@Localizer["ReportBuilderNav"]</a></li>
-                        }
-                        @if (canAccessCrm)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="crmDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">@Localizer["CrmNav"]</a>
-                                <ul class="dropdown-menu" aria-labelledby="crmDropdown">
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Accounts" asp-action="Index">@Localizer["AccountsNav"]</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Contacts" asp-action="Index">@Localizer["ContactsNav"]</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Deals" asp-action="Index">@Localizer["DealsNav"]</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Tasks" asp-action="Index">@Localizer["TasksNav"]</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Tickets" asp-action="Index">@Localizer["TicketsNav"]</a></li>
-                                </ul>
-                            </li>
-                        }
-                        @if (canManageUsers)
-                        {
-                            <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">@Localizer["UsersNav"]</a></li>
-                        }
-                    </ul>
-                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                        @if (isAuthenticated)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person-circle me-2"></i>@UserManager.GetUserName(User)
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Orders", new { area = string.Empty })" method="post" class="px-3 py-2">
-                                            <button class="btn btn-outline-danger w-100" type="submit">@Localizer["Logout"]</button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">@Localizer["Login"]</a>
-                            </li>
-                        }
-                    </ul>
+    <!-- Header -->
+    @if (ViewData["Header"] as bool? != false)
+    {
+        <header class="app-header">
+            <nav class="navbar navbar-expand-lg navbar-dark py-2">
+                <div class="container-xxl">
+                    <!-- Brand -->
+                    <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                        <span class="brand-icon d-inline-flex align-items-center justify-content-center">
+                            @* <i class="bi bi-tools"></i> *@
+                            <img class="logo" src="/svg/logo/logo.svg" alt="logo">
+                        </span>
+                        <span class="visible-brand-name text-muted">@Localizer["BrandName"]</span>
+                    </a>
+                    
+                    <!-- Mobile Toggle -->
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    
+                    <!-- Navigation -->
+                    <div class="collapse navbar-collapse" id="mainNav">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+                            @if (canAccessOrders)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Index">
+                                        <i class="bi bi-list-check me-1"></i>@Localizer["OrdersNav"]
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Kanban">
+                                        <i class="bi bi-kanban me-1"></i>@Localizer["KanbanNav"]
+                                    </a>
+                                </li>
+                            }
+                            
+                            @if (canAccessStock)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Stock" asp-action="Index">
+                                        <i class="bi bi-box-seam me-1"></i>@Localizer["StockNav"]
+                                    </a>
+                                </li>
+                            }
+                            
+                            @if (canAccessReports)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-flag me-1"></i>@Localizer["ReportsNav"]
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Reports" asp-action="Dashboard">
+                                            <i class="bi bi-graph-up me-2"></i>@Localizer["DashboardNav"]
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="ReportDefinitions" asp-action="Index">
+                                            <i class="bi bi-clipboard-plus me-2"></i>@Localizer["ReportBuilderNav"]
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            }
+                            
+                            @if (canAccessCrm)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-people me-1"></i>@Localizer["CrmNav"]
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Accounts" asp-action="Index">
+                                            <i class="bi bi-building me-2"></i>@Localizer["AccountsNav"]
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Contacts" asp-action="Index">
+                                            <i class="bi bi-person-vcard me-2"></i>@Localizer["ContactsNav"]
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Deals" asp-action="Index">
+                                            <i class="bi bi-cash-stack me-2"></i>@Localizer["DealsNav"]
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Tasks" asp-action="Index">
+                                            <i class="bi bi-check2-square me-2"></i>@Localizer["TasksNav"]
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Tickets" asp-action="Index">
+                                            <i class="bi bi-headset me-2"></i>@Localizer["TicketsNav"]
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            }
+                            
+                            @if (canManageUsers)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Admin" asp-controller="Users" asp-action="Index">
+                                        <i class="bi bi-shield-lock me-1"></i>@Localizer["UsersNav"]
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                        
+                        <!-- User Menu -->
+                        <ul class="navbar-nav ms-auto">
+                            @if (isAuthenticated)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                        <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center me-2 visible-user-acc" 
+                                             style="width: 32px; height: 32px; background: var(--user-circle-bg);">
+                                            <i class="bi bi-person-fill text-muted"></i>
+                                        </div>
+                                        <span class="visible-user-acc">@UserManager.GetUserName(User)</span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home")" method="post" class="p-2">
+                                                <button class="btn btn-outline-danger w-100" type="submit">
+                                                    <i class="bi bi-box-arrow-right me-2"></i>@Localizer["Logout"]
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>@Localizer["Login"]
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <main class="app-main flex-grow-1 py-4">
-        <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>
-        <div class="container-xxl">
-            @RenderBody()
-        </div>
+            </nav>
+        </header>
+    }
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1">
+        @RenderBody()
     </main>
 
-    <footer class="app-footer text-center text-muted py-4 mt-auto">
-        <div class="container-xxl small">
-            © @DateTime.UtcNow.Year @Localizer["BrandName"]. @Localizer["FooterTagline"].
-        </div>
-    </footer>
+    <!-- Footer -->
+    @if (ViewData["Footer"] as bool? == true)
+    {
+        <footer class="mt-auto rounded-7">
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Brand Column -->
+                    <div class="col-lg-4 col-md-6">
+                        <h5>
+                            <img class="logo-footer me-4" src="/svg/logo/logo.svg" alt="logo">@Localizer["BrandName"]
+                        </h5>
+                        <p class="mb-4">
+                            Открытая CRM-система для сервисных центров и ремонтных мастерских. 
+                            Надёжный ремонт и сервис в один клик.
+                        </p>
+                        <div class="social-icons">
+                            <a href="#" title="Telegram"><i class="bi bi-telegram"></i></a>
+                            <a href="#" title="GitHub"><i class="bi bi-github"></i></a>
+                            <a href="#" title="Email"><i class="bi bi-envelope"></i></a>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Column -->
+                    <div class="col-lg-2 col-md-6">
+                        <h5>Продукт</h5>
+                        <div class="footer-links d-flex flex-column gap-2">
+                            <a href="#">О системе</a>
+                            <a href="#">Возможности</a>
+                            <a href="#">Тарифы</a>
+                            <a href="#">Интеграции</a>
+                            <a href="#">API</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Support Column -->
+                    <div class="col-lg-2 col-md-6">
+                        <h5>Поддержка</h5>
+                        <div class="footer-links d-flex flex-column gap-2">
+                            <a href="#">База знаний</a>
+                            <a href="#">Документация</a>
+                            <a href="#">Сообщество</a>
+                            <a href="#">Обучение</a>
+                            <a href="#">Статус</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Contacts Column -->
+                    <div class="col-lg-4 col-md-6">
+                        <h5>Контакты</h5>
+                        <div class="footer-contact-item">
+                            <i class="bi bi-telephone"></i>
+                            <div>
+                                <div class="fw-semibold" style="color: white;">+7 (495) 123-45-67</div>
+                                <small>Звонки по России</small>
+                            </div>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="bi bi-envelope"></i>
+                            <div>
+                                <div class="fw-semibold" style="color: white;">info@scmservicecenter.com</div>
+                                <small>Техподдержка 24/7</small>
+                            </div>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="bi bi-clock"></i>
+                            <div>
+                                <div class="fw-semibold" style="color: white;">Пн-Пт: 9:00 - 18:00</div>
+                                <small>Время работы офиса</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer Bottom -->
+                <div class="footer-bottom">
+                    <p>&copy; @DateTime.UtcNow.Year @Localizer["BrandName"]. Все права защищены.</p>
+                </div>
+            </div>
+        </footer>
+    }
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.2/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.11.2/qs.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- Toast Script -->
     <script>
         (function () {
             const success = @Html.Raw(JsonSerializer.Serialize(TempData["Success"] ?? string.Empty));
@@ -133,18 +279,25 @@
             if (success) showToast(success, 'bg-success');
             if (error) showToast(error, 'bg-danger');
         })();
+        
         function showToast(message, cssClass) {
             const container = document.getElementById('toast-container');
             const wrapper = document.createElement('div');
-            wrapper.className = `toast align-items-center text-white ${cssClass} shadow`;
+            wrapper.className = `toast align-items-center text-white ${cssClass} border-0`;
             wrapper.setAttribute('role', 'alert');
             wrapper.setAttribute('aria-live', 'assertive');
             wrapper.setAttribute('aria-atomic', 'true');
-            wrapper.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="@Localizer["Close"]"></button></div>`;
+            wrapper.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>`;
             container.appendChild(wrapper);
             new bootstrap.Toast(wrapper, { delay: 4000 }).show();
         }
     </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

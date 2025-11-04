@@ -27,6 +27,9 @@
   <data name="CrmNav" xml:space="preserve">
     <value>CRM</value>
   </data>
+  <data name="DashboardNav" xml:space="preserve">
+    <value>Дашборд</value>
+  </data>
   <data name="DealsNav" xml:space="preserve">
     <value>Сделки</value>
   </data>

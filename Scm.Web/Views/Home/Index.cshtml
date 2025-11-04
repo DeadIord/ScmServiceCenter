@@ -1,8 +1,410 @@
-﻿@{
+@model Scm.Web.Models.Home.HomeIndexViewModel
+@using Scm.Domain.Entities
+@{
     ViewData["Title"] = "Home Page";
+    
+    string StatusBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "secondary",
+        OrderStatus.Diagnosing => "info",
+        OrderStatus.WaitingApproval => "warning",
+        OrderStatus.InRepair => "primary",
+        OrderStatus.Ready => "success",
+        OrderStatus.Closed => "dark",
+        _ => "secondary"
+    };
+    
+    string StatusTitle(OrderStatus status) => status switch
+    {
+        OrderStatus.Received => "Принят",
+        OrderStatus.Diagnosing => "Диагностика",
+        OrderStatus.WaitingApproval => "Согласование",
+        OrderStatus.InRepair => "В ремонте",
+        OrderStatus.Ready => "Готов",
+        OrderStatus.Closed => "Закрыт",
+        _ => status.ToString()
+    };
+
+    string[] avatarColors = { "primary", "success", "info", "warning", "danger", "secondary" };
+    string GetAvatarColor(int index) => avatarColors[index % avatarColors.Length];
+
+    ViewData["Footer"] = true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+    <section class="hero-section rounded-6">
+        <div class="container-fluid py-4">
+            <div class="row align-items-center gx-0 container-xxl mx-auto">
+                <div class="col-lg-6 d-flex justify-content-center align-items-center ">
+                    <div>
+                        <h1 class="display-4 fw-bold mb-4">ScmServiceCenter</h1>
+                        <p class="lead mb-4">Современная CRM для сервисных центров и мастерских</p>
+                        <p class="lead multiline-text"> Управление заказами, мобильные приложения 
+                                                        для сотрудников и руководителя, умный склад, 
+                                                        кассовый учет и наглядная аналитика</p>
+                    </div>
+                </div>
+            
+                <div class="col-lg-6 d-flex justify-content-center align-items-center">
+                    
+                    <div class="hero-image-container pos-up">
+                        @* <div class="window-background"></div> *@
+                        <img class="hero-image-image" src="/svg/home_pc_animation/computer_icon.svg" alt="Animation">
+                        <div class="screen-container"></div>
+                        <div class="notification"></div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Key Features Section -->
+
+<section id="features" class="py-4">
+    <div class="container">
+        <div class="text-center  mb-4">
+            <h2 class="fw-bold">Ключевые возможности системы</h2>
+            <p class="text-muted">Всё необходимое для эффективной работы сервисного центра</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card border-0 shadow-box h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-clipboard-check fs-1 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Приём заявок</h5>
+                        <p class="card-text">Формирование заказов, прикрепление файлов, история общения с клиентами.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card border-0 shadow-box h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-kanban fs-1 text-info"></i>
+                        </div>
+                        <h5 class="card-title">Планирование</h5>
+                        <p class="card-text">Расписание мастеров, распределение задач, контроль загрузки.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card border-0 shadow-box h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-box-seam fs-1 text-success"></i>
+                        </div>
+                        <h5 class="card-title">Склад и учёт</h5>
+                        <p class="card-text">Поступления, списания, резервирование запчастей под заказ.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card border-0 shadow-box h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-graph-up fs-1 text-warning"></i>
+                        </div>
+                        <h5 class="card-title">Отчётность</h5>
+                        <p class="card-text">Ценообразование, счета, акты, чеки, дашборды.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card border-0 shadow-box h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-people fs-1 text-secondary"></i>
+                        </div>
+                        <h5 class="card-title">Клиенты</h5>
+                        <p class="card-text">База клиентов, история заказов, контактная информация.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card border-0 shadow-box h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-gear fs-1 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Настройки</h5>
+                        <p class="card-text">Гибкая настройка системы под нужды вашего сервиса.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Table Orders Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Текущие заявки</h2>
+                    <p class="text-muted mb-0">Последние 3 активных заказа в работе</p>
+                </div>
+                <a href="@Url.Action("Index", "Orders")" class="btn btn-primary">
+                    <i class="bi bi-grid me-2"></i>Все заказы
+                </a>
+            </div>
+            
+            <div class="home-orders-card">
+                @if (!Model.RecentOrders.Any())
+                {
+                    <div class="home-empty-state">
+                        <i class="bi bi-inbox display-3 text-muted mb-3"></i>
+                        <h5 class="text-muted mb-2">Активных заказов нет</h5>
+                        <p class="text-muted small">Создайте первый заказ, чтобы начать работу</p>
+                        <a href="@Url.Action("Create", "Orders")" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle me-2"></i>Создать заказ
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive  shadow-box">
+                        <table class="home-orders-table">
+                            <thead>
+                                <tr>
+                                    <th>ЗАКАЗ</th>
+                                    <th>КЛИЕНТ</th>
+                                    <th>УСТРОЙСТВО</th>
+                                    <th>СТАТУС</th>
+                                    <th>ПРИОРИТЕТ</th>
+                                    <th>ДАТА</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var recentOrders = Model.RecentOrders.Take(3).ToList();
+                                }
+
+                                @for (int i = 0; i < recentOrders.Count; i++)
+                                {
+                                    var order = recentOrders[i];
+                                    
+                                    <tr class="home-order-row">
+                                        <td>
+                                            <span class="home-order-number">#@order.Number</span>
+                                        </td>
+                                        <td>
+                                            <div class="home-customer-cell">
+                                                <div class="home-customer-avatar bg-@GetAvatarColor(i)">
+                                                    @{
+                                                        var initials = "";
+                                                        if (!string.IsNullOrWhiteSpace(order.ClientName))
+                                                        {
+                                                            var parts = order.ClientName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                                            if (parts.Length >= 2) 
+                                                                initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+                                                            else 
+                                                                initials = parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+                                                        }
+                                                    }
+                                                    @initials
+                                                </div>
+                                                <div class="home-customer-info">
+                                                    <div class="home-customer-name">@order.ClientName</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="home-device-name">@order.Device</div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-@StatusBadge(order.Status)">
+                                                @StatusTitle(order.Status)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @{
+                                                var priorityClass = order.Priority switch
+                                                {
+                                                    OrderPriority.Low => "secondary",
+                                                    OrderPriority.Normal => "light",
+                                                    OrderPriority.High => "warning",
+                                                    OrderPriority.Critical => "danger",
+                                                    _ => "secondary"
+                                                };
+                                                var priorityTitle = order.Priority switch
+                                                {
+                                                    OrderPriority.Low => "Низкий",
+                                                    OrderPriority.Normal => "Обычный",
+                                                    OrderPriority.High => "Высокий",
+                                                    OrderPriority.Critical => "Критичный",
+                                                    _ => order.Priority.ToString()
+                                                };
+                                            }
+                                            <span class="priority-badge priority-@priorityClass">
+                                                @priorityTitle
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="home-order-date">
+                                                @order.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy")
+                                            </div>
+                                        </td>
+                                        <td class="text-end">
+                                            <a class="home-btn-view" 
+                                            asp-controller="Orders" 
+                                            asp-action="Details" 
+                                            asp-route-id="@order.Id"
+                                            title="Просмотр">
+                                                <i class="bi bi-arrow-right"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+<!-- Dashboard Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Панель управления</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-box h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-subtitle text-muted mb-0">Новые заявки</h5>
+                            <i class="bi bi-inbox text-primary fs-4 ihw"></i>
+                        </div>
+                        <h2 class="display-4 fw-bold mb-0">@Model.NewOrdersCount</h2>
+                        <small class="text-muted">Статус: Принят</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-box h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-subtitle text-muted mb-0">В работе</h5>
+                            <i class="bi bi-gear text-info fs-4 ihw"></i>
+                        </div>
+                        <h2 class="display-4 fw-bold mb-0">@Model.InProgressCount</h2>
+                        <small class="text-muted">Диагностика + Ремонт</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-box h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-subtitle text-muted mb-0">Запчастей на складе</h5>
+                            <i class="bi bi-box-seam text-success fs-4 ihw"></i>
+                        </div>
+                        <h2 class="display-4 fw-bold mb-0">@Model.PartsInStockCount</h2>
+                        <small class="text-muted">Общее количество</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-box h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-subtitle text-muted mb-0">Просроченные</h5>
+                            <i class="bi bi-exclamation-triangle text-danger fs-4 ihw"></i>
+                        </div>
+                        <h2 class="display-4 fw-bold mb-0 text-danger">@Model.OverdueCount</h2>
+                        <small class="text-muted">Истёк SLA</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Advantages Section -->
+<section id="advantages" class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Преимущества</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6 mb-4 justify-content-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="w-max-adv">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-code-slash fs-4 text-primary me-3 ihw"></i>
+                            <div>
+                                <h5>Открытый код</h5>
+                                <p class="text-muted multiline-text">   Полный доступ к исходному коду 
+                                                                        для настройки под ваши процессы.
+                                                                        </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="w-max-adv">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-puzzle fs-4 text-info me-3 ihw"></i>
+                            <div>
+                                <h5>Модульная архитектура</h5>
+                                <p class="text-muted">Гибкость в выборе и настройке нужных модулей.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="w-max-adv">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-hdd-network fs-4 text-success me-3 ihw"></i>
+                            <div>
+                                <h5>Локальная установка</h5>
+                                <p class="text-muted multiline-text">   Разворачивайте систему на своих серверах 
+                                                                        для полного контроля.
+                                                                        </p>
+                            </div>
+                        </div>                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+    <section class="cta-section">
+        <div class="container text-center position-relative">
+            <h2 class="display-5 fw-bold mb-4">Готовы оптимизировать работу своего сервиса?</h2>
+            <p class="lead mb-4">Присоединяйтесь к тысячам успешных сервисных центров</p>
+            <a href="mailto:info@scmservicecenter.com" class="btn btn-primary btn-lg me-3 bg-f">
+                <i class="bi bi-envelope me-2"></i>Написать нам
+            </a>
+            <a href="tel:+79001234567" class="btn btn-primary btn-lg ms-3 bg-f">
+                <i class="bi bi-telephone me-2"></i>Позвонить
+            </a>
+        </div>
+    </section>
+</section>
+
+<link rel="stylesheet" href="~/css/home_page/home_styles.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/home_page/hero_icon_animation.css" asp-append-version="true" />
+
+<script>  
+    // ==================== Паралакс для Hero  ====================
+        window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const parallax = document.querySelector('.hero-section');
+        if (parallax) {
+            parallax.style.transform = `translateY(${scrolled * 0.35}px)`;
+        }
+    });
+</script>

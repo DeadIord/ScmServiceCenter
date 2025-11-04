@@ -3,63 +3,400 @@
     ViewData["Title"] = Model.OnlyLowStock ? "Низкий остаток" : "Склад";
     var receiveModel = new ReceivePartDto();
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="section-title mb-1">@ViewData["Title"]</h1>
-        <p class="text-muted mb-0">Управление запасами и приходами</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-secondary" asp-action="LowStock"><i class="bi bi-exclamation-triangle me-2"></i>Низкий остаток</a>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiveModal"><i class="bi bi-box-arrow-in-down me-2"></i>Приход</button>
-    </div>
-</div>
-<div class="card shadow-sm rounded-3 p-4">
-    <form method="get" class="row g-3 align-items-end mb-3">
-        <div class="col-md-6">
-            <label class="form-label">Поиск</label>
-            <div class="input-group">
-                <input class="form-control" name="q" value="@Model.Query" placeholder="SKU или наименование" />
-                <button class="btn btn-outline-secondary" type="submit">Найти</button>
+
+<link rel="stylesheet" href="~/css/stock/stock_index.css" asp-append-version="true" />
+
+<div class="main-body">
+    <div class="stock-container">
+        <!-- Statistics -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <p class="stats-label">Всего позиций</p>
+                            <div class="stats-value">@Model.Parts.Count()</div>
+                            <span class="stats-change positive">100%</span>
+                        </div>
+                        <div class="stats-icon" style="background: #e3f2fd;">
+                            <i class="bi bi-box-seam" style="color: #2196f3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <p class="stats-label">Активных товаров</p>
+                            <div class="stats-value">@Model.Parts.Count(p => p.IsActive)</div>
+                            <span class="stats-change positive">
+                                @(Model.Parts.Any() ? Math.Round((decimal)Model.Parts.Count(p => p.IsActive) / Model.Parts.Count() * 100, 1) : 0)%
+                            </span>
+                        </div>
+                        <div class="stats-icon" style="background: #e8f5e9;">
+                            <i class="bi bi-check-circle" style="color: #4caf50;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <p class="stats-label">Низкий остаток</p>
+                            <div class="stats-value">@Model.Parts.Count(p => p.StockQty <= p.ReorderPoint)</div>
+                            <span class="stats-change negative">Требует внимания</span>
+                        </div>
+                        <div class="stats-icon" style="background: #ffe0e0;">
+                            <i class="bi bi-exclamation-triangle" style="color: #ff0000;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <p class="stats-label">Общая стоимость</p>
+                            <div class="stats-value">@Model.Parts.Sum(p => p.StockQty * p.PriceOut).ToString("N0") ₽</div>
+                            <span class="stats-change positive">Розничные цены</span>
+                        </div>
+                        <div class="stats-icon" style="background: #e8f5e9;">
+                            <i class="bi bi-cash-stack" style="color: #4caf50;"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </form>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle table-sticky mb-0">
-            <thead>
-                <tr>
-                    <th>SKU</th>
-                    <th>Наименование</th>
-                    <th class="text-end">Остаток</th>
-                    <th class="text-end">Порог</th>
-                    <th class="text-end">Розничная цена</th>
-                    <th>Активен</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Parts.Any())
-                {
-                    <tr>
-                        <td colspan="6" class="text-center py-5 table-empty">Записей нет</td>
-                    </tr>
-                }
-                else
-                {
-                    @foreach (var part in Model.Parts)
-                    {
+
+        <!-- Filters & Search -->
+        <div class="filter-section">
+            <form method="get" asp-action="Index">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold mb-2">Поиск</label>
+                        <input type="text" class="form-control search-input" name="q" value="@Model.Query" placeholder="SKU или наименование" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold mb-2">Статус</label>
+                        <select class="form-select filter-select" name="status">
+                            <option value="">Все статусы</option>
+                            <option value="active" selected="@(Context.Request.Query["status"] == "active")">Активные</option>
+                            <option value="inactive" selected="@(Context.Request.Query["status"] == "inactive")">Неактивные</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold mb-2">Категория</label>
+                        <select class="form-select filter-select" name="category">
+                            <option value="">Все категории</option>
+                            <option value="electronics" selected="@(Context.Request.Query["category"] == "electronics")">Запчасти</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold mb-2">Остаток</label>
+                        <select class="form-select filter-select" name="stock">
+                            <option value="">Любой остаток</option>
+                            <option value="low" selected="@(Context.Request.Query["stock"] == "low")">Низкий остаток</option>
+                            <option value="normal" selected="@(Context.Request.Query["stock"] == "normal")">Нормальный</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="@Url.Action("Index")" class="btn btn-export">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Сбросить
+                        </a>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#receiveModal">
+                            <i class="bi bi-plus-circle me-2"></i>Приход
+                        </button>
+                    </div>
+                </div>
+            </form>
+            @Html.AntiForgeryToken()
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <td>@part.Sku</td>
-                            <td>@part.Title</td>
-                            <td class="text-end">@part.StockQty.ToString("N2") @part.Unit</td>
-                            <td class="text-end">@part.ReorderPoint.ToString("N2")</td>
-                            <td class="text-end">@part.PriceOut.ToString("N2") ₽</td>
-                            <td>@(part.IsActive ? "Да" : "Нет")</td>
+                            <th lass="text-center" style="width: 50px;">
+                                <span>№</span>
+                            </th>
+                            <th class="sortable" data-column="sku">
+                                SKU
+                                <span class="sort-icons">
+                                    <i class="bi bi-chevron-up sort-asc"></i>
+                                    <i class="bi bi-chevron-down sort-desc"></i>
+                                </span>
+                            </th>
+                            <th class="sortable" data-column="title">
+                                ТОВАР
+                                <span class="sort-icons">
+                                    <i class="bi bi-chevron-up sort-asc"></i>
+                                    <i class="bi bi-chevron-down sort-desc"></i>
+                                </span>
+                            </th>
+                            <th class="text-center">КАТЕГОРИЯ</th>
+                            <th class="text-start sortable" data-column="price">
+                                ЦЕНА
+                                <span class="sort-icons">
+                                    <i class="bi bi-chevron-up sort-asc"></i>
+                                    <i class="bi bi-chevron-down sort-desc"></i>
+                                </span>
+                            </th>
+                            <th class="text-start sortable" data-column="stock">
+                                ОСТАТОК
+                                <span class="sort-icons">
+                                    <i class="bi bi-chevron-up sort-asc"></i>
+                                    <i class="bi bi-chevron-down sort-desc"></i>
+                                </span>
+                            </th>
+                            <th class="text-start sortable" data-column="reorder">
+                                ПОРОГ
+                                <span class="sort-icons">
+                                    <i class="bi bi-chevron-up sort-asc"></i>
+                                    <i class="bi bi-chevron-down sort-desc"></i>
+                                </span>
+                            </th>
+                            <th style="width: 80px;">Статус</th>
+                            <th style="width: 100px;" class="text-center">ДЕЙСТВИЯ</th>
                         </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Parts.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+                                    <h5 class="text-muted">Записей нет</h5>
+                                    <p class="text-muted small">Попробуйте изменить параметры поиска</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var part in Model.Parts)
+                            {
+                                var isLowStock = part.StockQty <= part.ReorderPoint;
+                                var initials = string.IsNullOrWhiteSpace(part.Title) ? "?" : 
+                                            part.Title.Length >= 2 ? part.Title.Substring(0, 2).ToUpper() : 
+                                            part.Title.ToUpper();
+                                
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="fw-semibold"></span>
+                                    </td>
+                                    @* SKU *@
+                                    <td>
+                                        <span class="sku-cl">@part.Sku</span>
+                                    </td>
+                                    @* Товар *@
+                                    <td>
+                                        <div class="product-cell">
+                                            <div class="product-icon">@initials</div>
+                                            <div class="product-info">
+                                                <h6>@part.Title</h6>
+
+                                            </div>
+                                        </div>
+                                    </td>
+                                    @* Категория *@
+                                    <td class="text-center">
+                                        <span class="category-badge">
+                                            <i class="bi bi-gear"></i>
+                                            Запчасти
+                                        </span>
+                                    </td>
+                                    @* Цена *@
+                                    <td class="text-start fw-semibold ">
+                                        <span class="rt-m">
+                                            @part.PriceOut.ToString("N2") ₽
+                                        </span>
+                                    </td>
+                                    @* Остаток *@
+                                    <td class="text-start">
+                                        <span class="rt-m @(isLowStock ? "text-danger fw-bold" : "")">
+                                            @part.StockQty.ToString("N2")
+                                            @part.Unit
+                                        </span>
+                                    </td>                            
+                                    @* Порог *@
+                                    <td class="text-start text-muted">
+                                        <span class="rt-m">
+                                            @part.ReorderPoint.ToString("N2")
+                                        </span>
+                                    </td>
+                                    @* Статус *@
+                                    <td class="text-center">
+                                        <div class="stock-toggle @(part.IsActive ? "active" : "")" 
+                                            title="@(part.IsActive ? "Активно" : "Неактивно")">
+                                        </div>
+                                    </td>
+                                    @* Действия *@
+                                    <td class="text-center">
+                                        <button class="action-btn" title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="action-btn" title="Еще">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Пагинация -->
+            @if (Model.Parts.Any())
+            {
+                <div class="pagination-custom">
+                    <button class="page-btn">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <span class="px-2 text-muted">...</span>
+                    <button class="page-btn">10</button>
+                    <button class="page-btn">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="text-center pb-3 text-muted small">
+                    Показано от 1 до @Math.Min(10, Model.Parts.Count()) из @Model.Parts.Count() записей
+                </div>
+            }
+        </div>
     </div>
+</div>
+
 @await Html.PartialAsync("_ReceiveModal", receiveModel)
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/stock/stock_index.js" asp-append-version="true"></script>
+    
+    <script>
+        // ==================== ТУМБЛЕР ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.stock-toggle').forEach(toggle => {
+                toggle.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    const row = this.closest('tr');
+                    const sku = row.querySelector('.sku-cl')?.textContent.trim();
+                    
+                    if (!sku) {
+                        showNotification('SKU не найден', 'error');
+                        return;
+                    }
+                    
+                    const isActive = this.classList.contains('active');
+                    const newState = !isActive;
+                    
+                    this.style.opacity = '0.5';
+                    this.style.pointerEvents = 'none';
+                    
+                    try {
+                        const response = await fetch('@Url.Action("ToggleActive", "Stock")', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ 
+                                sku: sku, 
+                                isActive: newState 
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok && result.success) {
+                            this.classList.toggle('active');
+                            this.setAttribute('title', newState ? 'Активно' : 'Неактивно');
+                            showNotification('Статус изменён', 'success');
+                            
+                            updateStatistics();
+                        } else {
+                            showNotification('Ошибка при изменении статуса', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                        showNotification('Произошла ошибка', 'error');
+                    } finally {
+                        this.style.opacity = '';
+                        this.style.pointerEvents = '';
+                    }
+                });
+            });
+        });
+        
+        // ==================== УВЕДОМЛЕНИЯ ====================
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? '#28a745' : '#dc3545';
+            const icon = type === 'success' ? '✓' : '✕';
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 14px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 9999;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            notification.innerHTML = `
+                <span style="font-size: 18px; font-weight: bold;">${icon}</span>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+        
+        if (!document.getElementById('notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @@keyframes slideIn {
+                    from { transform: translateX(400px); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @@keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(400px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    </script>
 }

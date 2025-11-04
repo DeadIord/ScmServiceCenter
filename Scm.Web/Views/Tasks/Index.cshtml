@@ -2,23 +2,263 @@
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Title"].Value;
+    @* var tasks = new[] {
+        new { Id = 1, Title = "Настройка сервера", Description = "Установка и настройка production сервера", Priority = "high", Status = "in-progress", DueDate = DateTime.Now.AddDays(2), Assignee = "Иван Петров" },
+        new { Id = 2, Title = "Обновление документации", Description = "Актуализация технической документации проекта", Priority = "medium", Status = "pending", DueDate = DateTime.Now.AddDays(5), Assignee = "Мария Сидорова" },
+        new { Id = 3, Title = "Тестирование API", Description = "Проведение unit и integration тестов", Priority = "high", Status = "in-progress", DueDate = DateTime.Now.AddDays(1), Assignee = "Алексей Смирнов" },
+        new { Id = 4, Title = "Оптимизация базы данных", Description = "Создание индексов и оптимизация запросов", Priority = "medium", Status = "pending", DueDate = DateTime.Now.AddDays(7), Assignee = "Иван Петров" },
+        new { Id = 5, Title = "Код-ревью модуля авторизации", Description = "Проверка и согласование изменений", Priority = "low", Status = "completed", DueDate = DateTime.Now.AddDays(-2), Assignee = "Мария Сидорова" },
+    }; *@
+
+    var tasks = Array.Empty<dynamic>();
+    var totalTasks = tasks.Length;
+    var completedTasks = 0;
+    var inProgressTasks = 0;
+    var pendingTasks = 0;
+    foreach (var t in tasks)
+    {
+        string status = (string)t.Status; 
+        if (status == "completed") completedTasks++;
+        else if (status == "in-progress") inProgressTasks++;
+        else if (status == "pending") pendingTasks++;
+    }
 }
+<link rel="stylesheet" href="~/css/tasks/tasks_index.css" asp-append-version="true" />
+<div class="main-body">
+    <div class="tasks-container">
+        @* <!-- Header --> *@
+        <div class="tasks-header">
+            <div class="header-title-section">
+                <div class="header-icon">
+                    <i class="bi bi-list-task"></i>
+                </div>
+                <div class="header-text">
+                    <h1>@Localizer["Heading"]</h1>
+                    <p>@Localizer["Description"]</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    @Localizer["PrimaryAction"]
+                </button>
+                <button type="button" class="btn btn-outline-secondary">
+                    <i class="bi bi-funnel"></i>
+                    @Localizer["SecondaryAction"]
+                </button>
+            </div>
+        </div>
+        @* <!-- Statistics Cards --> *@
+        <div class="stats-row">
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">Всего задач</p>
+                        <div class="stats-value">@totalTasks</div>
+                        <span class="stats-change neutral">100%</span>
+                    </div>
+                    <div class="stats-icon" style="background: #ede9fe;">
+                        <i class="bi bi-list-check" style="color: #8b5cf6;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">В работе</p>
+                        <div class="stats-value">@inProgressTasks</div>
+                        <span class="stats-change positive">@(totalTasks > 0 ? Math.Round((decimal)inProgressTasks / totalTasks * 100, 0) : 0)%</span>
+                    </div>
+                    <div class="stats-icon" style="background: #dbeafe;">
+                        <i class="bi bi-hourglass-split" style="color: #2563eb;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">Завершено</p>
+                        <div class="stats-value">@completedTasks</div>
+                        <span class="stats-change positive">@(totalTasks > 0 ? Math.Round((decimal)completedTasks / totalTasks * 100, 0) : 0)%</span>
+                    </div>
+                    <div class="stats-icon" style="background: #d1fae5;">
+                        <i class="bi bi-check-circle" style="color: #059669;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-content">
+                    <div class="stats-info">
+                        <p class="stats-label">Ожидают</p>
+                        <div class="stats-value">@pendingTasks</div>
+                        <span class="stats-change negative">Требует внимания</span>
+                    </div>
+                    <div class="stats-icon" style="background: #fff3cd;">
+                        <i class="bi bi-clock-history" style="color: #ffd321;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* <!-- Filter Card --> *@
+        <div class="filter-card">
+            <h2 class="filter-title">
+                <i class="bi bi-funnel"></i>
+                Фильтры и поиск
+            </h2>
+            <form class="filter-form" method="get">
+                <div class="filter-group">
+                    <label class="filter-label">Поиск</label>
+                    <input class="form-control" type="search" name="q" placeholder="Название или описание задачи" />
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Статус</label>
+                    <select class="form-select" name="status">
+                        <option value="">Все статусы</option>
+                        <option value="pending">Ожидает</option>
+                        <option value="in-progress">В работе</option>
+                        <option value="completed">Завершено</option>
+                        <option value="cancelled">Отменено</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Приоритет</label>
+                    <select class="form-select" name="priority">
+                        <option value="">Все приоритеты</option>
+                        <option value="high">Высокий</option>
+                        <option value="medium">Средний</option>
+                        <option value="low">Низкий</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                        Найти
+                    </button>
+                </div>
+            </form>
+        </div>
+        @* <!-- Table Card --> *@
+        <div class="tasks-table-card">
+            @if (!tasks.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-list-task"></i>
+                    </div>
+                    <h3 class="empty-state-title">@Localizer["EmptyTitle"]</h3>
+                    <p class="empty-state-text">@Localizer["EmptyDescription"]</p>
+                    <button type="button" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        @Localizer["PrimaryAction"]
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="table-wrapper">
+                    <table class="tasks-table">
+                        <thead>
+                            <tr>
+                                <th>Задача</th>
+                                <th>Приоритет</th>
+                                <th>Статус</th>
+                                <th>Срок</th>
+                                <th>Исполнитель</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in tasks)
+                            {
+                                @{
+                                    string assignee = (string)task.Assignee;
+                                    string title = (string)task.Title;
+                                    string description = (string)task.Description;
+                                    string priority = (string)task.Priority;
+                                    string status = (string)task.Status;
+                                    DateTime dueDate = (DateTime)task.DueDate;
 
-<div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-lg-between gap-3 mb-4">
-    <div>
-        <h1 class="h3 fw-semibold mb-2">@Localizer["Heading"]</h1>
-        <p class="text-muted mb-0">@Localizer["Description"]</p>
-    </div>
-    <div class="d-flex gap-2">
-        <button type="button" class="btn btn-primary" disabled>@Localizer["PrimaryAction"]</button>
-        <button type="button" class="btn btn-outline-secondary" disabled>@Localizer["SecondaryAction"]</button>
-    </div>
-</div>
-
-<div class="card border-0 shadow-sm">
-    <div class="card-body text-center py-5">
-        <i class="bi bi-list-task display-5 text-muted mb-3"></i>
-        <h2 class="h5 fw-semibold mb-2">@Localizer["EmptyTitle"]</h2>
-        <p class="text-muted mb-0">@Localizer["EmptyDescription"]</p>
+                                    var words = assignee.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                    var initials = string.Join("", words.Take(2).Select(w => w[0])).ToUpper();
+                                    var isOverdue = dueDate < DateTime.Now && status != "completed";
+                                }
+                                <tr>
+                                    <td>
+                                        <div class="task-name-cell">
+                                            <div class="task-icon">@initials</div>
+                                            <div class="task-info">
+                                                <div class="task-title">@title</div>
+                                                <div class="task-description">@description</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="priority-badge @priority">
+                                            @if (priority == "high")
+                                            {
+                                                <i class="bi bi-arrow-up-circle"></i>
+                                                <text>Высокий</text>
+                                            }
+                                            else if (priority == "medium")
+                                            {
+                                                <i class="bi bi-dash-circle"></i>
+                                                <text>Средний</text>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-arrow-down-circle"></i>
+                                                <text>Низкий</text>
+                                            }
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge @status">
+                                            @if (status == "pending")
+                                            {
+                                                <i class="bi bi-clock"></i>
+                                                <text>Ожидает</text>
+                                            }
+                                            else if (status == "in-progress")
+                                            {
+                                                <i class="bi bi-arrow-repeat"></i>
+                                                <text>В работе</text>
+                                            }
+                                            else if (status == "completed")
+                                            {
+                                                <i class="bi bi-check-circle"></i>
+                                                <text>Завершено</text>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-x-circle"></i>
+                                                <text>Отменено</text>
+                                            }
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="date-display @(isOverdue ? "overdue" : "")">
+                                            @dueDate.ToString("dd.MM.yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span>@assignee</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a class="btn-icon" href="#" title="Просмотр">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a class="btn-icon" href="#" title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
     </div>
 </div>

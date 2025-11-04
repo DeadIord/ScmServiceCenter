@@ -2,71 +2,167 @@
 @{
     ViewData["Title"] = "Контакты";
 }
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="section-title mb-0">Контакты</h1>
-    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-2"></i>Добавить</a>
-</div>
-<div class="card shadow-sm rounded-3 p-4 mb-4">
-    <form class="row g-3 align-items-end" method="get">
-        <div class="col-lg-4">
-            <label class="form-label">Контрагент</label>
-            <select class="form-select" name="accountId">
-                <option value="">Все</option>
-                @foreach (var account in Model.Accounts)
-                {
-                    <option value="@account.Id" selected="@(Model.AccountId == account.Id ? "selected" : null)">@account.Name</option>
-                }
-            </select>
+
+<link rel="stylesheet" href="~/css/contacts/contacts_index.css" asp-append-version="true" />
+
+<div class="main-body">
+    <div class="contacts-container">
+        <!-- Header -->
+        <div class="contacts-header">
+            <div class="header-title-section">
+                <div class="header-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Контакты</h1>
+                    <p>Управление контактными лицами</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a class="btn btn-primary" asp-action="Create">
+                    <i class="bi bi-plus-lg"></i>
+                    Добавить контакт
+                </a>
+            </div>
         </div>
-        <div class="col-lg-4">
-            <label class="form-label">Поиск</label>
-            <input class="form-control" type="search" name="q" value="@Model.Query" placeholder="Имя, телефон или email" />
+
+        <!-- Filter Card -->
+        <div class="filter-card">
+            <h2 class="filter-title">
+                <i class="bi bi-funnel"></i>
+                Фильтры и поиск
+            </h2>
+            <form class="filter-form" method="get">
+                <div class="filter-group">
+                    <label class="filter-label">Контрагент</label>
+                    <select class="form-select" name="accountId">
+                        <option value="">Все контрагенты</option>
+                        @foreach (var account in Model.Accounts)
+                        {
+                            <option value="@account.Id" selected="@(Model.AccountId == account.Id ? "selected" : null)">@account.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Поиск</label>
+                    <input class="form-control" type="search" name="q" value="@Model.Query" placeholder="Имя, телефон или email" />
+                </div>
+                <div class="filter-group">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                        Найти
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="col-lg-4 text-end">
-            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search me-2"></i>Найти</button>
+
+        <!-- Table Card -->
+        <div class="contacts-table-card">
+            @if (!Model.Contacts.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-person-x"></i>
+                    </div>
+                    <h3 class="empty-state-title">Контакты не найдены</h3>
+                    <p class="empty-state-text">
+                        @if (!string.IsNullOrEmpty(Model.Query) || Model.AccountId.HasValue)
+                        {
+                            <text>Попробуйте изменить условия поиска</text>
+                        }
+                        else
+                        {
+                            <text>Добавьте первый контакт для начала работы</text>
+                        }
+                    </p>
+                    <a class="btn btn-primary" asp-action="Create">
+                        <i class="bi bi-plus-lg"></i>
+                        Добавить контакт
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-wrapper">
+                    <table class="contacts-table">
+                        <thead>
+                            <tr>
+                                <th>Контакт</th>
+                                <th>Контрагент</th>
+                                <th>Телефон</th>
+                                <th>Email</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var contact in Model.Contacts)
+                            {
+                                var initials = string.Join("", contact.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(w => w[0])).ToUpper();
+                                <tr>
+                                    <td>
+                                        <div class="contact-name-cell">
+                                            <div class="contact-avatar">@initials</div>
+                                            <div class="contact-info">
+                                                <div class="contact-name">@contact.FullName</div>
+                                                @if (!string.IsNullOrEmpty(contact.Position))
+                                                {
+                                                    <div class="contact-position">@contact.Position</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (contact.Account is not null)
+                                        {
+                                            <a class="account-badge" asp-controller="Accounts" asp-action="Details" asp-route-id="@contact.AccountId">
+                                                <i class="bi bi-building"></i>
+                                                @contact.Account.Name
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(contact.Phone))
+                                        {
+                                            <a class="contact-link" href="tel:@contact.Phone">
+                                                <i class="bi bi-telephone"></i>
+                                                @contact.Phone
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(contact.Email))
+                                        {
+                                            <a class="contact-link" href="mailto:@contact.Email">
+                                                <i class="bi bi-envelope"></i>
+                                                @contact.Email
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a class="btn-icon" asp-action="Details" asp-route-id="@contact.Id" title="Просмотр">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
-    </form>
-</div>
-<div class="card shadow-sm rounded-3">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle table-sticky mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Имя</th>
-                    <th>Контрагент</th>
-                    <th>Телефон</th>
-                    <th>Email</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Contacts.Any())
-                {
-                    <tr>
-                        <td colspan="5" class="text-center py-5 table-empty">Записей нет</td>
-                    </tr>
-                }
-                else
-                {
-                    @foreach (var contact in Model.Contacts)
-                    {
-                        <tr>
-                            <td>@contact.FullName</td>
-                            <td>
-                                @if (contact.Account is not null)
-                                {
-                                    <a class="text-decoration-none" asp-controller="Accounts" asp-action="Details" asp-route-id="@contact.AccountId">@contact.Account.Name</a>
-                                }
-                            </td>
-                            <td><a class="text-decoration-none" href="tel:@contact.Phone">@contact.Phone</a></td>
-                            <td><a class="text-decoration-none" href="mailto:@contact.Email">@contact.Email</a></td>
-                            <td class="text-end">
-                                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@contact.Id"><i class="bi bi-eye"></i></a>
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
     </div>
 </div>
