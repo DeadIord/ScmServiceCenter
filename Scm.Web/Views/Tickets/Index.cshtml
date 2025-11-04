@@ -16,11 +16,11 @@
     {
         return in_status switch
         {
-            TicketStatus.Open => "text-bg-warning",
-            TicketStatus.Pending => "text-bg-info",
-            TicketStatus.Resolved => "text-bg-success",
-            TicketStatus.Closed => "text-bg-secondary",
-            _ => "text-bg-secondary"
+            TicketStatus.Open => "status-open",
+            TicketStatus.Pending => "status-pending",
+            TicketStatus.Resolved => "status-resolved",
+            TicketStatus.Closed => "status-closed",
+            _ => "status-closed"
         };
     }
 
@@ -49,240 +49,241 @@
     }
 }
 
-<div class="container-fluid px-0">
-    <div class="row g-4">
-        <div class="col-12 col-lg-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex flex-column">
-                    <form asp-action="Index" asp-route-id="@(Model.SelectedTicket?.Id)" method="get" class="mb-3">
-                        <div class="input-group">
-                            <input type="search" name="q" value="@Model.SearchTerm" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
-                            <button type="submit" class="btn btn-outline-secondary">@Localizer["SearchAction"]</button>
-                        </div>
+<link rel="stylesheet" href="~/css/tickets/tickets_index.css" asp-append-version="true" />
+
+<div class="tickets-main-container">
+    <div class="tickets-wrapper">
+        <div class="tickets-grid">
+            <!-- Left Sidebar -->
+            <div class="tickets-sidebar">
+                <!-- Search Box -->
+                <div class="search-box">
+                    <form asp-action="Index" asp-route-id="@(Model.SelectedTicket?.Id)" method="get" class="search-form">
+                        <input type="search" name="q" value="@Model.SearchTerm" class="search-input" placeholder="@Localizer["SearchPlaceholder"]" />
+                        <button type="submit" class="search-btn">@Localizer["SearchAction"]</button>
                         @if (Model.CurrentFilter.HasValue)
                         {
                             <input type="hidden" name="status" value="@Model.CurrentFilter" />
                         }
                     </form>
+                </div>
 
-                    <div class="d-flex flex-wrap gap-2 mb-3">
-                        <a class="btn btn-sm @(Model.CurrentFilter.HasValue ? "btn-outline-secondary" : "btn-primary")" href="@Url.Action("Index", new { id = Model.SelectedTicket?.Id, q = Model.SearchTerm })">
-                            @Localizer["Filter.All"]
-                            <span class="badge text-bg-light ms-1">@totalCount</span>
+                <!-- Filter Pills -->
+                <div class="filter-pills">
+                    <a class="filter-pill @(!Model.CurrentFilter.HasValue ? "active" : "")" href="@Url.Action("Index", new { id = Model.SelectedTicket?.Id, q = Model.SearchTerm })">
+                        @Localizer["Filter.All"]
+                        <span class="filter-pill-badge">@totalCount</span>
+                    </a>
+                    @foreach (var status in Enum.GetValues<TicketStatus>())
+                    {
+                        var isActive = Model.CurrentFilter == status;
+                        Model.Counters.TryGetValue(status, out var counter);
+                        <a class="filter-pill @(isActive ? "active" : "")" href="@Url.Action("Index", new { id = Model.SelectedTicket?.Id, status, q = Model.SearchTerm })">
+                            @FormatStatus(status)
+                            <span class="filter-pill-badge">@counter</span>
                         </a>
-                        @foreach (var status in Enum.GetValues<TicketStatus>())
+                    }
+                </div>
+
+                <!-- Poll Inbox -->
+                <div class="poll-inbox-section">
+                    <form asp-action="PollInbox" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="poll-inbox-btn">
+                            <i class="bi bi-arrow-repeat"></i>
+                            Получить письма
+                        </button>
+                        <div class="poll-inbox-hint">Импорт можно выполнять не чаще одного раза в минуту.</div>
+                    </form>
+                </div>
+
+                <!-- Tickets List -->
+                <div class="tickets-list">
+                    @if (!Model.Tickets.Any())
+                    {
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="bi bi-life-preserver"></i>
+                            </div>
+                            <p class="empty-state-text">@Localizer["EmptyDescription"]</p>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var ticket in Model.Tickets)
                         {
-                            var isActive = Model.CurrentFilter == status;
-                            Model.Counters.TryGetValue(status, out var counter);
-                            <a class="btn btn-sm @(isActive ? "btn-primary" : "btn-outline-secondary")" href="@Url.Action("Index", new { id = Model.SelectedTicket?.Id, status, q = Model.SearchTerm })">
-                                @FormatStatus(status)
-                                <span class="badge text-bg-light ms-1">@counter</span>
+                            var isActive = Model.SelectedTicket?.Id == ticket.Id;
+                            <a class="ticket-item @(isActive ? "active" : "")" href="@Url.Action("Index", new { id = ticket.Id, status = Model.CurrentFilter, q = Model.SearchTerm })">
+                                <div class="ticket-header">
+                                    <div>
+                                        <h6 class="ticket-subject">@ticket.Subject</h6>
+                                        <div class="ticket-client">@(string.IsNullOrWhiteSpace(ticket.ClientName) ? ticket.ClientEmail : ticket.ClientName)</div>
+                                    </div>
+                                    <div class="ticket-meta">
+                                        <span class="status-badge @StatusBadgeClass(ticket.Status)">@FormatStatus(ticket.Status)</span>
+                                        <div class="ticket-date">@ticket.UpdatedAtLocal.ToString("dd.MM.yyyy HH:mm")</div>
+                                    </div>
+                                </div>
+                                @if (ticket.AwaitingReply)
+                                {
+                                    <span class="awaiting-badge">@Localizer["AwaitingReply"]</span>
+                                }
                             </a>
                         }
-                    </div>
-
-                    <form asp-action="PollInbox" method="post" class="mb-3">
-                        @Html.AntiForgeryToken()
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-outline-primary">
-                                <i class="bi bi-arrow-repeat me-1"></i>
-                                Получить письма
-                            </button>
-                            <small class="text-muted">Импорт можно выполнять не чаще одного раза в минуту.</small>
-                        </div>
-                    </form>
-
-                    <div class="list-group list-group-flush border rounded-3 overflow-auto" style="max-height: calc(100vh - 320px);">
-                        @if (!Model.Tickets.Any())
-                        {
-                            <div class="text-center text-muted py-5 px-3">
-                                <i class="bi bi-life-preserver display-6 d-block mb-2"></i>
-                                <p class="mb-0">@Localizer["EmptyDescription"]</p>
-                            </div>
-                        }
-                        else
-                        {
-                            foreach (var ticket in Model.Tickets)
-                            {
-                                var isActive = Model.SelectedTicket?.Id == ticket.Id;
-                                <a class="list-group-item list-group-item-action py-3 @(isActive ? "active" : string.Empty)" href="@Url.Action("Index", new { id = ticket.Id, status = Model.CurrentFilter, q = Model.SearchTerm })">
-                                    <div class="d-flex justify-content-between align-items-start gap-3">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">@ticket.Subject</h6>
-                                            <div class="text-muted small">@(string.IsNullOrWhiteSpace(ticket.ClientName) ? ticket.ClientEmail : ticket.ClientName)</div>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="badge @StatusBadgeClass(ticket.Status)">@FormatStatus(ticket.Status)</span>
-                                            <div class="small text-muted mt-1">@ticket.UpdatedAtLocal.ToString("dd.MM.yyyy HH:mm")</div>
-                                        </div>
-                                    </div>
-                                    @if (ticket.AwaitingReply)
-                                    {
-                                        <div class="mt-2">
-                                            <span class="badge rounded-pill text-bg-warning">@Localizer["AwaitingReply"]</span>
-                                        </div>
-                                    }
-                                </a>
-                            }
-                        }
-                    </div>
+                    }
                 </div>
             </div>
-        </div>
-        <div class="col-12 col-lg-8">
-            @if (TempData["Tickets.Success"] is string successMessage)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @successMessage
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="@Localizer["Close"]"></button>
-                </div>
-            }
-            @if (TempData["Tickets.Error"] is string errorMessage)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    @errorMessage
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="@Localizer["Close"]"></button>
-                </div>
-            }
 
-            @if (Model.SelectedTicket is null)
-            {
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center py-5">
-                        <i class="bi bi-inboxes display-5 text-muted mb-3"></i>
-                        <h2 class="h5 fw-semibold mb-2">@Localizer["EmptyTitle"]</h2>
-                        <p class="text-muted mb-0">@Localizer["EmptyDescription"]</p>
+            <!-- Right Content -->
+            <div class="ticket-content">
+                @if (TempData["Tickets.Success"] is string successMessage)
+                {
+                    <div class="alert-modern alert-success" role="alert">
+                        @successMessage
+                        <button type="button" class="alert-close" data-bs-dismiss="alert" aria-label="@Localizer["Close"]">&times;</button>
                     </div>
-                </div>
-            }
-            else
-            {
-                <div class="d-flex flex-column gap-4">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-start gap-3">
+                }
+                @if (TempData["Tickets.Error"] is string errorMessage)
+                {
+                    <div class="alert-modern alert-danger" role="alert">
+                        @errorMessage
+                        <button type="button" class="alert-close" data-bs-dismiss="alert" aria-label="@Localizer["Close"]">&times;</button>
+                    </div>
+                }
+
+                @if (Model.SelectedTicket is null)
+                {
+                    <div class="empty-detail-state">
+                        <i class="bi bi-inboxes empty-detail-icon"></i>
+                        <h2 class="empty-detail-title">@Localizer["EmptyTitle"]</h2>
+                        <p class="empty-detail-text">@Localizer["EmptyDescription"]</p>
+                    </div>
+                }
+                else
+                {
+                    <!-- Ticket Header -->
+                    <div class="ticket-detail-header">
+                        <div class="ticket-detail-top">
                             <div>
-                                <h2 class="h4 fw-semibold mb-2">@Model.SelectedTicket.Subject</h2>
-                                <div class="d-flex align-items-center gap-2 text-muted">
+                                <h2 class="ticket-detail-title">@Model.SelectedTicket.Subject</h2>
+                                <div class="ticket-detail-info">
                                     <i class="bi bi-person"></i>
                                     <span>@(string.IsNullOrWhiteSpace(Model.SelectedTicket.ClientName) ? Model.SelectedTicket.ClientEmail : Model.SelectedTicket.ClientName)</span>
-                                    <span class="text-body-secondary">&middot;</span>
+                                    <span>&middot;</span>
                                     <span>@Model.SelectedTicket.CreatedAtLocal.ToString("dd.MM.yyyy HH:mm")</span>
                                 </div>
                             </div>
-                            <div class="d-flex flex-column align-items-lg-end gap-2 w-100 w-lg-auto">
-                                <span class="badge @StatusBadgeClass(Model.SelectedTicket.Status) fs-6">@FormatStatus(Model.SelectedTicket.Status)</span>
-                                <form asp-action="UpdateStatus" method="post" class="d-flex gap-2 align-items-center">
+                            <div class="ticket-detail-actions">
+                                <span class="status-badge @StatusBadgeClass(Model.SelectedTicket.Status)" style="font-size: 0.875rem; padding: 0.375rem 0.875rem;">
+                                    @FormatStatus(Model.SelectedTicket.Status)
+                                </span>
+                                <form asp-action="UpdateStatus" method="post" class="status-update-form">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="ticketId" value="@Model.SelectedTicket.Id" />
-                                    <select name="status" class="form-select form-select-sm">
+                                    <select name="status" class="status-select">
                                         @foreach (var status in Enum.GetValues<TicketStatus>())
                                         {
                                             <option value="@status" selected="@(status == Model.SelectedTicket.Status)">@FormatStatus(status)</option>
                                         }
                                     </select>
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">@Localizer["UpdateStatus"]</button>
+                                    <button type="submit" class="status-update-btn">@Localizer["UpdateStatus"]</button>
                                 </form>
                             </div>
                         </div>
                     </div>
 
-                    <div class="d-flex flex-column gap-3">
-                        @foreach (var message in Model.SelectedTicket.Messages)
-                        {
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start gap-3">
-                                        <div>
-                                            <span class="badge rounded-pill @(message.FromClient ? "text-bg-primary" : "text-bg-secondary")">@(message.FromClient ? Localizer["Message.Client"] : Localizer["Message.Agent"])</span>
-                                            <div class="fw-semibold mt-2">@message.Author</div>
-                                        </div>
-                                        <div class="text-muted small">@message.SentAtLocal.ToString("dd.MM.yyyy HH:mm")</div>
-                                    </div>
-                                    <div class="mt-3 message-body">@Html.Raw(message.BodyHtml)</div>
-                                    @if (message.Attachments.Any())
-                                    {
-                                        <div class="mt-4">
-                                            <div class="text-muted text-uppercase small fw-semibold mb-2">@Localizer["Attachments"]</div>
-                                            <div class="d-flex flex-wrap gap-3">
-                                                @foreach (var attachment in message.Attachments)
+                    <!-- Messages -->
+                    @foreach (var message in Model.SelectedTicket.Messages)
+                    {
+                        <div class="message-card">
+                            <div class="message-header">
+                                <div class="message-author-section">
+                                    <span class="message-type-badge @(message.FromClient ? "client" : "agent")">
+                                        @(message.FromClient ? Localizer["Message.Client"] : Localizer["Message.Agent"])
+                                    </span>
+                                    <div class="message-author">@message.Author</div>
+                                </div>
+                                <div class="message-date">@message.SentAtLocal.ToString("dd.MM.yyyy HH:mm")</div>
+                            </div>
+                            <div class="message-body">@Html.Raw(message.BodyHtml)</div>
+                            @if (message.Attachments.Any())
+                            {
+                                <div class="attachments-section">
+                                    <div class="attachments-title">@Localizer["Attachments"]</div>
+                                    <div class="attachments-grid">
+                                        @foreach (var attachment in message.Attachments)
+                                        {
+                                            <div class="attachment-card">
+                                                @{
+                                                    var previewContentType = attachment.ContentType ?? "application/octet-stream";
+                                                    var isImage = previewContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+                                                    var isVideo = previewContentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase);
+                                                }
+                                                @if (attachment.PreviewInline && isImage)
                                                 {
-                                                    <div class="border rounded-3 p-3 bg-light-subtle">
-                                                        @{ 
-                                                            var previewContentType = attachment.ContentType ?? "application/octet-stream";
-                                                            var isImage = previewContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
-                                                            var isVideo = previewContentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase);
-                                                        }
-                                                        @if (attachment.PreviewInline && isImage)
-                                                        {
-                                                            <a href="@attachment.DownloadUrl" class="d-block mb-2" target="_blank" rel="noopener">
-                                                                <img src="@attachment.PreviewUrl" alt="@attachment.FileName" class="img-fluid rounded" style="max-height: 180px;" />
-                                                            </a>
-                                                        }
-                                                        else if (attachment.PreviewInline && isVideo)
-                                                        {
-                                                            <video controls class="rounded w-100 mb-2">
-                                                                <source src="@attachment.PreviewUrl" type="@previewContentType" />
-                                                                @Localizer["VideoNotSupported"]
-                                                            </video>
-                                                        }
-                                                        <div class="fw-semibold small">@attachment.FileName</div>
-                                                        <div class="text-muted small">@FormatSize(attachment.Length)</div>
-                                                        <a class="btn btn-sm btn-outline-secondary mt-2" href="@attachment.DownloadUrl">
-                                                            <i class="bi bi-download me-1"></i>@Localizer["Download"]
+                                                    <div class="attachment-preview">
+                                                        <a href="@attachment.DownloadUrl" target="_blank" rel="noopener">
+                                                            <img src="@attachment.PreviewUrl" alt="@attachment.FileName" />
                                                         </a>
                                                     </div>
                                                 }
+                                                else if (attachment.PreviewInline && isVideo)
+                                                {
+                                                    <div class="attachment-preview">
+                                                        <video controls>
+                                                            <source src="@attachment.PreviewUrl" type="@previewContentType" />
+                                                            @Localizer["VideoNotSupported"]
+                                                        </video>
+                                                    </div>
+                                                }
+                                                <div class="attachment-name">@attachment.FileName</div>
+                                                <div class="attachment-size">@FormatSize(attachment.Length)</div>
+                                                <a class="attachment-download" href="@attachment.DownloadUrl">
+                                                    <i class="bi bi-download"></i>
+                                                    @Localizer["Download"]
+                                                </a>
                                             </div>
-                                        </div>
-                                    }
+                                        }
+                                    </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h3 class="h5 fw-semibold mb-3">@Localizer["ReplyHeading"]</h3>
-                            <form asp-action="Reply" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-3">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="TicketId" value="@Model.SelectedTicket!.Reply.TicketId" />
-                                <input type="hidden" name="ReplyToExternalId" value="@Model.SelectedTicket!.Reply.ReplyToExternalId" />
-                                <div>
-                                    <label for="reply-subject" class="form-label">@Localizer["Subject"]</label>
-                                    <input id="reply-subject" name="Subject" value="@Model.SelectedTicket!.Reply.Subject" class="form-control" />
-                                </div>
-                                <div>
-                                    <label for="reply-body" class="form-label">@Localizer["MessageBody"]</label>
-                                    <textarea id="reply-body" name="Body" class="form-control" rows="6">@Model.SelectedTicket!.Reply.Body</textarea>
-                                </div>
-                                <div>
-                                    <label for="reply-attachments" class="form-label">@Localizer["AddAttachments"]</label>
-                                    <input id="reply-attachments" name="Attachments" class="form-control" type="file" multiple />
-                                    <div class="form-text">@Localizer["AttachmentsHint"]</div>
-                                </div>
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-send me-1"></i>@Localizer["SendReply"]
-                                    </button>
-                                </div>
-                            </form>
+                            }
                         </div>
+                    }
+
+                    <!-- Reply Form -->
+                    <div class="reply-card">
+                        <h3 class="reply-title">@Localizer["ReplyHeading"]</h3>
+                        <form asp-action="Reply" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="TicketId" value="@Model.SelectedTicket!.Reply.TicketId" />
+                            <input type="hidden" name="ReplyToExternalId" value="@Model.SelectedTicket!.Reply.ReplyToExternalId" />
+
+                            <div class="form-group">
+                                <label for="reply-subject" class="form-label">@Localizer["Subject"]</label>
+                                <input id="reply-subject" name="Subject" value="@Model.SelectedTicket!.Reply.Subject" class="form-control" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reply-body" class="form-label">@Localizer["MessageBody"]</label>
+                                <textarea id="reply-body" name="Body" class="form-control">@Model.SelectedTicket!.Reply.Body</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reply-attachments" class="form-label">@Localizer["AddAttachments"]</label>
+                                <input id="reply-attachments" name="Attachments" class="form-control" type="file" multiple />
+                                <div class="form-text">@Localizer["AttachmentsHint"]</div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send"></i>
+                                    @Localizer["SendReply"]
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <style>
-        .message-body img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .message-body video {
-            max-width: 100%;
-        }
-    </style>
-}

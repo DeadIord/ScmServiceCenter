@@ -170,18 +170,17 @@
                         <tbody>
                             @foreach (var task in tasks)
                             {
-                                @{
-                                    string assignee = (string)task.Assignee;
-                                    string title = (string)task.Title;
-                                    string description = (string)task.Description;
-                                    string priority = (string)task.Priority;
-                                    string status = (string)task.Status;
-                                    DateTime dueDate = (DateTime)task.DueDate;
+                                string assignee = (string)task.Assignee;
+                                string title = (string)task.Title;
+                                string description = (string)task.Description;
+                                string priority = (string)task.Priority;
+                                string status = (string)task.Status;
+                                DateTime dueDate = (DateTime)task.DueDate;
 
-                                    var words = assignee.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                                    var initials = string.Join("", words.Take(2).Select(w => w[0])).ToUpper();
-                                    var isOverdue = dueDate < DateTime.Now && status != "completed";
-                                }
+                                var words = assignee.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                var initials = string.Join("", words.Take(2).Select(w => w[0])).ToUpper();
+                                var isOverdue = dueDate < DateTime.Now && status != "completed";
+                                
                                 <tr>
                                     <td>
                                         <div class="task-name-cell">
