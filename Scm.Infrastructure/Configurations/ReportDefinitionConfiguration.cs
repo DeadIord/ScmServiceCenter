@@ -23,6 +23,10 @@ public class ReportDefinitionConfiguration : IEntityTypeConfiguration<ReportDefi
             .HasColumnType("text")
             .IsRequired();
 
+        builder.Property(x => x.QueryDefinitionJson)
+            .HasColumnType("text")
+            .HasDefaultValue("{}");
+
         builder.Property(x => x.ParametersJson)
             .HasColumnType("text")
             .HasDefaultValue("[]");
