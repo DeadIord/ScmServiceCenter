@@ -91,16 +91,12 @@
     <table class="quote-table">
         <thead>
             <tr>
-                <th style="width: 40px;">
-                    <input type="checkbox" class="form-check-input" id="selectAllQuoteLines">
-                </th>
-                <th>НАИМЕНОВАНИЕ</th>
+                <th style="width: 40px;">НАИМЕНОВАНИЕ</th>
                 <th style="width: 120px;">ТИП</th>
                 <th class="text-end" style="width: 100px;">КОЛ-ВО</th>
                 <th class="text-end" style="width: 120px;">ЦЕНА, ₽</th>
                 <th class="text-end" style="width: 120px;">СУММА, ₽</th>
                 <th style="width: 140px;">СТАТУС</th>
-                <th style="width: 80px;"></th>
             </tr>
         </thead>
         <tbody id="quote-lines">
@@ -121,9 +117,6 @@
                     var badge = StatusBadge(line.Status);
                     var kindIcon = KindIcon(line.Kind);
                     <tr class="quote-line-row">
-                        <td>
-                            <input type="checkbox" class="form-check-input">
-                        </td>
                         <td>
                             <div class="quote-item-name">@line.Title</div>
                         </td>
@@ -146,24 +139,6 @@
                             <span class="status-badge-small status-@badge">
                                 @StatusTitle(line.Status)
                             </span>
-                        </td>
-                        <td>
-                            <div class="quote-actions">
-                                @if (line.Status == QuoteLineStatus.Proposed)
-                                {
-                                    @* <button class="btn-quote-action" type="button" title="Просмотр">
-                                        <i class="bi bi-eye"></i>
-                                    </button> *@
-                                    <button class="btn-quote-action text-warning" type="button" 
-                                            onclick="cancelQuoteLine('@line.Id')" title="Отозвать">
-                                        <i class="bi bi-x-circle"></i>
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span class="text-muted small">—</span>
-                                }
-                            </div>
                         </td>
                     </tr>
                 }
@@ -202,7 +177,7 @@
             <i class="bi bi-plus-circle me-2"></i>Добавить позицию
         </h6>
     </div>
-    <form id="add-line-form" class="quote-form-grid">
+    <form id="add-line-form" class="quote-form-grid" action="/Orders/AddQuoteLine" method="post">
         <input type="hidden" name="OrderId" value="@Model.Id" />
         
         <div class="form-group">
@@ -225,13 +200,13 @@
         
         <div class="form-group">
             <label class="form-label">Количество</label>
-            <input class="form-control" type="number" step="0.01" 
-                   name="Qty" value="1" min="0.01" required />
+            <input class="form-control" type="number" step="1" 
+                   name="Qty" value="1" min="1" required />
         </div>
         
         <div class="form-group">
             <label class="form-label">Цена (₽)</label>
-            <input class="form-control" type="number" step="0.01" 
+            <input class="form-control" type="number" step="1" 
                    name="Price" value="0" min="0" required />
         </div>
         

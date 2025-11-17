@@ -15,7 +15,7 @@ public sealed class AddQuoteLineDto
     [StringLength(200)]
     public string Title { get; set; } = string.Empty;
 
-    [Range(typeof(decimal), "0.01", "99999999")]
+    [Range(typeof(decimal), "1", "99999999")]
     public decimal Qty { get; set; }
 
     [Range(typeof(decimal), "0", "99999999")]

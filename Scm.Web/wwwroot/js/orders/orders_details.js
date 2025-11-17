@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeEventListeners() {
-    const modalChangeBtn = document.getElementById('modal-change-status');
-    if (modalChangeBtn) {
-        modalChangeBtn.addEventListener('click', function() {
-            updateStatus('modal-status-select');
+    const statusSelect = document.getElementById('status-select');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function () {
+            updateStatus('status-select');
         });
     }
     
@@ -33,6 +33,10 @@ function initializeEventListeners() {
             btn.addEventListener('click', handleSubmitQuote);
         }
     });
+    const generateInvoiceButton = document.getElementById('action-generate-invoice');
+    if (generateInvoiceButton) {
+        generateInvoiceButton.addEventListener('click', handleGenerateInvoice);
+    }
 
     const messageForm = document.getElementById('message-form');
     if (messageForm) {
@@ -66,6 +70,8 @@ function updateStatus(selectId) {
     if (!selectElement) return;
     
     const status = selectElement.value;
+    selectElement.disabled = true;
+
     const form = new URLSearchParams();
     form.append('id', orderId);
     form.append('to', status);
@@ -80,9 +86,38 @@ function updateStatus(selectId) {
     .catch(err => {
         console.error('Status update error:', err);
         showToast(err.response?.data?.message ?? 'Ошибка обновления статуса', 'bg-danger');
+        selectElement.disabled = false;
+
     });
 }
+function handleGenerateInvoice(e) {
+    e.preventDefault();
 
+    if (!orderId) {
+        showToast('Ошибка: ID заказа не найден', 'bg-danger');
+        return;
+    }
+
+    const form = new URLSearchParams();
+    form.append('id', orderId);
+
+    axios.post('/Orders/GenerateInvoice', form, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+        .then(response => {
+            const targetUrl = response.data?.url;
+            if (targetUrl) {
+                window.location.href = targetUrl;
+                return;
+            }
+
+            showToast('Не удалось открыть счёт', 'bg-danger');
+        })
+        .catch(err => {
+            console.error('Generate invoice error:', err);
+            showToast(err.response?.data?.message ?? 'Ошибка формирования счёта', 'bg-danger');
+        });
+}
 function handleSubmitQuote() {
     if (!orderId) {
         showToast('Ошибка: ID заказа не найден', 'bg-danger');

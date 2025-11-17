@@ -193,25 +193,37 @@ public class OrdersController : Controller
     {
         if (!ModelState.IsValid)
         {
-            Response.StatusCode = 400;
             var errors = ModelState.Values
                 .SelectMany(v => v.Errors)
                 .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message : e.ErrorMessage)
                 .Where(e => !string.IsNullOrWhiteSpace(e))
                 .ToList();
-            return Json(new { success = false, errors });
+
+            TempData["Error"] = string.Join("\n", errors);
+            return RedirectToOrder(dto.OrderId);
         }
 
         try
         {
             await m_quoteService.AddLineAsync(dto);
-            return Json(new { success = true });
+            TempData["Success"] = "Позиция добавлена";
+            return RedirectToOrder(dto.OrderId);
         }
         catch (Exception ex)
         {
-            Response.StatusCode = 400;
-            return Json(new { success = false, message = ex.Message });
+            TempData["Error"] = ex.Message;
+            return RedirectToOrder(dto.OrderId);
         }
+    }
+
+    private IActionResult RedirectToOrder(Guid orderId)
+    {
+        if (orderId == Guid.Empty)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        return RedirectToAction(nameof(Details), new { id = orderId });
     }
 
     [HttpPost]
@@ -297,14 +309,14 @@ public class OrdersController : Controller
         }
 
         var lines = order.QuoteLines
-            .Where(l => l.Status == QuoteLineStatus.Approved)
-            .OrderBy(l => l.Kind)
-            .ThenBy(l => l.Title)
-            .ToList();
+           .Where(l => l.Status == QuoteLineStatus.Approved || l.Status == QuoteLineStatus.Proposed)
+           .OrderBy(l => l.Kind)
+           .ThenBy(l => l.Title)
+           .ToList();
 
         if (!lines.Any())
         {
-            TempData["Error"] = "Нет утверждённых строк сметы для формирования счёта.";
+            TempData["Error"] = "Нет строк сметы для формирования счёта.";
             return RedirectToAction(nameof(Details), new { id = orderId });
         }
 

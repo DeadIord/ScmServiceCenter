@@ -147,16 +147,16 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             throw new InvalidOperationException("Заказ не найден");
         }
 
-        var approvedLines = order.QuoteLines
-            .Where(l => l.Status == QuoteLineStatus.Approved)
-            .ToList();
+        var invoiceLines = order.QuoteLines
+             .Where(l => l.Status == QuoteLineStatus.Approved || l.Status == QuoteLineStatus.Proposed)
+             .ToList();
 
-        if (!approvedLines.Any())
+        if (!invoiceLines.Any())
         {
-            throw new InvalidOperationException("Нет утверждённых работ или запчастей для формирования счёта");
+            throw new InvalidOperationException("Нет работ или запчастей для формирования счёта");
         }
 
-        var amount = approvedLines.Sum(l => l.Price * l.Qty);
+        var amount = invoiceLines.Sum(l => l.Price * l.Qty);
 
         var invoice = new Invoice
         {

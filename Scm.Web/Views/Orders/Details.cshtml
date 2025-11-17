@@ -98,22 +98,29 @@
         </div>
 
         <div class="row g-4">
-            <!-- Левая колонка -->
-            <div class="col-lg-8">
-                <!-- Прогресс заказа -->
-                <div class="card-modern mb-4">
-                    <div class="card-header-modern">
-                        <h5 class="card-title-modern">
-                            <i class="bi bi-clock-history me-2"></i>Статус заказа
-                        </h5>
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#statusModal">
-                            <i class="bi bi-arrow-repeat me-1"></i>Изменить статус
-                        </button>
+            <div class="row g-4">
+                <!-- Левая колонка -->
+                <div class="col-lg-8">
+                    <!-- Прогресс заказа -->
+                    <div class="card-modern mb-4">
+                        <div class="card-header-modern flex-wrap">
+                            <h5 class="card-title-modern">
+                                <i class="bi bi-clock-history me-2"></i>Статус заказа
+                            </h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="status-select" class="form-label mb-0 text-muted small">Выберите статус</label>
+                                <select class="form-select form-select-sm" id="status-select">
+                                    @foreach (var status in statuses)
+                                    {
+                                        <option value="@status" selected="@(status == Model.Order.Status ? "selected" : null)">@StatusTitle(status)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body-modern">
+                            @await Html.PartialAsync("_OrderProgress", (Model.Order, currentStatusIndex))
+                        </div>
                     </div>
-                    <div class="card-body-modern">
-                        @await Html.PartialAsync("_OrderProgress", (Model.Order, currentStatusIndex))
-                    </div>
-                </div>
 
                 <!-- Детали заказа -->
                 <div class="card-modern mb-4">
@@ -144,10 +151,7 @@
                         <div class="card-header-modern">
                             <h5 class="card-title-modern">
                                 <i class="bi bi-person me-2"></i>Клиент
-                            </h5>
-                            <a href="#" class="btn-link-modern">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            </h5>                      
                         </div>
                         <div class="card-body-modern">
                             <div class="customer-info">
@@ -159,20 +163,13 @@
                                     <p class="customer-id">ID клиента: #@Model.Order.Id.ToString().Substring(0, 6)</p>
                                 </div>
                             </div>
-                            
-                            <div class="customer-stats mt-3">
-                                <div class="stat-item">
-                                    <i class="bi bi-bag-check text-success"></i>
-                                    <span>12 заказов</span>
-                                </div>
-                            </div>
+                       
                             
                             <hr class="my-3">
                             
                             <div class="contact-info-section">
                                 <h6 class="contact-info-title">
                                     Контактная информация
-                                    <a href="#" class="btn-link-modern float-end">Изменить</a>
                                 </h6>
                                 
                                 @if (!string.IsNullOrWhiteSpace(Model.Order.ClientEmail))
@@ -234,7 +231,7 @@
                             <button class="btn btn-outline-primary" id="action-submit-quote" data-order-id="@Model.Order.Id">
                                 <i class="bi bi-send-check me-2"></i>Отправить смету
                             </button>
-                            <a class="btn btn-outline-success" href="#">
+                            <a class="btn btn-outline-success" href="#" id="action-generate-invoice" data-order-id="@Model.Order.Id">
                                 <i class="bi bi-receipt me-2"></i>Сформировать счёт
                             </a>
                         </div>
@@ -291,31 +288,6 @@
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно изменения статуса -->
-    <div class="modal fade" id="statusModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Изменить статус заказа</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted">Выберите новый статус заказа. Клиент получит уведомление об изменении.</p>
-                    <select class="form-select" id="modal-status-select">
-                        @foreach (var status in statuses)
-                        {
-                            <option value="@status" selected="@(status == Model.Order.Status ? "selected" : null)">@StatusTitle(status)</option>
-                        }
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-primary" id="modal-change-status">Применить</button>
                 </div>
             </div>
         </div>
