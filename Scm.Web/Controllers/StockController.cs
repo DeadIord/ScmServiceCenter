@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Application.Validators;
+using Scm.Web.Authorization;
 using Scm.Web.Models.Stock;
 using Scm.Infrastructure.Persistence;
 
 namespace Scm.Web.Controllers;
 
-[Authorize]
+[Authorize(Policy = PolicyNames.StockAccess)]
 public class StockController : Controller
 {
     private readonly ScmDbContext _dbContext;
@@ -26,20 +27,30 @@ public class StockController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(string? q)
     {
-        var query = _dbContext.Parts.AsNoTracking();
+        var allParts = await _dbContext.Parts
+            .AsNoTracking()
+            .ToListAsync();
+
+        var query = allParts.AsEnumerable();
         if (!string.IsNullOrWhiteSpace(q))
         {
             var term = q.Trim();
             query = query.Where(p => p.Sku.Contains(term) || p.Title.Contains(term));
         }
 
-        var parts = await query.OrderBy(p => p.Title).ToListAsync();
+        var parts = query
+            .OrderBy(p => p.Title)
+            .ToList();
 
         var model = new StockIndexViewModel
         {
             Query = q,
             OnlyLowStock = false,
-            Parts = parts
+            Parts = parts,
+            TotalParts = allParts.Count,
+            ActiveParts = allParts.Count(p => p.IsActive),
+            LowStockParts = allParts.Count(p => p.StockQty <= p.ReorderPoint),
+            TotalStockValue = allParts.Sum(p => p.StockQty * p.PriceOut)
         };
 
         return View(model);
@@ -49,10 +60,18 @@ public class StockController : Controller
     public async Task<IActionResult> LowStock()
     {
         var parts = await _stockService.GetLowStockAsync();
+        var allParts = await _dbContext.Parts
+            .AsNoTracking()
+            .ToListAsync();
+
         var model = new StockIndexViewModel
         {
             OnlyLowStock = true,
-            Parts = parts
+            Parts = parts,
+            TotalParts = allParts.Count,
+            ActiveParts = allParts.Count(p => p.IsActive),
+            LowStockParts = allParts.Count(p => p.StockQty <= p.ReorderPoint),
+            TotalStockValue = allParts.Sum(p => p.StockQty * p.PriceOut)
         };
 
         return View("Index", model);
@@ -88,6 +107,7 @@ public class StockController : Controller
         return RedirectToAction(nameof(Index));
     }
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleActive([FromBody] ToggleActiveRequest request)
     {
         try

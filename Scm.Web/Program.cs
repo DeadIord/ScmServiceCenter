@@ -83,6 +83,9 @@ builder.Services.AddOptions<TicketInboxOptions>()
     .ValidateOnStart();
 builder.Services.AddSingleton<ITicketInboxPoller, TicketInboxPoller>();
 builder.Services.AddHostedService<TicketInboxHostedService>();
+builder.Services.AddOptions<ReportBuilderOptions>()
+    .Bind(builder.Configuration.GetSection("ReportBuilder"))
+    .ValidateOnStart();
 
 builder.Services.AddHealthChecks()
     .AddCheck<MailConfigurationHealthCheck>("mail_delivery");
