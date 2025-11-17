@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Persistence;
@@ -19,7 +20,7 @@ public sealed class ReportBuilderServiceTests : IDisposable
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _dbContext = new ScmDbContext(options);
-        _service = new ReportBuilderService(_dbContext);
+        _service = new ReportBuilderService(_dbContext, Options.Create(new ReportBuilderOptions()));
     }
 
     [Fact]

@@ -85,6 +85,8 @@
         const sqlPreview = root.querySelector('[data-role="sql-preview"]');
         const legacyNotice = root.querySelector('[data-role="legacy-notice"]');
         const badge = root.querySelector('[data-role="builder-badge"]');
+        const metadataStatus = root.querySelector('[data-role="metadata-status"]');
+        const metadataError = root.querySelector('[data-role="metadata-error"]');
 
         const selectors = {
             tableSelector: root.querySelector('[data-role="table-selector"]'),
@@ -112,6 +114,21 @@
         }
 
         state = normalizeState(state);
+
+        function setMetadataStatus(message, isError) {
+            if (!metadataStatus) {
+                return;
+            }
+
+            metadataStatus.textContent = message;
+            if (isError) {
+                metadataStatus.classList.add('text-warning');
+                metadataStatus.classList.remove('text-white-50');
+            } else {
+                metadataStatus.classList.remove('text-warning');
+                metadataStatus.classList.add('text-white-50');
+            }
+        }
 
         function updateBadge() {
             if (!badge) {
@@ -921,6 +938,12 @@
                 option.textContent = table.schema + '.' + table.name;
                 selector.appendChild(option);
             });
+
+            if (metadata.tables.length === 0) {
+                setMetadataStatus('Доступные таблицы не найдены', true);
+            } else {
+                setMetadataStatus('Доступно таблиц: ' + metadata.tables.length, false);
+            }
         }
 
         if (root.querySelector('[data-action="add-table"]')) {
@@ -961,11 +984,18 @@
                     populateTableSelector();
                     renderColumns();
                     renderFilters();
+                    if (metadataError) {
+                        metadataError.classList.add('d-none');
+                    }
                 })
                 .catch(function () {
                     metadata = { tables: [] };
                     metadataIndex = {};
                     populateTableSelector();
+                    if (metadataError) {
+                        metadataError.classList.remove('d-none');
+                    }
+                    setMetadataStatus('Ошибка загрузки списка таблиц', true);
                 });
         }
     };

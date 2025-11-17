@@ -1,0 +1,105 @@
+.main-body {
+    display: flex;
+    justify-content: center;
+}
+
+.report-builder-container {
+    max-width: 1296px;
+    width: 100%;
+    background: #f8fafc;
+    padding: 1.5rem;
+}
+
+.builder-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
+    margin-bottom: 1rem;
+}
+
+.builder-subtitle {
+    color: #475569;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.report-card {
+    background: white;
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.report-card .card-body {
+    padding: 1.75rem;
+}
+
+.report-card .card-footer {
+    padding: 1.25rem 1.75rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.report-builder-card {
+    border: 1px solid #cbd5e1;
+}
+
+.report-builder-card .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.report-builder-card .card-body {
+    background: #f8fafc;
+}
+
+.report-builder-card .card {
+    border: none;
+    box-shadow: none;
+}
+
+.report-builder-card .card-header.bg-light {
+    background: #f1f5f9 !important;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.report-builder-card table thead th {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.8rem;
+}
+
+.report-builder-card table tbody tr td {
+    vertical-align: middle;
+}
+
+.builder-meta {
+    font-size: 0.85rem;
+}
+
+.table-empty {
+    color: #94a3b8;
+}
+
+.table-empty-row {
+    background: #f8fafc;
+}
+
+@media (max-width: 768px) {
+    .builder-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

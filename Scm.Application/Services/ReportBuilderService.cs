@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Persistence;
 
@@ -17,10 +18,17 @@ public class ReportBuilderService : IReportBuilderService
     private static readonly Regex SchemaRegex = new("\\b([a-zA-Z_][\\w]*)\\.", RegexOptions.Compiled);
 
     private readonly ScmDbContext _dbContext;
+    private readonly HashSet<string> _hiddenSchemas;
+    private readonly HashSet<string> _hiddenTables;
+    private readonly List<string> _hiddenPrefixes;
 
-    public ReportBuilderService(ScmDbContext dbContext)
+    public ReportBuilderService(ScmDbContext dbContext, IOptions<ReportBuilderOptions>? options = null)
     {
         _dbContext = dbContext;
+        var settings = options?.Value ?? new ReportBuilderOptions();
+        _hiddenSchemas = new HashSet<string>(settings.HiddenSchemas ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+        _hiddenTables = new HashSet<string>(settings.HiddenTables ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+        _hiddenPrefixes = settings.HiddenTablePrefixes ?? new List<string>();
     }
 
     public IReadOnlyCollection<ReportParameterDefinition> DeserializeParameters(string? json)
@@ -230,6 +238,11 @@ public class ReportBuilderService : IReportBuilderService
                 var dataType = reader.GetString(3);
                 var isNullable = string.Equals(reader.GetString(4), "YES", StringComparison.OrdinalIgnoreCase);
 
+                if (ShouldSkipTable(schema, tableName))
+                {
+                    continue;
+                }
+
                 var key = $"{schema}.{tableName}";
                 if (!tables.TryGetValue(key, out var table))
                 {
@@ -274,6 +287,29 @@ public class ReportBuilderService : IReportBuilderService
         {
             Tables = ordered
         };
+    }
+
+    private bool ShouldSkipTable(string schema, string tableName)
+    {
+        if (_hiddenSchemas.Contains(schema))
+        {
+            return true;
+        }
+
+        if (_hiddenTables.Contains(tableName) || _hiddenTables.Contains($"{schema}.{tableName}"))
+        {
+            return true;
+        }
+
+        foreach (var prefix in _hiddenPrefixes)
+        {
+            if (!string.IsNullOrWhiteSpace(prefix) && tableName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public async Task<ReportExecutionResult> ExecuteAsync(ReportDefinition report, IDictionary<string, string?> parameterValues, bool isPreview, CancellationToken cancellationToken = default)
