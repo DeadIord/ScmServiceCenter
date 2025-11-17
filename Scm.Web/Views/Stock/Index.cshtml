@@ -1,13 +1,23 @@
 @model Scm.Web.Models.Stock.StockIndexViewModel
+@using System.Globalization
 @{
     ViewData["Title"] = Model.OnlyLowStock ? "Низкий остаток" : "Склад";
     var receiveModel = new ReceivePartDto();
+    var percentActive = Model.TotalParts > 0
+        ? Math.Round((decimal)Model.ActiveParts / Model.TotalParts * 100, 1)
+        : 0;
 }
 
 <link rel="stylesheet" href="~/css/stock/stock_index.css" asp-append-version="true" />
 
 <div class="main-body">
     <div class="stock-container">
+        <div id="stock-summary"
+             data-total="@Model.TotalParts"
+             data-active="@Model.ActiveParts"
+             data-low="@Model.LowStockParts"
+             data-value="@Model.TotalStockValue.ToString(CultureInfo.InvariantCulture)"></div>
+
         <!-- Statistics -->
         <div class="row g-4 mb-4">
             <div class="col-lg-3 col-md-6">
@@ -15,7 +25,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
                             <p class="stats-label">Всего позиций</p>
-                            <div class="stats-value">@Model.Parts.Count()</div>
+                            <div class="stats-value">@Model.TotalParts</div>
                             <span class="stats-change positive">100%</span>
                         </div>
                         <div class="stats-icon" style="background: #e3f2fd;">
@@ -30,10 +40,8 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
                             <p class="stats-label">Активных товаров</p>
-                            <div class="stats-value">@Model.Parts.Count(p => p.IsActive)</div>
-                            <span class="stats-change positive">
-                                @(Model.Parts.Any() ? Math.Round((decimal)Model.Parts.Count(p => p.IsActive) / Model.Parts.Count() * 100, 1) : 0)%
-                            </span>
+                            <div class="stats-value">@Model.ActiveParts</div>
+                            <span class="stats-change positive">@percentActive%</span>
                         </div>
                         <div class="stats-icon" style="background: #e8f5e9;">
                             <i class="bi bi-check-circle" style="color: #4caf50;"></i>
@@ -47,7 +55,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
                             <p class="stats-label">Низкий остаток</p>
-                            <div class="stats-value">@Model.Parts.Count(p => p.StockQty <= p.ReorderPoint)</div>
+                            <div class="stats-value">@Model.LowStockParts</div>
                             <span class="stats-change negative">Требует внимания</span>
                         </div>
                         <div class="stats-icon" style="background: #ffe0e0;">
@@ -62,7 +70,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
                             <p class="stats-label">Общая стоимость</p>
-                            <div class="stats-value">@Model.Parts.Sum(p => p.StockQty * p.PriceOut).ToString("N0") ₽</div>
+                            <div class="stats-value">@Model.TotalStockValue.ToString("N0") ₽</div>
                             <span class="stats-change positive">Розничные цены</span>
                         </div>
                         <div class="stats-icon" style="background: #e8f5e9;">
@@ -245,10 +253,16 @@
                                     </td>
                                     @* Действия *@
                                     <td class="text-center">
-                                        <button class="action-btn" title="Редактировать">
+                                        <button class="action-btn action-btn-edit" title="Приход по позиции"
+                                                data-sku="@part.Sku"
+                                                data-title="@part.Title"
+                                                data-unit="@part.Unit"
+                                                data-pricein="@part.PriceIn.ToString(CultureInfo.InvariantCulture)"
+                                                data-priceout="@part.PriceOut.ToString(CultureInfo.InvariantCulture)">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="action-btn" title="Еще">
+                                        <button class="action-btn action-btn-copy" title="Скопировать SKU"
+                                                data-sku="@part.Sku">
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                     </td>
@@ -294,6 +308,7 @@
     <script>
         // ==================== ТУМБЛЕР ====================
         document.addEventListener('DOMContentLoaded', function() {
+            const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
             document.querySelectorAll('.stock-toggle').forEach(toggle => {
                 toggle.addEventListener('click', async function(e) {
                     e.preventDefault();
@@ -317,10 +332,11 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'RequestVerificationToken': antiForgeryToken ?? ''
                             },
-                            body: JSON.stringify({ 
-                                sku: sku, 
-                                isActive: newState 
+                            body: JSON.stringify({
+                                sku: sku,
+                                isActive: newState
                             })
                         });
                         
@@ -330,7 +346,13 @@
                             this.classList.toggle('active');
                             this.setAttribute('title', newState ? 'Активно' : 'Неактивно');
                             showNotification('Статус изменён', 'success');
-                            
+
+                            if (newState) {
+                                summaryState.active += 1;
+                            } else {
+                                summaryState.active = Math.max(0, summaryState.active - 1);
+                            }
+
                             updateStatistics();
                         } else {
                             showNotification('Ошибка при изменении статуса', 'error');

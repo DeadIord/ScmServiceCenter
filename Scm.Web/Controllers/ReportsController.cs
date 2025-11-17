@@ -22,25 +22,16 @@ public class ReportsController : Controller
     [HttpGet]
     public async Task<IActionResult> Dashboard(DateOnly? periodStart, DateOnly? periodEnd)
     {
-        var ordersQuery = _dbContext.Orders.AsQueryable();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var periodStartValue = periodStart ?? today.AddDays(-13);
+        var periodEndValue = periodEnd ?? today;
 
-        var startDate = periodStart.HasValue
-            ? DateTime.SpecifyKind(periodStart.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : (DateTime?)null;
+        var startDate = DateTime.SpecifyKind(periodStartValue.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        var endDateExclusive = DateTime.SpecifyKind(periodEndValue.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
 
-        var endDateExclusive = periodEnd.HasValue
-            ? DateTime.SpecifyKind(periodEnd.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
-            : (DateTime?)null;
-
-        if (startDate.HasValue)
-        {
-            ordersQuery = ordersQuery.Where(o => o.CreatedAtUtc >= startDate.Value);
-        }
-
-        if (endDateExclusive.HasValue)
-        {
-            ordersQuery = ordersQuery.Where(o => o.CreatedAtUtc < endDateExclusive.Value);
-        }
+        var ordersQuery = _dbContext.Orders
+            .Where(o => o.CreatedAtUtc >= startDate)
+            .Where(o => o.CreatedAtUtc < endDateExclusive);
 
         var filteredOrders = await ordersQuery
             .Select(o => new
@@ -70,16 +61,34 @@ public class ReportsController : Controller
             : (double)slaViolations / completedWithSla.Count * 100d;
 
         var orderIds = filteredOrders.Select(o => o.Id).ToArray();
-        decimal revenue = 0m;
+        var orderCreatedLookup = filteredOrders.ToDictionary(o => o.Id, o => o.CreatedAtUtc);
 
-        if (orderIds.Length > 0)
-        {
-            revenue = await _dbContext.QuoteLines
+        var approvedLines = orderIds.Length > 0
+            ? await _dbContext.QuoteLines
                 .Where(q => orderIds.Contains(q.OrderId))
                 .Where(q => q.Status == QuoteLineStatus.Approved)
                 .Where(q => q.Kind == QuoteLineKind.Labor || q.Kind == QuoteLineKind.Part)
-                .SumAsync(q => q.Price * q.Qty);
+                .Select(q => new QuoteLinePoint(q.OrderId, q.Price, q.Qty))
+                .ToListAsync()
+            : new List<QuoteLinePoint>();
+
+        var revenue = approvedLines.Sum(q => q.Price * q.Qty);
+
+        var ordersByDate = filteredOrders
+            .GroupBy(o => DateOnly.FromDateTime(o.CreatedAtUtc.Date))
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var ordersTimeline = new List<DashboardOrdersPoint>();
+        for (var date = periodStartValue; date <= periodEndValue; date = date.AddDays(1))
+        {
+            ordersTimeline.Add(new DashboardOrdersPoint(date.ToString("dd.MM"), ordersByDate.GetValueOrDefault(date)));
         }
+
+        var weeklyRevenue = approvedLines
+            .GroupBy(line => GetWeekStart(DateOnly.FromDateTime(orderCreatedLookup[line.OrderId].Date)))
+            .OrderBy(g => g.Key)
+            .Select(group => new DashboardRevenuePoint(GetWeekLabel(group.Key), group.Sum(q => q.Price * q.Qty)))
+            .ToList();
 
         var topDefects = filteredOrders
             .GroupBy(o => string.IsNullOrWhiteSpace(o.Defect) ? "Не указано" : o.Defect)
@@ -91,15 +100,32 @@ public class ReportsController : Controller
 
         var model = new DashboardViewModel
         {
-            PeriodStart = periodStart,
-            PeriodEnd = periodEnd,
+            PeriodStart = periodStartValue,
+            PeriodEnd = periodEndValue,
             AverageRepairDays = Math.Round(averageDays, 1),
             SlaViolationRate = Math.Round(slaViolationRate, 1),
-            RevenueStub = revenue,
+            Revenue = revenue,
             TotalOrders = filteredOrders.Count,
-            TopDefects = topDefects
+            TopDefects = topDefects,
+            OrdersByDay = ordersTimeline,
+            RevenueByWeek = weeklyRevenue
         };
 
         return View(model);
     }
+
+    private static DateOnly GetWeekStart(DateOnly date)
+    {
+        var dayOfWeek = (int)date.DayOfWeek;
+        var offset = dayOfWeek == 0 ? 6 : dayOfWeek - 1;
+        return date.AddDays(-offset);
+    }
+
+    private static string GetWeekLabel(DateOnly weekStart)
+    {
+        var weekEnd = weekStart.AddDays(6);
+        return $"{weekStart:dd.MM} - {weekEnd:dd.MM}";
+    }
+
+    private sealed record QuoteLinePoint(Guid OrderId, decimal Price, decimal Qty);
 }
