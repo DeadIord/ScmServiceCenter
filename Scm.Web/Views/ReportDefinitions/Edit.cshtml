@@ -1,18 +1,29 @@
 @model Scm.Web.Models.ReportBuilder.ReportDefinitionEditViewModel
-@{
+@{ 
     ViewData["Title"] ??= Model.Id.HasValue ? $"Редактирование: {Model.Title}" : "Новый отчёт";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-0">@ViewData["Title"]</h1>
-        <p class="text-muted mb-0">Опишите запрос, параметры и доступ к отчёту</p>
-    </div>
-    <a asp-action="Index" class="btn btn-outline-secondary">Назад к списку</a>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/reports/report_builder.css" asp-append-version="true" />
+}
 
-<form asp-action="Edit" method="post" class="card shadow-sm rounded-3">
-    <div class="card-body">
+<div class="main-body">
+    <div class="report-builder-container">
+        <div class="builder-header">
+            <div>
+                <p class="text-uppercase text-muted fw-semibold mb-1">Конструктор отчётов</p>
+                <h1 class="display-6 mb-2">@ViewData["Title"]</h1>
+                <p class="builder-subtitle">Соберите запрос из таблиц, колонок и фильтров, ограничьте доступ и подготовьте параметры.</p>
+            </div>
+            <div class="header-actions">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Назад к списку
+                </a>
+            </div>
+        </div>
+
+        <form asp-action="Edit" method="post" class="report-card shadow-sm rounded-4">
+            <div class="card-body">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="Id" />
         <div class="row g-3">
@@ -30,7 +41,7 @@
                 <textarea asp-for="Description" class="form-control" rows="2"></textarea>
             </div>
             <div class="col-md-12">
-                <div class="card border-primary shadow-sm" id="report-builder-root"
+                <div class="card border-primary shadow-sm report-builder-card" id="report-builder-root"
                      data-metadata-url="@Url.Action("Metadata")"
                      data-generate-sql-url="@Url.Action("GenerateSql")">
                     <div class="card-header bg-primary text-white">
@@ -39,7 +50,10 @@
                                 <h2 class="h5 mb-0">Конструктор SQL-запроса</h2>
                                 <small class="text-white-50">Соберите таблицы, поля и условия</small>
                             </div>
-                            <span class="badge bg-light text-dark" data-role="builder-badge">Конструктор</span>
+                            <div class="text-end">
+                                <span class="badge bg-light text-dark" data-role="builder-badge">Конструктор</span>
+                                <div class="builder-meta text-white-50" data-role="metadata-status">Идёт загрузка списка таблиц…</div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -57,6 +71,9 @@
                                 <strong>Шаг 1. Источники данных</strong>
                             </div>
                             <div class="card-body">
+                                <div class="alert alert-warning d-none" role="alert" data-role="metadata-error">
+                                    Не удалось загрузить список таблиц. Проверьте подключение или обновите страницу.
+                                </div>
                                 <div class="row g-2 align-items-end">
                                     <div class="col-md-4">
                                         <label class="form-label">Таблица</label>
@@ -80,7 +97,7 @@
                                         <button type="button" class="btn btn-primary" data-action="add-table"><i class="bi bi-plus"></i> Добавить</button>
                                     </div>
                                 </div>
-                                <div class="form-text mt-2">Для первой таблицы соединение и условие не требуются.</div>
+                                <div class="form-text mt-2">Для первой таблицы соединение и условие не требуются. Системные таблицы Identity и журналы миграций скрыты автоматически.</div>
                                 <div class="table-responsive mt-3">
                                     <table class="table table-sm table-hover align-middle" data-role="selected-tables">
                                         <thead class="table-light">
@@ -276,6 +293,8 @@
         <a asp-action="Preview" asp-route-id="@Model.Id" class="btn btn-outline-secondary @(Model.Id.HasValue ? string.Empty : "disabled")">Предпросмотр</a>
     </div>
 </form>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
