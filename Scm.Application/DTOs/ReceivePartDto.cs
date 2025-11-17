@@ -6,7 +6,7 @@ public sealed class ReceivePartDto
 
     public string Title { get; set; } = string.Empty;
 
-    public decimal Qty { get; set; }
+    public int Qty { get; set; }
 
     public decimal PriceIn { get; set; }
 

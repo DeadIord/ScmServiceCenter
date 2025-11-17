@@ -273,7 +273,9 @@ document.addEventListener('DOMContentLoaded', function() {
             titleInput.value = button.dataset.title || '';
         }
         if (qtyInput) {
-            qtyInput.value = qtyInput.value || '1';
+            const receivedQty = parseInt(button.dataset.qty || '1', 10);
+            qtyInput.value = Number.isNaN(receivedQty) ? '1' : Math.max(1, receivedQty);
+            qtyInput.dispatchEvent(new Event('input'));
         }
         if (unitInput) {
             unitInput.value = button.dataset.unit || '';
@@ -293,6 +295,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    if (receiveForm) {
+        const qtyInput = receiveForm.querySelector('input[name="Qty"]');
+        qtyInput?.addEventListener('input', function () {
+            const parsed = parseInt(this.value || '1', 10);
+            const sanitized = Number.isNaN(parsed) ? 1 : Math.max(1, parsed);
+            if (sanitized.toString() !== this.value) {
+                this.value = sanitized.toString();
+            }
+        });
+    }
     document.querySelectorAll('.action-btn-copy').forEach(button => {
         button.addEventListener('click', async function() {
             const sku = this.dataset.sku || '';
