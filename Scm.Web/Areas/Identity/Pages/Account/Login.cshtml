@@ -1,5 +1,5 @@
 @page
-@model LoginModel
+@model Scm.Web.Areas.Identity.Pages.Account.LoginModel
 @{
     ViewData["Title"] = "Вход в систему";
     ViewData["Footer"] = false;
@@ -33,9 +33,25 @@
                             <span asp-validation-for="Input.Password" class="text-danger"></span>
                         </div>
 
-                        <div class="form-check mb-4">
-                            <input class="form-check-input" asp-for="Input.RememberMe" />
-                            <label class="form-check-label" asp-for="Input.RememberMe"></label>
+                        <div class="mb-4">
+                            <p class="fw-semibold mb-2">Настройки входа</p>
+                            <div class="d-flex flex-column gap-2">
+                                <label class="form-check border rounded-3 p-3 m-0 d-flex align-items-start">
+                                    <input class="form-check-input mt-1" asp-for="Input.RememberMe" />
+                                    <span class="ms-3">
+                                        <span class="fw-semibold d-block">Запомнить меня</span>
+                                        <small class="text-muted">Оставаться в системе на этом устройстве.</small>
+                                    </span>
+                                </label>
+
+                                <label class="form-check border rounded-3 p-3 m-0 d-flex align-items-start bg-light-subtle">
+                                    <input class="form-check-input mt-1" type="checkbox" checked disabled />
+                                    <span class="ms-3">
+                                        <span class="fw-semibold d-block">Доступ только для сотрудников</span>
+                                        <small class="text-muted">Регистрация новых аккаунтов выполняется администратором.</small>
+                                    </span>
+                                </label>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 mb-3">Войти</button>
