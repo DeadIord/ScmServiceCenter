@@ -201,8 +201,10 @@
                                         <i class="bi bi-envelope"></i>
                                         <div>
                                             <div class="contact-label">Email:</div>
-                                            <a href="mailto:@Model.Order.ClientEmail" class="contact-value">@Model.Order.ClientEmail</a>
-                                        </div>
+                                                <a href="@Url.Action("Index", "Tickets", new { q = Model.Order.ClientEmail })" class="contact-value">
+                                                    @Model.Order.ClientEmail
+                                                </a>
+                                            </div>
                                     </div>
                                 }
                                 
