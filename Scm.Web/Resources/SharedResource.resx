@@ -39,6 +39,9 @@
   <data name="User_DisplayName" xml:space="preserve">
     <value>Display name</value>
   </data>
+  <data name="User_IsActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
   <data name="User_Email" xml:space="preserve">
     <value>Email</value>
   </data>
@@ -54,6 +57,9 @@
   <data name="User_Phone" xml:space="preserve">
     <value>Phone</value>
   </data>
+  <data name="User_UserName" xml:space="preserve">
+    <value>Login</value>
+  </data>
   <data name="User_RoleDisplay" xml:space="preserve">
     <value>Role name</value>
   </data>
@@ -62,6 +68,15 @@
   </data>
   <data name="User_Roles" xml:space="preserve">
     <value>Roles</value>
+  </data>
+  <data name="Role_List" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+  <data name="Role_Name" xml:space="preserve">
+    <value>Role name</value>
+  </data>
+  <data name="Role_Selected" xml:space="preserve">
+    <value>Selected</value>
   </data>
   <data name="User_Search" xml:space="preserve">
     <value>Search</value>

@@ -1,37 +1,35 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Scm.Web.Localization;
-
 namespace Scm.Web.Areas.Admin.Models.Users;
 
 public class UserCreateViewModel
 {
-    [Required(ErrorMessageResourceName = "Validation_Required", ErrorMessageResourceType = typeof(SharedResource))]
-    [EmailAddress(ErrorMessageResourceName = "Validation_Email", ErrorMessageResourceType = typeof(SharedResource))]
-    [Display(Name = "User_Email", ResourceType = typeof(SharedResource))]
+    [Required(ErrorMessage = "Validation_Required")]
+    [EmailAddress(ErrorMessage = "Validation_Email")]
+    [Display(Name = "User_Email")]
     public string Email { get; set; } = string.Empty;
 
-    [Display(Name = "User_DisplayName", ResourceType = typeof(SharedResource))]
+    [Display(Name = "User_DisplayName")]
     [StringLength(128)]
     public string? DisplayName { get; set; }
 
-    [Phone(ErrorMessageResourceName = "Validation_Phone", ErrorMessageResourceType = typeof(SharedResource))]
-    [Display(Name = "User_Phone", ResourceType = typeof(SharedResource))]
+    [Phone(ErrorMessage = "Validation_Phone")]
+    [Display(Name = "User_Phone")]
     public string? PhoneNumber { get; set; }
 
-    [Required(ErrorMessageResourceName = "Validation_Required", ErrorMessageResourceType = typeof(SharedResource))]
+    [Required(ErrorMessage = "Validation_Required")]
     [DataType(DataType.Password)]
-    [StringLength(64, MinimumLength = 6, ErrorMessageResourceName = "Validation_StringLength", ErrorMessageResourceType = typeof(SharedResource))]
-    [Display(Name = "User_Password", ResourceType = typeof(SharedResource))]
+    [StringLength(64, MinimumLength = 6, ErrorMessage = "Validation_StringLength")]
+    [Display(Name = "User_Password")]
     public string Password { get; set; } = string.Empty;
 
-    [Required(ErrorMessageResourceName = "Validation_Required", ErrorMessageResourceType = typeof(SharedResource))]
+    [Required(ErrorMessage = "Validation_Required")]
     [DataType(DataType.Password)]
-    [Compare("Password", ErrorMessageResourceName = "Validation_PasswordMismatch", ErrorMessageResourceType = typeof(SharedResource))]
-    [Display(Name = "User_ConfirmPassword", ResourceType = typeof(SharedResource))]
+    [Compare("Password", ErrorMessage = "Validation_PasswordMismatch")]
+    [Display(Name = "User_ConfirmPassword")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
-    [Display(Name = "User_IsLocked", ResourceType = typeof(SharedResource))]
+    [Display(Name = "User_IsLocked")]
     public bool IsLocked { get; set; }
 
     public IList<UserRoleOptionViewModel> Roles { get; set; } = new List<UserRoleOptionViewModel>();
