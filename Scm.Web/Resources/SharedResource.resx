@@ -12,8 +12,23 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Validation_Email" xml:space="preserve">
+    <value>Enter a valid email address.</value>
+  </data>
+  <data name="Validation_PasswordMismatch" xml:space="preserve">
+    <value>The password and confirmation do not match.</value>
+  </data>
+  <data name="Validation_Phone" xml:space="preserve">
+    <value>Enter a valid phone number.</value>
+  </data>
   <data name="ValidationRequired" xml:space="preserve">
     <value>The field is required.</value>
+  </data>
+  <data name="Validation_Required" xml:space="preserve">
+    <value>The {0} field is required.</value>
+  </data>
+  <data name="Validation_StringLength" xml:space="preserve">
+    <value>The field {0} must be between {2} and {1} characters long.</value>
   </data>
   <data name="ValidationInvalidFormat" xml:space="preserve">
     <value>Invalid format.</value>
