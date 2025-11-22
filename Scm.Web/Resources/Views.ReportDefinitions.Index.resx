@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Report builder</value>
+  </data>
+  <data name="Heading" xml:space="preserve">
+    <value>SQL reports</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Build, manage and launch your SQL-based reports.</value>
+  </data>
+  <data name="DashboardAction" xml:space="preserve">
+    <value>Open dashboard</value>
+  </data>
+  <data name="NewReportAction" xml:space="preserve">
+    <value>New report</value>
+  </data>
+  <data name="FiltersTitle" xml:space="preserve">
+    <value>Filters and search</value>
+  </data>
+  <data name="FiltersDescription" xml:space="preserve">
+    <value>Narrow down the list by title, description or visibility.</value>
+  </data>
+  <data name="ResetFilters" xml:space="preserve">
+    <value>Reset filters</value>
+  </data>
+  <data name="SearchLabel" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Title or description</value>
+  </data>
+  <data name="VisibilityFilterLabel" xml:space="preserve">
+    <value>Visibility</value>
+  </data>
+  <data name="VisibilityAll" xml:space="preserve">
+    <value>All visibilities</value>
+  </data>
+  <data name="VisibilityPrivate" xml:space="preserve">
+    <value>Author only</value>
+  </data>
+  <data name="VisibilityTeam" xml:space="preserve">
+    <value>Team (by roles)</value>
+  </data>
+  <data name="VisibilityOrganization" xml:space="preserve">
+    <value>Entire organization</value>
+  </data>
+  <data name="ApplyFilters" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="NameColumn" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="DescriptionColumn" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="VisibilityColumn" xml:space="preserve">
+    <value>Visibility</value>
+  </data>
+  <data name="CreatedColumn" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="ActionsColumn" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="EmptyState" xml:space="preserve">
+    <value>No reports found</value>
+  </data>
+  <data name="NoDescription" xml:space="preserve">
+    <value>No description</value>
+  </data>
+  <data name="PreviewAction" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="EditAction" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="CreatedBy" xml:space="preserve">
+    <value>Created {0}</value>
+  </data>
+</root>

@@ -38,7 +38,7 @@ public class ReportDefinitionsController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? search, ReportVisibility? visibility)
     {
         var currentUser = await _userManager.GetUserAsync(User);
         if (currentUser is null)
@@ -47,8 +47,22 @@ public class ReportDefinitionsController : Controller
         }
 
         var userRoles = await _userManager.GetRolesAsync(currentUser);
-        var reports = await _dbContext.ReportDefinitions
+        var reportQuery = _dbContext.ReportDefinitions
             .Where(r => r.IsActive)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalizedSearch = search.Trim();
+            reportQuery = reportQuery.Where(r => r.Title.Contains(normalizedSearch) || (r.Description != null && r.Description.Contains(normalizedSearch)));
+        }
+
+        if (visibility.HasValue)
+        {
+            reportQuery = reportQuery.Where(r => r.Visibility == visibility.Value);
+        }
+
+        var reports = await reportQuery
             .OrderByDescending(r => r.CreatedAtUtc)
             .ToListAsync();
 
@@ -66,6 +80,8 @@ public class ReportDefinitionsController : Controller
             })
             .ToList();
 
+        ViewBag.SearchQuery = search;
+        ViewBag.CurrentVisibility = visibility;
         ViewData["Title"] = "Конструктор отчётов";
         return View(model);
     }
