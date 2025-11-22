@@ -64,6 +64,8 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
+builder.Services.AddSingleton<IMoneyConverter, MoneyConverter>();
+builder.Services.AddScoped<IReportingService, ReportingService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddAuthorization(options =>
 {
@@ -86,6 +88,8 @@ builder.Services.AddHostedService<TicketInboxHostedService>();
 builder.Services.AddOptions<ReportBuilderOptions>()
     .Bind(builder.Configuration.GetSection("ReportBuilder"))
     .ValidateOnStart();
+builder.Services.AddOptions<CurrencyOptions>()
+    .Bind(builder.Configuration.GetSection("Currency"));
 
 builder.Services.AddHealthChecks()
     .AddCheck<MailConfigurationHealthCheck>("mail_delivery");
