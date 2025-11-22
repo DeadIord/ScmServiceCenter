@@ -1,5 +1,5 @@
 @page
-@model Scm.Web.Areas.Identity.Pages.Account.LoginModel
+@model LoginModel
 @{
     ViewData["Title"] = "Вход в систему";
     ViewData["Footer"] = false;
@@ -18,7 +18,7 @@
                         <p class="text-muted mb-0">Доступ только для зарегистрированных пользователей. Регистрацию выполняет администратор.</p>
                     </div>
 
-                    <form method="post">
+                    <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
 
                         <div class="mb-3">
