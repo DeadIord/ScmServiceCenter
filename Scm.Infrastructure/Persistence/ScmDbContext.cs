@@ -20,6 +20,7 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
     public DbSet<TicketAttachment> TicketAttachments => Set<TicketAttachment>();
+    public DbSet<TechnicianTask> TechnicianTasks => Set<TechnicianTask>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -37,5 +38,6 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
         builder.ApplyConfiguration(new TicketConfiguration());
         builder.ApplyConfiguration(new TicketMessageConfiguration());
         builder.ApplyConfiguration(new TicketAttachmentConfiguration());
+        builder.ApplyConfiguration(new TechnicianTaskConfiguration());
     }
 }

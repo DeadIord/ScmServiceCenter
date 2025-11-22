@@ -65,6 +65,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITechnicianTaskService, TechnicianTaskService>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AuthorizationPolicies.StockAccess, policy =>

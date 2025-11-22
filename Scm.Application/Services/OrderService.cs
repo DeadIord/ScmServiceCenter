@@ -7,9 +7,12 @@ using Scm.Infrastructure.Persistence;
 
 namespace Scm.Application.Services;
 
-public sealed class OrderService(ScmDbContext dbContext) : IOrderService
+public sealed class OrderService(
+    ScmDbContext in_dbContext,
+    ITechnicianTaskService in_technicianTaskService) : IOrderService
 {
-    private readonly ScmDbContext _dbContext = dbContext;
+    private readonly ScmDbContext m_dbContext = in_dbContext;
+    private readonly ITechnicianTaskService m_technicianTaskService = in_technicianTaskService;
 
     public async Task<Order> CreateAsync(CreateOrderDto dto, CancellationToken cancellationToken = default)
     {
@@ -32,8 +35,10 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             CreatedAtUtc = DateTime.UtcNow
         };
 
-        _dbContext.Orders.Add(order);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        m_dbContext.Orders.Add(order);
+        await m_dbContext.SaveChangesAsync(cancellationToken);
+
+        await m_technicianTaskService.CreateForOrderAsync(order, cancellationToken);
         return order;
     }
 
@@ -92,7 +97,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
 
     private IQueryable<Order> BuildQueueQuery(string? in_q, OrderStatus? in_status)
     {
-        var query = _dbContext.Orders
+        var query = m_dbContext.Orders
             .Include(o => o.AssignedUser)
             .AsNoTracking();
 
@@ -117,7 +122,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
 
     public async Task<Order?> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Orders
+        return await m_dbContext.Orders
             .Include(o => o.QuoteLines)
             .Include(o => o.Messages)
             .Include(o => o.Invoices)
@@ -130,19 +135,19 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
 
     public async Task ChangeStatusAsync(Guid id, OrderStatus to, CancellationToken cancellationToken = default)
     {
-        var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        var order = await m_dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         if (order is null)
         {
             throw new InvalidOperationException("Заказ не найден");
         }
 
         order.Status = to;
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await m_dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<Invoice> CreateInvoiceAsync(Guid in_orderId, CancellationToken cancellationToken = default)
     {
-        var order = await _dbContext.Orders
+        var order = await m_dbContext.Orders
             .Include(o => o.QuoteLines)
             .FirstOrDefaultAsync(o => o.Id == in_orderId, cancellationToken);
 
@@ -171,8 +176,8 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             CreatedAt = DateTime.UtcNow
         };
 
-        _dbContext.Invoices.Add(invoice);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        m_dbContext.Invoices.Add(invoice);
+        await m_dbContext.SaveChangesAsync(cancellationToken);
 
         return invoice;
     }
@@ -180,7 +185,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
     public string GenerateNumber()
     {
         var prefix = $"SRV-{DateTime.UtcNow:yyyy}-";
-        var existing = _dbContext.Orders
+        var existing = m_dbContext.Orders
             .Where(o => o.Number.StartsWith(prefix))
             .Select(o => o.Number)
             .ToList();
