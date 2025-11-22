@@ -1,31 +1,29 @@
 using System.ComponentModel.DataAnnotations;
-using Scm.Web.Localization;
-
 namespace Scm.Web.Areas.Admin.Models;
 
 public class UserEditViewModel
 {
     public string Id { get; set; } = string.Empty;
 
-    [Required(ErrorMessageResourceName = "Validation_Required", ErrorMessageResourceType = typeof(SharedResource))]
-    [Display(Name = "User_UserName", ResourceType = typeof(SharedResource))]
+    [Required(ErrorMessage = "Validation_Required")]
+    [Display(Name = "User_UserName")]
     public string UserName { get; set; } = string.Empty;
 
-    [Required(ErrorMessageResourceName = "Validation_Required", ErrorMessageResourceType = typeof(SharedResource))]
-    [EmailAddress(ErrorMessageResourceName = "Validation_Email", ErrorMessageResourceType = typeof(SharedResource))]
-    [Display(Name = "User_Email", ResourceType = typeof(SharedResource))]
+    [Required(ErrorMessage = "Validation_Required")]
+    [EmailAddress(ErrorMessage = "Validation_Email")]
+    [Display(Name = "User_Email")]
     public string Email { get; set; } = string.Empty;
 
-    [Phone(ErrorMessageResourceName = "Validation_Phone", ErrorMessageResourceType = typeof(SharedResource))]
-    [Display(Name = "User_Phone", ResourceType = typeof(SharedResource))]
+    [Phone(ErrorMessage = "Validation_Phone")]
+    [Display(Name = "User_Phone")]
     public string? PhoneNumber { get; set; }
 
-    [Display(Name = "User_DisplayName", ResourceType = typeof(SharedResource))]
+    [Display(Name = "User_DisplayName")]
     public string? DisplayName { get; set; }
 
-    [Display(Name = "User_IsActive", ResourceType = typeof(SharedResource))]
+    [Display(Name = "User_IsActive")]
     public bool IsActive { get; set; }
 
-    [Display(Name = "Role_List", ResourceType = typeof(SharedResource))]
+    [Display(Name = "Role_List")]
     public IList<UserRoleSelectionViewModel> Roles { get; set; } = new List<UserRoleSelectionViewModel>();
 }
