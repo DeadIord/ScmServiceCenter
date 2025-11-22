@@ -29,9 +29,10 @@ public sealed class TasksController : Controller
     public async Task<IActionResult> Index(string? in_q, TechnicianTaskStatus? in_status)
     {
         m_logger.LogInformation("Открыт раздел задач.");
-        var tasks = await m_taskService.GetAsync(in_q, in_status);
+        var allTasks = await m_taskService.GetAsync(null, null);
+        var filteredTasks = await m_taskService.GetAsync(in_q, in_status);
 
-        var items = tasks
+        var items = filteredTasks
             .Select(task => MapTask(task))
             .ToList();
 
@@ -40,10 +41,10 @@ public sealed class TasksController : Controller
             Query = in_q,
             Status = in_status,
             Tasks = items,
-            TotalTasks = items.Count,
-            CompletedTasks = items.Count(t => t.Status == TechnicianTaskStatus.Completed),
-            InProgressTasks = items.Count(t => t.Status == TechnicianTaskStatus.InProgress),
-            PendingTasks = items.Count(t => t.Status == TechnicianTaskStatus.Pending)
+            TotalTasks = allTasks.Count,
+            CompletedTasks = allTasks.Count(t => t.Status == TechnicianTaskStatus.Completed),
+            InProgressTasks = allTasks.Count(t => t.Status == TechnicianTaskStatus.InProgress),
+            PendingTasks = allTasks.Count(t => t.Status == TechnicianTaskStatus.Pending)
         };
 
         IActionResult ret = View(model);
