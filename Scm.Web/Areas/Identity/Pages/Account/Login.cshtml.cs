@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 
 namespace Scm.Web.Areas.Identity.Pages.Account;
 
