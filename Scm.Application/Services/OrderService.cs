@@ -143,6 +143,8 @@ public sealed class OrderService(
 
         order.Status = to;
         await m_dbContext.SaveChangesAsync(cancellationToken);
+
+        await m_technicianTaskService.SyncStatusFromOrderAsync(order, cancellationToken);
     }
 
     public async Task<Invoice> CreateInvoiceAsync(Guid in_orderId, CancellationToken cancellationToken = default)

@@ -11,4 +11,6 @@ public sealed class OrderDetailsViewModel
     public IReadOnlyCollection<Message> Messages { get; init; } = Array.Empty<Message>();
 
     public string ClientTrackingLink { get; init; } = string.Empty;
+
+    public string ReturnUrl { get; init; } = string.Empty;
 }

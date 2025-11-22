@@ -229,7 +229,7 @@
                                     </td>
                                     <td class="actions-cell">
                                         <div class="btn-group">
-                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@task.OrderId" class="btn btn-link">Подробнее</a>
+                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@task.OrderId" asp-route-returnUrl="@Url.Action("Index", "Tasks", new { in_q = Model.Query, in_status = Model.Status })" class="btn btn-link">Подробнее</a>
                                         </div>
                                     </td>
                                 </tr>

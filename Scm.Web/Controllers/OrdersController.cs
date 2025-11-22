@@ -168,7 +168,7 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, string? returnUrl = null)
     {
         var order = await m_orderService.GetAsync(id);
         if (order is null)
@@ -186,7 +186,8 @@ public class OrdersController : Controller
             Order = order,
             Messages = messages,
             ApprovedTotal = total,
-            ClientTrackingLink = trackingLink
+            ClientTrackingLink = trackingLink,
+            ReturnUrl = BuildReturnUrl(returnUrl)
         };
 
         return View(model);
@@ -244,6 +245,27 @@ public class OrdersController : Controller
         }
 
         return RedirectToAction(nameof(Details), new { id = orderId });
+    }
+
+    private string BuildReturnUrl(string? in_returnUrl)
+    {
+        var defaultUrl = Url.Action(nameof(Index)) ?? "/";
+
+        if (!string.IsNullOrWhiteSpace(in_returnUrl) && Url.IsLocalUrl(in_returnUrl))
+        {
+            return in_returnUrl;
+        }
+
+        var referer = Request.Headers.Referer.ToString();
+        if (!string.IsNullOrWhiteSpace(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
+        {
+            if (Url.IsLocalUrl(refererUri.PathAndQuery))
+            {
+                return refererUri.PathAndQuery;
+            }
+        }
+
+        return defaultUrl;
     }
 
     [HttpPost]

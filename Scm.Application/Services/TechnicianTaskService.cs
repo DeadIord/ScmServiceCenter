@@ -65,4 +65,40 @@ public sealed class TechnicianTaskService(ScmDbContext in_dbContext) : ITechnici
 
         return ret;
     }
+
+    public async Task SyncStatusFromOrderAsync(Order in_order, CancellationToken in_cancellationToken = default)
+    {
+        var tasks = await m_dbContext.TechnicianTasks
+            .Where(t => t.OrderId == in_order.Id)
+            .ToListAsync(in_cancellationToken);
+
+        if (tasks.Count == 0)
+        {
+            return;
+        }
+
+        var mappedStatus = MapStatus(in_order.Status);
+
+        foreach (var task in tasks)
+        {
+            task.Status = mappedStatus;
+        }
+
+        await m_dbContext.SaveChangesAsync(in_cancellationToken);
+    }
+
+    private TechnicianTaskStatus MapStatus(OrderStatus in_status)
+    {
+        TechnicianTaskStatus ret;
+
+        ret = in_status switch
+        {
+            OrderStatus.Closed or OrderStatus.Ready => TechnicianTaskStatus.Completed,
+            OrderStatus.InRepair or OrderStatus.Diagnosing or OrderStatus.WaitingApproval => TechnicianTaskStatus.InProgress,
+            OrderStatus.Received => TechnicianTaskStatus.Pending,
+            _ => TechnicianTaskStatus.Pending
+        };
+
+        return ret;
+    }
 }
