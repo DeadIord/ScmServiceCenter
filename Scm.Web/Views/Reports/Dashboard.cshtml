@@ -1,13 +1,14 @@
 @model Scm.Web.Models.Reports.DashboardViewModel
 @using System.Text.Json
-@{
-    ViewData["Title"] = "Дашборд";
-    var periodStartValue = Model.PeriodStart?.ToString("yyyy-MM-dd") ?? string.Empty;
-    var periodEndValue = Model.PeriodEnd?.ToString("yyyy-MM-dd") ?? string.Empty;
-    var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-    var ordersChartJson = JsonSerializer.Serialize(Model.OrdersByDay, jsonOptions);
-    var revenueChartJson = JsonSerializer.Serialize(Model.RevenueByWeek, jsonOptions);
-}
+@{ 
+    ViewData["Title"] = "Дашборд"; 
+    var periodStartValue = Model.PeriodStart?.ToString("yyyy-MM-dd") ?? string.Empty; 
+    var periodEndValue = Model.PeriodEnd?.ToString("yyyy-MM-dd") ?? string.Empty; 
+    var currencyValue = Model.Currency;
+    var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }; 
+    var ordersChartJson = JsonSerializer.Serialize(Model.OrdersByDay, jsonOptions); 
+    var revenueChartJson = JsonSerializer.Serialize(Model.RevenueByWeek, jsonOptions); 
+} 
 
 <link rel="stylesheet" href="~/css/reports/dashboard.css" asp-append-version="true" />
 
@@ -23,15 +24,24 @@
     <!-- Фильтры -->
     <div class="filter-card">
         <form method="get" class="row g-3 align-items-end">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label fw-semibold mb-2">Начало периода</label>
                 <input type="date" class="form-control date-input" name="periodStart" value="@periodStartValue" />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label fw-semibold mb-2">Окончание периода</label>
                 <input type="date" class="form-control date-input" name="periodEnd" value="@periodEndValue" />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold mb-2">Валюта</label>
+                <select class="form-select" name="currency">
+                    @foreach (var code in Model.AvailableCurrencies)
+                    {
+                        <option value="@code" selected="@(string.Equals(code, Model.Currency, StringComparison.OrdinalIgnoreCase))">@code</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
                 <button type="submit" class="btn btn-apply w-100">
                     <i class="bi bi-graph-up me-2"></i>Показать
                 </button>
@@ -90,9 +100,9 @@
                     <i class="bi bi-arrow-up"></i>+24%
                 </span>
             </div>
-            <div class="metric-value">@Model.Revenue.ToString("N0") ₽</div>
-            <p class="metric-label">Оценка выручки</p>
-            <p class="metric-subtitle">за период</p>
+            <div class="metric-value">@Model.Revenue.ToString("N0") @Model.Currency</div>
+            <p class="metric-label">Фактическая выручка</p>
+            <p class="metric-subtitle">Возвраты: @Model.Refunded.ToString("N0") @Model.Currency</p>
         </div>
 
         <!-- Заказы в периоде -->
@@ -131,7 +141,7 @@
             <div class="chart-header">
                 <div>
                     <h3 class="chart-title">Выручка по неделям</h3>
-                    <p class="chart-subtitle">Динамика выручки</p>
+                    <p class="chart-subtitle">План: @Model.PlannedRevenue.ToString("N0") @Model.Currency</p>
                 </div>
             </div>
             <div class="chart-container">
@@ -196,6 +206,7 @@
     <script>
         // ==================== ГРАФИКИ ====================
         document.addEventListener('DOMContentLoaded', function() {
+            const currencyValue = '@currencyValue';
             const ordersData = @Html.Raw(ordersChartJson);
             const revenueData = @Html.Raw(revenueChartJson);
 
@@ -271,7 +282,7 @@
                     data: {
                         labels: revenueLabels.length ? revenueLabels : ['Нет данных'],
                         datasets: [{
-                            label: 'Выручка (₽)',
+                            label: `Выручка (${currencyValue})`,
                             data: revenueValues.length ? revenueValues : [0],
                             backgroundColor: '#28a745',
                             borderRadius: 8,
@@ -290,7 +301,7 @@
                                 padding: 12,
                                 callbacks: {
                                     label: function(context) {
-                                        return 'Выручка: ' + context.parsed.y.toLocaleString('ru-RU') + ' ₽';
+                                        return 'Выручка: ' + context.parsed.y.toLocaleString('ru-RU') + ` ${currencyValue}`;
                                     }
                                 }
                             }
@@ -303,7 +314,7 @@
                                 },
                                 ticks: {
                                     callback: function(value) {
-                                        return value.toLocaleString('ru-RU') + ' ₽';
+                                        return value.toLocaleString('ru-RU') + ` ${currencyValue}`;
                                     },
                                     font: { size: 12 }
                                 }

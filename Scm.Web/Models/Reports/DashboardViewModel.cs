@@ -12,20 +12,22 @@ public sealed class DashboardViewModel
 
     public decimal Revenue { get; init; }
 
+    public decimal Refunded { get; init; }
+
+    public decimal PlannedRevenue { get; init; }
+
+    public string Currency { get; init; } = "RUB";
+
+    public IReadOnlyCollection<string> AvailableCurrencies { get; init; } = Array.Empty<string>();
+
     public int TotalOrders { get; init; }
 
-    public IReadOnlyList<DashboardTopDefectRow> TopDefects { get; init; }
-        = Array.Empty<DashboardTopDefectRow>();
+    public IReadOnlyList<Scm.Application.Services.DashboardTopDefectRow> TopDefects { get; init; }
+        = Array.Empty<Scm.Application.Services.DashboardTopDefectRow>();
 
-    public IReadOnlyList<DashboardOrdersPoint> OrdersByDay { get; init; }
-        = Array.Empty<DashboardOrdersPoint>();
+    public IReadOnlyList<Scm.Application.Services.DashboardOrdersPoint> OrdersByDay { get; init; }
+        = Array.Empty<Scm.Application.Services.DashboardOrdersPoint>();
 
-    public IReadOnlyList<DashboardRevenuePoint> RevenueByWeek { get; init; }
-        = Array.Empty<DashboardRevenuePoint>();
+    public IReadOnlyList<Scm.Application.Services.DashboardRevenuePoint> RevenueByWeek { get; init; }
+        = Array.Empty<Scm.Application.Services.DashboardRevenuePoint>();
 }
-
-public sealed record DashboardTopDefectRow(string Defect, int Count);
-
-public sealed record DashboardOrdersPoint(string Date, int Count);
-
-public sealed record DashboardRevenuePoint(string Week, decimal Amount);
