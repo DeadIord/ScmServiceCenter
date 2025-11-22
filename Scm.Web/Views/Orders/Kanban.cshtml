@@ -40,85 +40,87 @@
         return ret;
     }
 }
-<h1 class="section-title mb-4">@Localizer["SectionTitle"]</h1>
-<div class="kanban-page">
-    <div class="kanban-toolbar card shadow-sm border-0 rounded-4 mb-4">
-        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <div class="kanban-toolbar-icon d-flex align-items-center justify-content-center">
-                    <i class="bi bi-kanban"></i>
+<div class="container-xxl px-3 px-md-4 px-xl-5">
+    <h1 class="section-title mb-4">@Localizer["SectionTitle"]</h1>
+    <div class="kanban-page">
+        <div class="kanban-toolbar card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kanban-toolbar-icon d-flex align-items-center justify-content-center">
+                        <i class="bi bi-kanban"></i>
+                    </div>
+                    <div>
+                        <div class="kanban-toolbar-label text-uppercase small fw-semibold">@Localizer["TotalOrdersLabel"]</div>
+                        <div class="kanban-toolbar-value">@totalOrders</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="kanban-toolbar-label text-uppercase small fw-semibold">@Localizer["TotalOrdersLabel"]</div>
-                    <div class="kanban-toolbar-value">@totalOrders</div>
-                </div>
-            </div>
-            <div class="kanban-toolbar-legend d-flex flex-column flex-lg-row gap-2 align-items-lg-center">
-                <span class="kanban-toolbar-legend-label text-uppercase small fw-semibold">@Localizer["LegendLabel"]</span>
-                <div class="kanban-toolbar-legend-items d-flex flex-wrap gap-2">
-                    @foreach (var column in Model.Columns)
-                    {
-                        <span class="badge rounded-pill text-bg-@StatusBadge(column.Status) fw-semibold">
-                            @Localizer[$"Status_{column.Status}"]
-                            <span class="ms-1">(@column.Orders.Count)</span>
-                        </span>
-                    }
+                <div class="kanban-toolbar-legend d-flex flex-column flex-lg-row gap-2 align-items-lg-center">
+                    <span class="kanban-toolbar-legend-label text-uppercase small fw-semibold">@Localizer["LegendLabel"]</span>
+                    <div class="kanban-toolbar-legend-items d-flex flex-wrap gap-2">
+                        @foreach (var column in Model.Columns)
+                        {
+                            <span class="badge rounded-pill text-bg-@StatusBadge(column.Status) fw-semibold">
+                                @Localizer[$"Status_{column.Status}"]
+                                <span class="ms-1">(@column.Orders.Count)</span>
+                            </span>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="kanban-board" id="kanban-board">
-        @foreach (var column in Model.Columns)
-        {
-            <section class="kanban-column-wrapper">
-                <div class="card shadow-sm border-0 kanban-status-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-semibold">@Localizer[$"Status_{column.Status}"]</span>
-                        <span class="badge text-bg-@StatusBadge(column.Status) js-column-count">@column.Orders.Count</span>
-                    </div>
-                    <div class="kanban-column" data-status="@column.Status" id="col-@column.Status">
-                        @foreach (var order in column.Orders.OrderBy(o => o.CreatedAtUtc))
-                        {
-                            var slaClass = order.SLAUntil.HasValue && order.SLAUntil < DateTime.UtcNow ? "text-bg-danger" : "text-bg-success";
-                            var createdAt = order.CreatedAtUtc.ToLocalTime();
-                            <article class="kanban-item" data-id="@order.Id">
-                                <div class="kanban-item-header">
-                                    <div class="kanban-item-number">
-                                        <i class="bi bi-hash"></i>
-                                        <span>@order.Number</span>
+        <div class="kanban-board" id="kanban-board">
+            @foreach (var column in Model.Columns)
+            {
+                <section class="kanban-column-wrapper">
+                    <div class="card shadow-sm border-0 kanban-status-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">@Localizer[$"Status_{column.Status}"]</span>
+                            <span class="badge text-bg-@StatusBadge(column.Status) js-column-count">@column.Orders.Count</span>
+                        </div>
+                        <div class="kanban-column" data-status="@column.Status" id="col-@column.Status">
+                            @foreach (var order in column.Orders.OrderBy(o => o.CreatedAtUtc))
+                            {
+                                var slaClass = order.SLAUntil.HasValue && order.SLAUntil < DateTime.UtcNow ? "text-bg-danger" : "text-bg-success";
+                                var createdAt = order.CreatedAtUtc.ToLocalTime();
+                                <article class="kanban-item" data-id="@order.Id">
+                                    <div class="kanban-item-header">
+                                        <div class="kanban-item-number">
+                                            <i class="bi bi-hash"></i>
+                                            <span>@order.Number</span>
+                                        </div>
+                                        <span class="badge text-bg-@PriorityBadge(order.Priority)">@PriorityTitle(order.Priority)</span>
                                     </div>
-                                    <span class="badge text-bg-@PriorityBadge(order.Priority)">@PriorityTitle(order.Priority)</span>
+                                    <div class="kanban-item-body">
+                                        <div class="kanban-item-line text-muted">
+                                            <i class="bi bi-cpu"></i>
+                                            <span>@order.Device</span>
+                                        </div>
+                                        <div class="kanban-item-line">
+                                            <i class="bi bi-person"></i>
+                                            <span>@order.ClientName</span>
+                                        </div>
+                                    </div>
+                                    <div class="kanban-item-footer">
+                                        <span class="badge @slaClass">@Localizer["SlaShortLabel"]: @(order.SLAUntil?.ToString("dd.MM") ?? Localizer["NoValuePlaceholder"].Value)</span>
+                                        <div class="kanban-item-meta text-muted small">
+                                            <i class="bi bi-calendar-event"></i>
+                                            <span class="fw-semibold">@Localizer["CreatedAtLabel"]:</span>
+                                            <span>@createdAt.ToString("dd.MM.yyyy HH:mm")</span>
+                                        </div>
+                                    </div>
+                                </article>
+                            }
+                            <div class="kanban-empty@(column.Orders.Any() ? " d-none" : string.Empty)">
+                                <div class="kanban-empty-icon">
+                                    <i class="bi bi-columns-gap"></i>
                                 </div>
-                                <div class="kanban-item-body">
-                                    <div class="kanban-item-line text-muted">
-                                        <i class="bi bi-cpu"></i>
-                                        <span>@order.Device</span>
-                                    </div>
-                                    <div class="kanban-item-line">
-                                        <i class="bi bi-person"></i>
-                                        <span>@order.ClientName</span>
-                                    </div>
-                                </div>
-                                <div class="kanban-item-footer">
-                                    <span class="badge @slaClass">@Localizer["SlaShortLabel"]: @(order.SLAUntil?.ToString("dd.MM") ?? Localizer["NoValuePlaceholder"].Value)</span>
-                                    <div class="kanban-item-meta text-muted small">
-                                        <i class="bi bi-calendar-event"></i>
-                                        <span class="fw-semibold">@Localizer["CreatedAtLabel"]:</span>
-                                        <span>@createdAt.ToString("dd.MM.yyyy HH:mm")</span>
-                                    </div>
-                                </div>
-                            </article>
-                        }
-                        <div class="kanban-empty@(column.Orders.Any() ? " d-none" : string.Empty)">
-                            <div class="kanban-empty-icon">
-                                <i class="bi bi-columns-gap"></i>
+                                <div class="kanban-empty-text">@Localizer["ColumnEmptyMessage"]</div>
                             </div>
-                            <div class="kanban-empty-text">@Localizer["ColumnEmptyMessage"]</div>
                         </div>
                     </div>
-                </div>
-            </section>
-        }
+                </section>
+            }
+        </div>
     </div>
 </div>
 @section Scripts {
