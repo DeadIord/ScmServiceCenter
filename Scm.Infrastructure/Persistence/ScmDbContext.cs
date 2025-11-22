@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Configurations;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 
 namespace Scm.Infrastructure.Persistence;
 

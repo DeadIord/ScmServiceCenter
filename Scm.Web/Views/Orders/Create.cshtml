@@ -8,6 +8,7 @@
     ViewData["Title"] = Localizer["Title"].Value;
     var accountOptions = ViewBag.Accounts as List<SelectListItem> ?? new();
     var contactOptions = ViewBag.Contacts as List<SelectListItem> ?? new();
+    var technicianOptions = ViewBag.Technicians as List<SelectListItem> ?? new();
     var accountSearch = ViewData["AccountSearch"] as string ?? string.Empty;
     var contactSearch = ViewData["ContactSearch"] as string ?? string.Empty;
     List<SelectListItem> priorityOptions = Enum.GetValues<OrderPriority>()
@@ -22,6 +23,12 @@
     if (contactPlaceholderOption is not null)
     {
         contactPlaceholderOption.Text = Localizer["ContactPlaceholder"].Value;
+    }
+
+    var technicianPlaceholderOption = technicianOptions.FirstOrDefault(option => string.IsNullOrEmpty(option.Value));
+    if (technicianPlaceholderOption is not null)
+    {
+        technicianPlaceholderOption.Text = Localizer["TechnicianPlaceholder"].Value;
     }
 }
 <div class="row g-4 justify-content-center">
@@ -66,6 +73,11 @@
                     <label class="form-label">@Localizer["ContactLabel"]</label>
                     <select class="form-select" asp-for="ContactId" asp-items="contactOptions"></select>
                     <span asp-validation-for="ContactId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">@Localizer["TechnicianLabel"]</label>
+                    <select class="form-select" asp-for="AssignedUserId" asp-items="technicianOptions"></select>
+                    <span asp-validation-for="AssignedUserId" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">@Localizer["ClientNameLabel"]</label>

@@ -111,4 +111,10 @@
   <data name="ContactPlaceholder" xml:space="preserve">
     <value>— Без контакта —</value>
   </data>
+  <data name="TechnicianLabel" xml:space="preserve">
+    <value>Исполнитель</value>
+  </data>
+  <data name="TechnicianPlaceholder" xml:space="preserve">
+    <value>— Без исполнителя —</value>
+  </data>
 </root>

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Scm.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Scm.Infrastructure.Persistence;
 namespace Scm.Infrastructure.Migrations
 {
     [DbContext(typeof(ScmDbContext))]
-    partial class ScmDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251117195021_AddOrderAssignedUser")]
+    partial class AddOrderAssignedUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

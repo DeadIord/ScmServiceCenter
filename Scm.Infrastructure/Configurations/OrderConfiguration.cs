@@ -52,6 +52,8 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(o => o.ContactId);
 
+        builder.HasIndex(o => o.AssignedUserId);
+
         builder.HasIndex(o => o.SLAUntil);
 
         builder.Property(o => o.Priority)
@@ -74,6 +76,11 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasOne(o => o.Contact)
             .WithMany(c => c.Orders)
             .HasForeignKey(o => o.ContactId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(o => o.AssignedUser)
+            .WithMany()
+            .HasForeignKey(o => o.AssignedUserId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

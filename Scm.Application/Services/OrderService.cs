@@ -23,6 +23,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             ClientEmail = dto.ClientEmail.Trim(),
             AccountId = dto.AccountId,
             ContactId = dto.ContactId,
+            AssignedUserId = string.IsNullOrWhiteSpace(dto.AssignedUserId) ? null : dto.AssignedUserId.Trim(),
             Device = dto.Device.Trim(),
             Serial = string.IsNullOrWhiteSpace(dto.Serial) ? null : dto.Serial.Trim(),
             Defect = dto.Defect.Trim(),
@@ -91,7 +92,9 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
 
     private IQueryable<Order> BuildQueueQuery(string? in_q, OrderStatus? in_status)
     {
-        var query = _dbContext.Orders.AsNoTracking();
+        var query = _dbContext.Orders
+            .Include(o => o.AssignedUser)
+            .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(in_q))
         {
@@ -120,6 +123,7 @@ public sealed class OrderService(ScmDbContext dbContext) : IOrderService
             .Include(o => o.Invoices)
             .Include(o => o.Account)
             .Include(o => o.Contact)
+            .Include(o => o.AssignedUser)
             .AsSplitQuery()
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }

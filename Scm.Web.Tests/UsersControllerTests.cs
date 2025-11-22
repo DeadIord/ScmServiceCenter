@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 using Scm.Web.Areas.Admin.Controllers;
 using Scm.Web.Areas.Admin.Models;
 using Xunit;

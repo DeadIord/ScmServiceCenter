@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Authorization;
 using Scm.Web.Models.ReportBuilder;

@@ -39,6 +39,29 @@
 
         return ret;
     }
+
+    string GetTechnicianName(Order in_order)
+    {
+        string ret;
+        if (in_order.AssignedUser is null)
+        {
+            ret = string.Empty;
+        }
+        else if (!string.IsNullOrWhiteSpace(in_order.AssignedUser.DisplayName))
+        {
+            ret = in_order.AssignedUser.DisplayName;
+        }
+        else if (!string.IsNullOrWhiteSpace(in_order.AssignedUser.UserName))
+        {
+            ret = in_order.AssignedUser.UserName;
+        }
+        else
+        {
+            ret = in_order.AssignedUser.Email ?? string.Empty;
+        }
+
+        return string.IsNullOrWhiteSpace(ret) ? Localizer["NoValuePlaceholder"].Value : ret;
+    }
 }
 <h1 class="section-title mb-4">@Localizer["SectionTitle"]</h1>
 <div class="kanban-page">
@@ -97,6 +120,10 @@
                                     <div class="kanban-item-line">
                                         <i class="bi bi-person"></i>
                                         <span>@order.ClientName</span>
+                                    </div>
+                                    <div class="kanban-item-line">
+                                        <i class="bi bi-person-gear"></i>
+                                        <span>@GetTechnicianName(order)</span>
                                     </div>
                                 </div>
                                 <div class="kanban-item-footer">

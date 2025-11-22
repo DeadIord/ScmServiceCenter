@@ -111,4 +111,10 @@
   <data name="ContactPlaceholder" xml:space="preserve">
     <value>— No contact —</value>
   </data>
+  <data name="TechnicianLabel" xml:space="preserve">
+    <value>Technician</value>
+  </data>
+  <data name="TechnicianPlaceholder" xml:space="preserve">
+    <value>— Not assigned —</value>
+  </data>
 </root>

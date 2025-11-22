@@ -25,6 +25,9 @@ public sealed class CreateOrderDto
     public Guid? ContactId { get; set; }
         = null;
 
+    public string? AssignedUserId { get; set; }
+        = null;
+
     [Required]
     [StringLength(128)]
     public string Device { get; set; } = string.Empty;

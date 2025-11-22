@@ -161,6 +161,7 @@
                             <th class="text-center">№</th>
                             <th>ЗАКАЗ</th>
                             <th>КЛИЕНТ</th>
+                            <th>ИСПОЛНИТЕЛЬ</th>
                             <th>УСТРОЙСТВО</th>
                             <th>СТАТУС</th>
                             <th>ПРИОРИТЕТ</th>
@@ -208,6 +209,16 @@
                                                 }
                                             </div>
                                         </div>
+                                    </td>
+                                    <td>
+                                        @if (string.IsNullOrWhiteSpace(order.AssignedUserName))
+                                        {
+                                            <span class="text-muted">Не назначен</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@order.AssignedUserName</span>
+                                        }
                                     </td>
                                     <td>
                                         <div class="device-name">@order.Device</div>

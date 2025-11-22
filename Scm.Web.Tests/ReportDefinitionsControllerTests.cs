@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Scm.Application.Services;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Controllers;
 using Scm.Web.Models.ReportBuilder;

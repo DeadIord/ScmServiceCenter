@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scm.Application.Services;
 using Scm.Application.Validators;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Authorization;
 using Scm.Web.Localization;
