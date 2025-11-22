@@ -2,8 +2,8 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @using System.Globalization
 @using System.Text.Json
-@inject SignInManager<Scm.Infrastructure.Identity.ApplicationUser> SignInManager
-@inject UserManager<Scm.Infrastructure.Identity.ApplicationUser> UserManager
+@inject SignInManager<Scm.Domain.Identity.ApplicationUser> SignInManager
+@inject UserManager<Scm.Domain.Identity.ApplicationUser> UserManager
 @inject IViewLocalizer Localizer
 @{
     bool isAuthenticated = SignInManager.IsSignedIn(User);

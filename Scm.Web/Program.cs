@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scm.Application.Services;
 using Scm.Application.Validators;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 using Scm.Infrastructure.Persistence;
 using Scm.Web.Authorization;
 using Scm.Web.Localization;
@@ -67,6 +67,7 @@ builder.Services.AddScoped<IReportBuilderService, ReportBuilderService>();
 builder.Services.AddSingleton<IMoneyConverter, MoneyConverter>();
 builder.Services.AddScoped<IReportingService, ReportingService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITechnicianTaskService, TechnicianTaskService>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AuthorizationPolicies.StockAccess, policy =>

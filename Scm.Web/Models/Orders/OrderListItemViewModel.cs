@@ -23,4 +23,6 @@ public sealed class OrderListItemViewModel
     public DateTime? SLAUntil { get; init; }
 
     public DateTime CreatedAtUtc { get; init; }
+
+    public string AssignedUserName { get; init; } = string.Empty;
 }

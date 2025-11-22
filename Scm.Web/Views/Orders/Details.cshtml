@@ -55,6 +55,29 @@
         if (parts.Length >= 2) return $"{parts[0][0]}{parts[1][0]}".ToUpper();
         return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
     }
+
+    string GetAssignedUserName()
+    {
+        string ret;
+        if (Model.Order.AssignedUser is null)
+        {
+            ret = string.Empty;
+        }
+        else if (!string.IsNullOrWhiteSpace(Model.Order.AssignedUser.DisplayName))
+        {
+            ret = Model.Order.AssignedUser.DisplayName;
+        }
+        else if (!string.IsNullOrWhiteSpace(Model.Order.AssignedUser.UserName))
+        {
+            ret = Model.Order.AssignedUser.UserName;
+        }
+        else
+        {
+            ret = Model.Order.AssignedUser.Email ?? string.Empty;
+        }
+
+        return string.IsNullOrWhiteSpace(ret) ? "Не назначен" : ret;
+    }
     
     // Определяем текущий индекс статуса для прогресс-бара
     int GetStatusIndex(OrderStatus status) => status switch
@@ -78,7 +101,7 @@
         <!-- Header -->
         <div class="order-header mb-4 justify-content-start gap-3">
             <div class="d-flex align-items-center gap-3">
-                <a href="@Url.Action("Index")" class="btn btn-icon">
+                <a href="@(string.IsNullOrWhiteSpace(Model.ReturnUrl) ? Url.Action("Index") : Model.ReturnUrl)" class="btn btn-icon">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <div>
@@ -188,6 +211,13 @@
                                     <div>
                                         <div class="contact-label">Телефон:</div>
                                         <a href="tel:@Model.Order.ClientPhone" class="contact-value">@Model.Order.ClientPhone</a>
+                                    </div>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-person-gear"></i>
+                                    <div>
+                                        <div class="contact-label">Исполнитель:</div>
+                                        <div class="contact-value">@GetAssignedUserName()</div>
                                     </div>
                                 </div>
                             </div>

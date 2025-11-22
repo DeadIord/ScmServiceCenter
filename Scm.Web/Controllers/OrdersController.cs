@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Scm.Application.DTOs;
 using Scm.Application.Services;
 using Scm.Domain.Entities;
+using Scm.Domain.Identity;
 using Scm.Web.Models.Orders;
 using Scm.Web.Authorization;
 
@@ -22,6 +24,8 @@ public class OrdersController : Controller
     private readonly IAccountService m_accountService;
     private readonly IContactService m_contactService;
     private readonly IMailService m_mailService;
+    private readonly UserManager<ApplicationUser> m_userManager;
+    private readonly RoleManager<IdentityRole> m_roleManager;
     private readonly ILogger<OrdersController> m_logger;
     private readonly IStringLocalizer<OrdersController> m_localizer;
     public OrdersController(
@@ -31,6 +35,8 @@ public class OrdersController : Controller
         IAccountService in_accountService,
         IContactService in_contactService,
         IMailService in_mailService,
+        UserManager<ApplicationUser> in_userManager,
+        RoleManager<IdentityRole> in_roleManager,
         ILogger<OrdersController> in_logger,
         IStringLocalizer<OrdersController> in_localizer)
     {
@@ -40,6 +46,8 @@ public class OrdersController : Controller
         m_accountService = in_accountService;
         m_contactService = in_contactService;
         m_mailService = in_mailService;
+        m_userManager = in_userManager;
+        m_roleManager = in_roleManager;
         m_logger = in_logger;
         m_localizer = in_localizer;
     }
@@ -53,23 +61,24 @@ public class OrdersController : Controller
         {
             Query = q,
             Status = status,
-            Orders = pagedOrders.Items.Select(o => new OrderListItemViewModel
-            {
-                Id = o.Id,
-                Number = o.Number,
-                ClientName = o.ClientName,
-                ClientPhone = o.ClientPhone,
-                ClientEmail = o.ClientEmail,
-                Device = o.Device,
-                Status = o.Status,
-                Priority = o.Priority,
-                SLAUntil = o.SLAUntil,
-                CreatedAtUtc = o.CreatedAtUtc
-            }).ToList(),
-            PageNumber = pagedOrders.PageNumber,
-            TotalPages = pagedOrders.TotalPages,
-            PageSize = pagedOrders.PageSize,
-            TotalCount = pagedOrders.TotalCount,
+                Orders = pagedOrders.Items.Select(o => new OrderListItemViewModel
+                {
+                    Id = o.Id,
+                    Number = o.Number,
+                    ClientName = o.ClientName,
+                    ClientPhone = o.ClientPhone,
+                    ClientEmail = o.ClientEmail,
+                    Device = o.Device,
+                    Status = o.Status,
+                    Priority = o.Priority,
+                    SLAUntil = o.SLAUntil,
+                    CreatedAtUtc = o.CreatedAtUtc,
+                    AssignedUserName = GetUserDisplayName(o.AssignedUser)
+                }).ToList(),
+                PageNumber = pagedOrders.PageNumber,
+                TotalPages = pagedOrders.TotalPages,
+                PageSize = pagedOrders.PageSize,
+                TotalCount = pagedOrders.TotalCount,
             StartRecord = pagedOrders.StartRecord,
             EndRecord = pagedOrders.EndRecord
         };
@@ -101,6 +110,7 @@ public class OrdersController : Controller
         }
 
         await PopulateCrmSelectionsAsync(dto.AccountId, accountSearch, dto.ContactId, contactSearch);
+        await PopulateTechnicianSelectionsAsync(dto.AssignedUserId);
         ViewData["AccountSearch"] = accountSearch;
         ViewData["ContactSearch"] = contactSearch;
         return View(dto);
@@ -134,9 +144,19 @@ public class OrdersController : Controller
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(dto.AssignedUserId))
+        {
+            var technician = await m_userManager.FindByIdAsync(dto.AssignedUserId);
+            if (technician is null || !await m_userManager.IsInRoleAsync(technician, "Technician"))
+            {
+                ModelState.AddModelError(nameof(dto.AssignedUserId), m_localizer["Error_TechnicianNotFound"].Value);
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             await PopulateCrmSelectionsAsync(dto.AccountId, accountSearch, dto.ContactId, contactSearch);
+            await PopulateTechnicianSelectionsAsync(dto.AssignedUserId);
             ViewData["AccountSearch"] = accountSearch;
             ViewData["ContactSearch"] = contactSearch;
             return View(dto);
@@ -148,7 +168,7 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, string? returnUrl = null)
     {
         var order = await m_orderService.GetAsync(id);
         if (order is null)
@@ -166,7 +186,8 @@ public class OrdersController : Controller
             Order = order,
             Messages = messages,
             ApprovedTotal = total,
-            ClientTrackingLink = trackingLink
+            ClientTrackingLink = trackingLink,
+            ReturnUrl = BuildReturnUrl(returnUrl)
         };
 
         return View(model);
@@ -224,6 +245,27 @@ public class OrdersController : Controller
         }
 
         return RedirectToAction(nameof(Details), new { id = orderId });
+    }
+
+    private string BuildReturnUrl(string? in_returnUrl)
+    {
+        var defaultUrl = Url.Action(nameof(Index)) ?? "/";
+
+        if (!string.IsNullOrWhiteSpace(in_returnUrl) && Url.IsLocalUrl(in_returnUrl))
+        {
+            return in_returnUrl;
+        }
+
+        var referer = Request.Headers.Referer.ToString();
+        if (!string.IsNullOrWhiteSpace(referer) && Uri.TryCreate(referer, UriKind.Absolute, out var refererUri))
+        {
+            if (Url.IsLocalUrl(refererUri.PathAndQuery))
+            {
+                return refererUri.PathAndQuery;
+            }
+        }
+
+        return defaultUrl;
     }
 
     [HttpPost]
@@ -417,6 +459,30 @@ public class OrdersController : Controller
             .ToList();
     }
 
+    private async Task PopulateTechnicianSelectionsAsync(string? in_selectedUserId)
+    {
+        bool hasTechnicianRole = await m_roleManager.RoleExistsAsync("Technician");
+        var technicians = hasTechnicianRole
+            ? await m_userManager.GetUsersInRoleAsync("Technician")
+            : new List<ApplicationUser>();
+
+        ViewBag.Technicians = technicians
+            .OrderBy(u => GetUserDisplayName(u))
+            .Select(u => new SelectListItem
+            {
+                Text = GetUserDisplayName(u),
+                Value = u.Id,
+                Selected = !string.IsNullOrWhiteSpace(in_selectedUserId) && u.Id == in_selectedUserId
+            })
+            .Prepend(new SelectListItem
+            {
+                Text = m_localizer["Selection_NoTechnician"].Value,
+                Value = string.Empty,
+                Selected = string.IsNullOrWhiteSpace(in_selectedUserId)
+            })
+            .ToList();
+    }
+
     private string GetStatusTitle(OrderStatus in_status)
     {
         string ret;
@@ -429,6 +495,29 @@ public class OrdersController : Controller
         else
         {
             ret = localized.Value;
+        }
+
+        return ret;
+    }
+
+    private string GetUserDisplayName(ApplicationUser? in_user)
+    {
+        string ret;
+        if (in_user is null)
+        {
+            ret = string.Empty;
+        }
+        else if (!string.IsNullOrWhiteSpace(in_user.DisplayName))
+        {
+            ret = in_user.DisplayName;
+        }
+        else if (!string.IsNullOrWhiteSpace(in_user.UserName))
+        {
+            ret = in_user.UserName;
+        }
+        else
+        {
+            ret = in_user.Email ?? string.Empty;
         }
 
         return ret;

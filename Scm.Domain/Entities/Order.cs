@@ -1,3 +1,5 @@
+using Scm.Domain.Identity;
+
 namespace Scm.Domain.Entities;
 
 public enum OrderPriority
@@ -36,6 +38,9 @@ public sealed class Order
     public Guid? ContactId { get; set; }
         = null;
 
+    public string? AssignedUserId { get; set; }
+        = null;
+
     public string Device { get; set; } = string.Empty;
 
     public string? Serial { get; set; }
@@ -62,5 +67,8 @@ public sealed class Order
         = null;
 
     public Contact? Contact { get; set; }
+        = null;
+
+    public Identity.ApplicationUser? AssignedUser { get; set; }
         = null;
 }

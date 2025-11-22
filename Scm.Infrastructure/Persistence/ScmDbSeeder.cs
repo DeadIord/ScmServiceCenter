@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using Scm.Domain.Entities;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 
 namespace Scm.Infrastructure.Persistence;
 

@@ -52,6 +52,9 @@
   <data name="Selection_NoContact" xml:space="preserve">
     <value>— Без контакта —</value>
   </data>
+  <data name="Selection_NoTechnician" xml:space="preserve">
+    <value>— Без исполнителя —</value>
+  </data>
   <data name="Status_Closed" xml:space="preserve">
     <value>Закрыты</value>
   </data>
@@ -69,5 +72,8 @@
   </data>
   <data name="Status_WaitingApproval" xml:space="preserve">
     <value>Ожидают согласования</value>
+  </data>
+  <data name="Error_TechnicianNotFound" xml:space="preserve">
+    <value>Указанный исполнитель не найден или не имеет роли Technician.</value>
   </data>
 </root>

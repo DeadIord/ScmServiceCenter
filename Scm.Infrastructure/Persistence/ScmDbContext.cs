@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Scm.Domain.Entities;
 using Scm.Infrastructure.Configurations;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 
 namespace Scm.Infrastructure.Persistence;
 
@@ -20,6 +20,7 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
     public DbSet<TicketAttachment> TicketAttachments => Set<TicketAttachment>();
+    public DbSet<TechnicianTask> TechnicianTasks => Set<TechnicianTask>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -37,5 +38,6 @@ public class ScmDbContext(DbContextOptions<ScmDbContext> options) : IdentityDbCo
         builder.ApplyConfiguration(new TicketConfiguration());
         builder.ApplyConfiguration(new TicketMessageConfiguration());
         builder.ApplyConfiguration(new TicketAttachmentConfiguration());
+        builder.ApplyConfiguration(new TechnicianTaskConfiguration());
     }
 }

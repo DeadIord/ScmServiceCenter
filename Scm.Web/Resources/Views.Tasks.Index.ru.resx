@@ -28,9 +28,6 @@
     <value>Открыть календарь</value>
   </data>
   <data name="EmptyTitle" xml:space="preserve">
-    <value>Раздел в разработке</value>
-  </data>
-  <data name="EmptyDescription" xml:space="preserve">
-    <value>Доска задач скоро будет доступна. Мы завершаем подготовку.</value>
+    <value>Задачи отсутсвуют</value>
   </data>
 </root>

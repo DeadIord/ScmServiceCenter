@@ -52,6 +52,9 @@ SCM Service Center</value>
   <data name="Selection_NoContact" xml:space="preserve">
     <value>— Without contact —</value>
   </data>
+  <data name="Selection_NoTechnician" xml:space="preserve">
+    <value>— Without technician —</value>
+  </data>
   <data name="Status_Closed" xml:space="preserve">
     <value>Closed</value>
   </data>
@@ -69,5 +72,8 @@ SCM Service Center</value>
   </data>
   <data name="Status_WaitingApproval" xml:space="preserve">
     <value>Awaiting approval</value>
+  </data>
+  <data name="Error_TechnicianNotFound" xml:space="preserve">
+    <value>Selected technician not found or not in Technician role.</value>
   </data>
 </root>

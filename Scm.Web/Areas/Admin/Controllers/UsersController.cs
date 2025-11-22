@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Scm.Infrastructure.Identity;
+using Scm.Domain.Identity;
 
 using Scm.Web.Areas.Admin.Models.Users;
 using Scm.Web.Authorization;

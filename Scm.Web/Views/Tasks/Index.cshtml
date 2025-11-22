@@ -1,32 +1,42 @@
 @using Microsoft.AspNetCore.Mvc.Localization
+@using Scm.Domain.Entities
+@using Scm.Web.Models.Tasks
+@model TasksIndexViewModel
 @inject IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["Title"].Value;
-    @* var tasks = new[] {
-        new { Id = 1, Title = "Настройка сервера", Description = "Установка и настройка production сервера", Priority = "high", Status = "in-progress", DueDate = DateTime.Now.AddDays(2), Assignee = "Иван Петров" },
-        new { Id = 2, Title = "Обновление документации", Description = "Актуализация технической документации проекта", Priority = "medium", Status = "pending", DueDate = DateTime.Now.AddDays(5), Assignee = "Мария Сидорова" },
-        new { Id = 3, Title = "Тестирование API", Description = "Проведение unit и integration тестов", Priority = "high", Status = "in-progress", DueDate = DateTime.Now.AddDays(1), Assignee = "Алексей Смирнов" },
-        new { Id = 4, Title = "Оптимизация базы данных", Description = "Создание индексов и оптимизация запросов", Priority = "medium", Status = "pending", DueDate = DateTime.Now.AddDays(7), Assignee = "Иван Петров" },
-        new { Id = 5, Title = "Код-ревью модуля авторизации", Description = "Проверка и согласование изменений", Priority = "low", Status = "completed", DueDate = DateTime.Now.AddDays(-2), Assignee = "Мария Сидорова" },
-    }; *@
+    var tasks = Model.Tasks;
+    var totalTasks = Model.TotalTasks;
+    var completedTasks = Model.CompletedTasks;
+    var inProgressTasks = Model.InProgressTasks;
+    var pendingTasks = Model.PendingTasks;
 
-    var tasks = Array.Empty<dynamic>();
-    var totalTasks = tasks.Length;
-    var completedTasks = 0;
-    var inProgressTasks = 0;
-    var pendingTasks = 0;
-    foreach (var t in tasks)
+    string GetPriorityClass(OrderPriority priority) => priority switch
     {
-        string status = (string)t.Status; 
-        if (status == "completed") completedTasks++;
-        else if (status == "in-progress") inProgressTasks++;
-        else if (status == "pending") pendingTasks++;
-    }
+        OrderPriority.High or OrderPriority.Critical => "high",
+        OrderPriority.Low => "low",
+        _ => "medium"
+    };
+
+    string GetStatusClass(TechnicianTaskStatus status) => status switch
+    {
+        TechnicianTaskStatus.Completed => "completed",
+        TechnicianTaskStatus.InProgress => "in-progress",
+        TechnicianTaskStatus.Cancelled => "cancelled",
+        _ => "pending"
+    };
+
+    string GetStatusLabel(TechnicianTaskStatus status) => status switch
+    {
+        TechnicianTaskStatus.Completed => "Завершена",
+        TechnicianTaskStatus.InProgress => "В работе",
+        TechnicianTaskStatus.Cancelled => "Отменена",
+        _ => "Ожидает"
+    };
 }
 <link rel="stylesheet" href="~/css/tasks/tasks_index.css" asp-append-version="true" />
 <div class="main-body">
     <div class="tasks-container">
-        @* <!-- Header --> *@
         <div class="tasks-header">
             <div class="header-title-section">
                 <div class="header-icon">
@@ -36,9 +46,18 @@
                     <h1>@Localizer["Heading"]</h1>
                     <p>@Localizer["Description"]</p>
                 </div>
-            </div>           
+            </div>
+            <div class="header-actions">
+                <a asp-controller="Tasks" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Обновить
+                </a>
+            </div>
+                    <i class="bi bi-funnel"></i>
+                    @Localizer["SecondaryAction"]
+                </button>
+            </div>
         </div>
-        @* <!-- Statistics Cards --> *@
         <div class="stats-row">
             <div class="stats-card">
                 <div class="stats-card-content">
@@ -89,7 +108,6 @@
                 </div>
             </div>
         </div>
-        @* <!-- Filter Card --> *@
         <div class="filter-card">
             <h2 class="filter-title">
                 <i class="bi bi-funnel"></i>
@@ -98,25 +116,16 @@
             <form class="filter-form" method="get">
                 <div class="filter-group">
                     <label class="filter-label">Поиск</label>
-                    <input class="form-control" type="search" name="q" placeholder="Название или описание задачи" />
+                    <input class="form-control" type="search" name="in_q" value="@Model.Query" placeholder="Номер заказа или описание" />
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Статус</label>
-                    <select class="form-select" name="status">
+                    <select class="form-select" name="in_status">
                         <option value="">Все статусы</option>
-                        <option value="pending">Ожидает</option>
-                        <option value="in-progress">В работе</option>
-                        <option value="completed">Завершено</option>
-                        <option value="cancelled">Отменено</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label class="filter-label">Приоритет</label>
-                    <select class="form-select" name="priority">
-                        <option value="">Все приоритеты</option>
-                        <option value="high">Высокий</option>
-                        <option value="medium">Средний</option>
-                        <option value="low">Низкий</option>
+                        <option value="Pending" selected="@(Model.Status == TechnicianTaskStatus.Pending ? "selected" : null)">Ожидает</option>
+                        <option value="InProgress" selected="@(Model.Status == TechnicianTaskStatus.InProgress ? "selected" : null)">В работе</option>
+                        <option value="Completed" selected="@(Model.Status == TechnicianTaskStatus.Completed ? "selected" : null)">Завершено</option>
+                        <option value="Cancelled" selected="@(Model.Status == TechnicianTaskStatus.Cancelled ? "selected" : null)">Отменено</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -127,7 +136,6 @@
                 </div>
             </form>
         </div>
-        @* <!-- Table Card --> *@
         <div class="tasks-table-card">
             @if (!tasks.Any())
             {
@@ -136,11 +144,6 @@
                         <i class="bi bi-list-task"></i>
                     </div>
                     <h3 class="empty-state-title">@Localizer["EmptyTitle"]</h3>
-                    <p class="empty-state-text">@Localizer["EmptyDescription"]</p>
-                    <button type="button" class="btn btn-primary">
-                        <i class="bi bi-plus-lg"></i>
-                        @Localizer["PrimaryAction"]
-                    </button>
                 </div>
             }
             else
@@ -160,86 +163,68 @@
                         <tbody>
                             @foreach (var task in tasks)
                             {
-                                string assignee = (string)task.Assignee;
-                                string title = (string)task.Title;
-                                string description = (string)task.Description;
-                                string priority = (string)task.Priority;
-                                string status = (string)task.Status;
-                                DateTime dueDate = (DateTime)task.DueDate;
-
-                                var words = assignee.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                                var initials = string.Join("", words.Take(2).Select(w => w[0])).ToUpper();
-                                var isOverdue = dueDate < DateTime.Now && status != "completed";
-                                
+                                var priorityClass = GetPriorityClass(task.Priority);
+                                var statusClass = GetStatusClass(task.Status);
+                                var statusLabel = GetStatusLabel(task.Status);
+                                var dueLabel = task.DueDateUtc.HasValue ? task.DueDateUtc.Value.ToLocalTime().ToString("dd.MM.yyyy") : "Не задан";
                                 <tr>
                                     <td>
                                         <div class="task-name-cell">
-                                            <div class="task-icon">@initials</div>
+                                            <div class="task-icon">@task.Initials</div>
                                             <div class="task-info">
-                                                <div class="task-title">@title</div>
-                                                <div class="task-description">@description</div>
+                                                <div class="task-title">@task.Title</div>
+                                                <div class="task-description">@task.Description</div>
+                                                @if (!string.IsNullOrEmpty(task.OrderNumber))
+                                                {
+                                                    <div class="task-meta">Заказ: @task.OrderNumber</div>
+                                                }
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="priority-badge @priority">
-                                            @if (priority == "high")
+                                        <span class="priority-badge @priorityClass">
+                                            @if (task.Priority == OrderPriority.High || task.Priority == OrderPriority.Critical)
                                             {
                                                 <i class="bi bi-arrow-up-circle"></i>
                                                 <text>Высокий</text>
                                             }
-                                            else if (priority == "medium")
-                                            {
-                                                <i class="bi bi-dash-circle"></i>
-                                                <text>Средний</text>
-                                            }
-                                            else
+                                            else if (task.Priority == OrderPriority.Low)
                                             {
                                                 <i class="bi bi-arrow-down-circle"></i>
                                                 <text>Низкий</text>
                                             }
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge @status">
-                                            @if (status == "pending")
-                                            {
-                                                <i class="bi bi-clock"></i>
-                                                <text>Ожидает</text>
-                                            }
-                                            else if (status == "in-progress")
-                                            {
-                                                <i class="bi bi-arrow-repeat"></i>
-                                                <text>В работе</text>
-                                            }
-                                            else if (status == "completed")
-                                            {
-                                                <i class="bi bi-check-circle"></i>
-                                                <text>Завершено</text>
-                                            }
                                             else
                                             {
-                                                <i class="bi bi-x-circle"></i>
-                                                <text>Отменено</text>
+                                                <i class="bi bi-circle"></i>
+                                                <text>Средний</text>
                                             }
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="date-display @(isOverdue ? "overdue" : "")">
-                                            @dueDate.ToString("dd.MM.yyyy")
+                                        <span class="status-badge @statusClass">
+                                            @statusLabel
                                         </span>
                                     </td>
                                     <td>
-                                        <span>@assignee</span>
+                                        <div class="date-cell @(task.IsOverdue ? "overdue" : string.Empty)">
+                                            <i class="bi bi-calendar3"></i>
+                                            <div class="date-info">
+                                                <div class="date-label">@dueLabel</div>
+                                                <div class="date-sub">Создана @task.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy")</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
-                                        <div class="action-buttons">
-                                            <a class="btn-icon" href="#" title="Просмотр">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a class="btn-icon" href="#" title="Редактировать">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
+                                        <div class="assignee-cell">
+                                            <div class="assignee-avatar">@task.Initials</div>
+                                            <div class="assignee-info">
+                                                <div class="assignee-name">@task.Assignee</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <div class="btn-group">
+                                            <a asp-controller="Orders" asp-action="Details" asp-route-id="@task.OrderId" asp-route-returnUrl="@Url.Action("Index", "Tasks", new { in_q = Model.Query, in_status = Model.Status })" class="btn btn-link">Подробнее</a>
                                         </div>
                                     </td>
                                 </tr>
