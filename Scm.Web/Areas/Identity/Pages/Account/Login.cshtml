@@ -1,0 +1,74 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Вход в систему";
+    ViewData["Footer"] = false;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card shadow-sm rounded-4 border-0">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary mb-3" style="width: 72px; height: 72px;">
+                            <i class="bi bi-shield-lock" style="font-size: 32px;"></i>
+                        </div>
+                        <h2 class="fw-semibold mb-1">Вход для сотрудников</h2>
+                        <p class="text-muted mb-0">Доступ только для зарегистрированных пользователей. Регистрацию выполняет администратор.</p>
+                    </div>
+
+                    <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Password" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" />
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="fw-semibold mb-2">Настройки входа</p>
+                            <div class="d-flex flex-column gap-2">
+                                <label class="form-check border rounded-3 p-3 m-0 d-flex align-items-start">
+                                    <input class="form-check-input mt-1" asp-for="Input.RememberMe" />
+                                    <span class="ms-3">
+                                        <span class="fw-semibold d-block">Запомнить меня</span>
+                                        <small class="text-muted">Оставаться в системе на этом устройстве.</small>
+                                    </span>
+                                </label>
+
+                                <label class="form-check border rounded-3 p-3 m-0 d-flex align-items-start bg-light-subtle">
+                                    <input class="form-check-input mt-1" type="checkbox" checked disabled />
+                                    <span class="ms-3">
+                                        <span class="fw-semibold d-block">Доступ только для сотрудников</span>
+                                        <small class="text-muted">Регистрация новых аккаунтов выполняется администратором.</small>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Войти</button>
+
+                        <div class="alert alert-secondary d-flex align-items-center mb-0" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <div>
+                                При возникновении проблем обратитесь к администратору для проверки учётной записи.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
