@@ -11,6 +11,8 @@ public interface IContactService
 
     Task<Contact?> GetAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<Contact?> FindByIdentityAsync(string? in_email, string? in_phone, CancellationToken in_cancellationToken = default);
+
     Task<Contact> CreateAsync(ContactInputDto dto, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(Guid id, ContactInputDto dto, CancellationToken cancellationToken = default);

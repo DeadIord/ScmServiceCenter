@@ -44,7 +44,7 @@ public sealed class OrderService(
 
     public async Task<List<Order>> GetQueueAsync(string? q, OrderStatus? status, CancellationToken cancellationToken = default)
     {
-        var query = BuildQueueQuery(q, status);
+        var query = BuildQueueQuery(q, status, null);
 
         return await query
             .OrderBy(o => o.Status)
@@ -57,12 +57,13 @@ public sealed class OrderService(
         OrderStatus? in_status,
         int in_pageNumber,
         int in_pageSize,
+        ClientOrderAccessFilter? in_clientFilter = null,
         CancellationToken in_cancellationToken = default)
     {
         int pageNumber = Math.Max(1, in_pageNumber);
         int pageSize = Math.Clamp(in_pageSize, 1, 100);
 
-        var query = BuildQueueQuery(in_q, in_status);
+        var query = BuildQueueQuery(in_q, in_status, in_clientFilter);
 
         var totalCount = await query.CountAsync(in_cancellationToken);
 
@@ -95,11 +96,35 @@ public sealed class OrderService(
         };
     }
 
-    private IQueryable<Order> BuildQueueQuery(string? in_q, OrderStatus? in_status)
+    private IQueryable<Order> BuildQueueQuery(
+        string? in_q,
+        OrderStatus? in_status,
+        ClientOrderAccessFilter? in_clientFilter)
     {
         var query = m_dbContext.Orders
             .Include(o => o.AssignedUser)
+            .Include(o => o.Contact)
             .AsNoTracking();
+
+        if (in_clientFilter is not null && in_clientFilter.HasAny)
+        {
+            var contactId = in_clientFilter.ContactId;
+            var email = string.IsNullOrWhiteSpace(in_clientFilter.Email)
+                ? null
+                : in_clientFilter.Email.Trim().ToLowerInvariant();
+            var phone = string.IsNullOrWhiteSpace(in_clientFilter.Phone)
+                ? null
+                : in_clientFilter.Phone.Trim();
+
+            query = query.Where(o =>
+                (contactId.HasValue && contactId.Value != Guid.Empty && o.ContactId == contactId.Value)
+                || (email != null && (
+                    (!string.IsNullOrWhiteSpace(o.ClientEmail) && o.ClientEmail.ToLower() == email)
+                    || (o.Contact != null && o.Contact.Email.ToLower() == email)))
+                || (phone != null && (
+                    (!string.IsNullOrWhiteSpace(o.ClientPhone) && o.ClientPhone == phone)
+                    || (o.Contact != null && o.Contact.Phone == phone))));
+        }
 
         if (!string.IsNullOrWhiteSpace(in_q))
         {

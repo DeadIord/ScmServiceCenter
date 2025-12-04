@@ -58,6 +58,27 @@ public sealed class ContactService(ScmDbContext dbContext) : IContactService
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
+    public async Task<Contact?> FindByIdentityAsync(
+        string? in_email,
+        string? in_phone,
+        CancellationToken in_cancellationToken = default)
+    {
+        var email = string.IsNullOrWhiteSpace(in_email) ? null : in_email.Trim().ToLowerInvariant();
+        var phone = string.IsNullOrWhiteSpace(in_phone) ? null : in_phone.Trim();
+
+        if (email is null && phone is null)
+        {
+            return null;
+        }
+
+        return await _dbContext.Contacts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                c => (email != null && c.Email.ToLower() == email)
+                    || (phone != null && c.Phone == phone),
+                in_cancellationToken);
+    }
+
     public async Task<Contact> CreateAsync(ContactInputDto dto, CancellationToken cancellationToken = default)
     {
         var contact = new Contact

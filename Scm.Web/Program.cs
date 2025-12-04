@@ -44,7 +44,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(PolicyNames.AdministrationAccess, policy =>
         policy.RequireRole("Admin"));
     options.AddPolicy(PolicyNames.OrdersAccess, policy =>
-        policy.RequireRole("Admin", "Manager", "Technician"));
+        policy.RequireRole("Admin", "Manager", "Technician", "Client"));
     options.AddPolicy(PolicyNames.StockAccess, policy =>
         policy.RequireRole("Admin", "Manager", "Storekeeper"));
     options.AddPolicy(PolicyNames.ReportsAccess, policy =>
@@ -52,7 +52,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(PolicyNames.CrmAccess, policy =>
         policy.RequireRole("Admin", "Manager", "Technician", "Support"));
     options.AddPolicy(PolicyNames.MessagesAccess, policy =>
-        policy.RequireRole("Admin", "Manager", "Technician", "Support"));
+        policy.RequireRole("Admin", "Manager", "Technician", "Support", "Client"));
 });
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -68,6 +68,7 @@ builder.Services.AddSingleton<IMoneyConverter, MoneyConverter>();
 builder.Services.AddScoped<IReportingService, ReportingService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<ITechnicianTaskService, TechnicianTaskService>();
+builder.Services.AddScoped<IClientOrderAccessService, ClientOrderAccessService>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AuthorizationPolicies.StockAccess, policy =>
