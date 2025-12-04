@@ -12,6 +12,7 @@ using Scm.Domain.Entities;
 using Scm.Domain.Identity;
 using Scm.Web.Models.Orders;
 using Scm.Web.Authorization;
+using Scm.Web.Security;
 
 namespace Scm.Web.Controllers;
 
@@ -28,6 +29,8 @@ public class OrdersController : Controller
     private readonly RoleManager<IdentityRole> m_roleManager;
     private readonly ILogger<OrdersController> m_logger;
     private readonly IStringLocalizer<OrdersController> m_localizer;
+    private readonly IClientOrderAccessService m_clientOrderAccessService;
+    private bool IsClient => User.IsInRole("Client");
     public OrdersController(
         IOrderService in_orderService,
         IQuoteService in_quoteService,
@@ -38,7 +41,8 @@ public class OrdersController : Controller
         UserManager<ApplicationUser> in_userManager,
         RoleManager<IdentityRole> in_roleManager,
         ILogger<OrdersController> in_logger,
-        IStringLocalizer<OrdersController> in_localizer)
+        IStringLocalizer<OrdersController> in_localizer,
+        IClientOrderAccessService in_clientOrderAccessService)
     {
         m_orderService = in_orderService;
         m_quoteService = in_quoteService;
@@ -50,13 +54,15 @@ public class OrdersController : Controller
         m_roleManager = in_roleManager;
         m_logger = in_logger;
         m_localizer = in_localizer;
+        m_clientOrderAccessService = in_clientOrderAccessService;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index(string? q, OrderStatus? status, int page = 1)
     {
         const int pageSize = 20;
-        var pagedOrders = await m_orderService.GetQueuePageAsync(q, status, page, pageSize);
+        var clientFilter = await BuildClientFilterAsync();
+        var pagedOrders = await m_orderService.GetQueuePageAsync(q, status, page, pageSize, clientFilter);
         var model = new OrdersIndexViewModel
         {
             Query = q,
@@ -89,6 +95,11 @@ public class OrdersController : Controller
     [HttpGet]
     public async Task<IActionResult> Create(Guid? accountId, Guid? contactId, string? accountSearch, string? contactSearch)
     {
+        if (IsClient)
+        {
+            return Forbid();
+        }
+
         var dto = new CreateOrderDto();
 
         if (contactId.HasValue && contactId.Value != Guid.Empty)
@@ -120,6 +131,11 @@ public class OrdersController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateOrderDto dto, string? accountSearch, string? contactSearch)
     {
+        if (IsClient)
+        {
+            return Forbid();
+        }
+
         if (dto.ContactId.HasValue && dto.ContactId.Value != Guid.Empty)
         {
             var contact = await m_contactService.GetAsync(dto.ContactId.Value);
@@ -176,6 +192,11 @@ public class OrdersController : Controller
             return NotFound();
         }
 
+        if (!await CanClientAccessOrderAsync(order))
+        {
+            return Forbid();
+        }
+
         var messages = await m_messageService.GetForOrderAsync(id);
         var total = await m_quoteService.GetTotalAsync(id);
 
@@ -197,6 +218,11 @@ public class OrdersController : Controller
     [Authorize(Policy = PolicyNames.OrdersAccess)]
     public async Task<IActionResult> ChangeStatus(Guid id, OrderStatus to)
     {
+        if (IsClient)
+        {
+            return Forbid();
+        }
+
         try
         {
             await m_orderService.ChangeStatusAsync(id, to);
@@ -212,6 +238,11 @@ public class OrdersController : Controller
     [HttpPost]
     public async Task<IActionResult> AddQuoteLine(AddQuoteLineDto dto)
     {
+        if (IsClient)
+        {
+            return Forbid();
+        }
+
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values
@@ -235,6 +266,23 @@ public class OrdersController : Controller
             TempData["Error"] = ex.Message;
             return RedirectToOrder(dto.OrderId);
         }
+    }
+
+    private async Task<ClientOrderAccessFilter?> BuildClientFilterAsync(CancellationToken in_cancellationToken = default)
+    {
+        return await m_clientOrderAccessService.GetFilterAsync(User, in_cancellationToken);
+    }
+
+    private async Task<bool> CanClientAccessOrderAsync(Order in_order, CancellationToken in_cancellationToken = default)
+    {
+        if (!IsClient)
+        {
+            return true;
+        }
+
+        var clientFilter = await BuildClientFilterAsync(in_cancellationToken);
+        var token = Request.Query["token"].ToString();
+        return m_clientOrderAccessService.CanAccessOrder(in_order, clientFilter, token);
     }
 
     private IActionResult RedirectToOrder(Guid orderId)
@@ -271,6 +319,11 @@ public class OrdersController : Controller
     [HttpPost]
     public async Task<IActionResult> SubmitQuote(Guid orderId)
     {
+        if (IsClient)
+        {
+            return Forbid();
+        }
+
         try
         {
             await m_quoteService.SubmitForApprovalAsync(orderId);
@@ -317,6 +370,11 @@ public class OrdersController : Controller
     [HttpPost]
     public async Task<IActionResult> GenerateInvoice(Guid id)
     {
+        if (IsClient)
+        {
+            return Forbid();
+        }
+
         try
         {
             var invoice = await m_orderService.CreateInvoiceAsync(id);
@@ -342,6 +400,11 @@ public class OrdersController : Controller
         if (order is null)
         {
             return NotFound();
+        }
+
+        if (!await CanClientAccessOrderAsync(order))
+        {
+            return Forbid();
         }
 
         var invoice = order.Invoices.FirstOrDefault(i => i.Id == invoiceId);

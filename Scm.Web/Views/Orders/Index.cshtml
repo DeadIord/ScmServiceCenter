@@ -116,11 +116,14 @@
                 <h1 class="orders-title mb-1">Очередь заказов</h1>
                 <p class="orders-subtitle mb-0">Актуальные ремонты, статусы согласования и связь с клиентами</p>
             </div>
-            <div class="orders-actions">
-                <a class="btn btn-primary" asp-action="Create">
-                    <i class="bi bi-plus-circle me-2"></i>Создать заказ
-                </a>
-            </div>
+            @if (!User.IsInRole("Client"))
+            {
+                <div class="orders-actions">
+                    <a class="btn btn-primary" asp-action="Create">
+                        <i class="bi bi-plus-circle me-2"></i>Создать заказ
+                    </a>
+                </div>
+            }
         </div>
 
         <!-- Фильтры -->

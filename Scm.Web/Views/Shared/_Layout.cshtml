@@ -7,7 +7,7 @@
 @inject IViewLocalizer Localizer
 @{
     bool isAuthenticated = SignInManager.IsSignedIn(User);
-    bool canAccessOrders = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Technician"));
+    bool canAccessOrders = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Technician") || User.IsInRole("Client"));
     bool canAccessStock = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Storekeeper"));
     bool canAccessReports = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Accountant"));
     bool canAccessCrm = isAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Technician") || User.IsInRole("Support"));

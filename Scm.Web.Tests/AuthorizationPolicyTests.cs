@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Scm.Web.Controllers;
+using Scm.Web.Authorization;
 using Scm.Web.Security;
 using Xunit;
 
@@ -71,5 +72,45 @@ public class AuthorizationPolicyTests
         var ret = await authorizationService.AuthorizeAsync(user, null, AuthorizationPolicies.ReportsAccess);
 
         Assert.False(ret.Succeeded);
+    }
+
+    [Fact]
+    public async Task OrdersPolicy_AllowsClientRole()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(PolicyNames.OrdersAccess, policy =>
+                policy.RequireRole("Admin", "Manager", "Technician", "Client"));
+        });
+        var provider = services.BuildServiceProvider();
+        var authorizationService = provider.GetRequiredService<IAuthorizationService>();
+        var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Role, "Client") }, "TestAuth");
+        var user = new ClaimsPrincipal(identity);
+
+        var ret = await authorizationService.AuthorizeAsync(user, null, PolicyNames.OrdersAccess);
+
+        Assert.True(ret.Succeeded);
+    }
+
+    [Fact]
+    public async Task MessagesPolicy_AllowsClientRole()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(PolicyNames.MessagesAccess, policy =>
+                policy.RequireRole("Admin", "Manager", "Technician", "Support", "Client"));
+        });
+        var provider = services.BuildServiceProvider();
+        var authorizationService = provider.GetRequiredService<IAuthorizationService>();
+        var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Role, "Client") }, "TestAuth");
+        var user = new ClaimsPrincipal(identity);
+
+        var ret = await authorizationService.AuthorizeAsync(user, null, PolicyNames.MessagesAccess);
+
+        Assert.True(ret.Succeeded);
     }
 }

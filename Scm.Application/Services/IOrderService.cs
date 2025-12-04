@@ -14,6 +14,7 @@ public interface IOrderService
         OrderStatus? in_status,
         int in_pageNumber,
         int in_pageSize,
+        ClientOrderAccessFilter? in_clientFilter = null,
         CancellationToken in_cancellationToken = default);
 
     Task<Order?> GetAsync(Guid id, CancellationToken cancellationToken = default);
